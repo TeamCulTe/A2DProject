@@ -10,14 +10,9 @@ public final class Quote extends DBEntity {
     private String quote;
 
     /**
-     * Stores the user who wrote the quote.
+     * Stores the pseudo of the user who wrote the quote.
      */
-    private User user;
-
-    /**
-     * Stores the book on which the review has been written.
-     */
-    private Book book;
+    private String author;
 
     /**
      * Quote's default constructor.
@@ -30,13 +25,11 @@ public final class Quote extends DBEntity {
      * Quote's nearly full filled constructor, providing all attributes values except for the database's related ones.
      *
      * @param quote The text of the quote to set.
-     * @param user The user related to the quote.
-     * @param book The book concerned by the review.
+     * @param author The user's pseudo related to the quote.
      */
-    public Quote(String quote, User user, Book book) {
+    public Quote(String quote, String author) {
         this.quote = quote;
-        this.user = user;
-        this.book = book;
+        this.author = author;
     }
 
     /**
@@ -44,16 +37,14 @@ public final class Quote extends DBEntity {
      *
      * @param id The id to set.
      * @param quote The text of the quote to set.
-     * @param user The user related to the quote.
-     * @param book The book concerned by the review.
+     * @param author The user's pseudo related to the quote.
      * @param deleted The boolean value of the deleted attribute to set.
      */
-    public Quote(int id, String quote, User user, Book book, boolean deleted) {
+    public Quote(int id, String quote, String author, boolean deleted) {
         super(id, deleted);
 
         this.quote = quote;
-        this.user = user;
-        this.book = book;
+        this.author = author;
     }
 
     /**
@@ -75,38 +66,20 @@ public final class Quote extends DBEntity {
     }
 
     /**
-     * Gets the user attribute.
+     * Gets the author attribute.
      *
-     * @return The User value of user attribute.
+     * @return The String value of author attribute.
      */
-    public User getUser() {
-        return this.user;
+    public String getAuthor() {
+        return this.author;
     }
 
     /**
-     * Sets the user attribute.
+     * Sets the author attribute.
      *
-     * @param newUser The new User value to set.
+     * @param newAuthor The new String value to set.
      */
-    public void setUser(User newUser) {
-        this.user = newUser;
-    }
-
-    /**
-     * Gets the book attribute.
-     *
-     * @return The Book value of book attribute.
-     */
-    public Book getBook() {
-        return this.book;
-    }
-
-    /**
-     * Sets the book attribute.
-     *
-     * @param newBook The new Book value to set.
-     */
-    public void setBook(Book newBook) {
-        this.book = newBook;
+    public void setAuthor(String newAuthor) {
+        this.author = newAuthor;
     }
 }
