@@ -10,14 +10,9 @@ public final class Review extends DBEntity {
     private String review;
 
     /**
-     * Stores the book concerned by the review.
+     * Stores the author's pseudo.
      */
-    private Book book;
-
-    /**
-     * Stores the user who wrote the review.
-     */
-    private User user;
+    private String author;
 
     /**
      * Not yet implemented.
@@ -36,14 +31,12 @@ public final class Review extends DBEntity {
      * Review's nearly full filled constructor, providing all attributes values, except for database related ones.
      *
      * @param review The review to set.
-     * @param book The book to set.
-     * @param user The user to set.
+     * @param author The name of the author to set.
      * @param shared The value defining if the review is shared or not.
      */
-    public Review(String review, Book book, User user, boolean shared) {
+    public Review(String review, String author, boolean shared) {
         this.review = review;
-        this.book = book;
-        this.user = user;
+        this.author = author;
         this.shared = shared;
     }
 
@@ -51,16 +44,14 @@ public final class Review extends DBEntity {
      * Review's full filled constructor, providing all attributes values.
      *
      * @param review The review to set.
-     * @param book The book to set.
-     * @param user The user to set.
+     * @param author The user to set.
      * @param shared The value defining if the review is shared or not.
      */
-    public Review(int id, String review, Book book, User user, boolean shared, boolean deleted) {
+    public Review(int id, String review, String author, boolean shared, boolean deleted) {
         super(id, deleted);
 
         this.review = review;
-        this.book = book;
-        this.user = user;
+        this.author = author;
         this.shared = shared;
     }
 
@@ -83,39 +74,21 @@ public final class Review extends DBEntity {
     }
 
     /**
-     * Gets the book attribute.
+     * Gets the author attribute.
      *
-     * @return The Book value of book attribute.
+     * @return The String value of author attribute.
      */
-    public Book getBook() {
-        return this.book;
+    public String getAuthor() {
+        return this.author;
     }
 
     /**
-     * Sets the book attribute.
+     * Sets the author attribute.
      *
-     * @param newBook The new Book value to set.
+     * @param newAuthor The new User value to set.
      */
-    public void setBook(Book newBook) {
-        this.book = newBook;
-    }
-
-    /**
-     * Gets the user attribute.
-     *
-     * @return The User value of user attribute.
-     */
-    public User getUser() {
-        return this.user;
-    }
-
-    /**
-     * Sets the user attribute.
-     *
-     * @param newUser The new User value to set.
-     */
-    public void setUser(User newUser) {
-        this.user = newUser;
+    public void setAuthor(String newAuthor) {
+        this.author = newAuthor;
     }
 
     /**

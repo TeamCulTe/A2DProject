@@ -35,11 +35,6 @@ public final class User extends DBEntity {
     private String city;
 
     /**
-     * Contains the user's associated profile.
-     */
-    private Profile profile;
-
-    /**
      * Stores the user's book lists.
      */
     private Map<String, BookList> bookLists;
@@ -65,18 +60,16 @@ public final class User extends DBEntity {
      * @param email The email to set.
      * @param country The country name to set.
      * @param city the city name to set.
-     * @param profile The associated profile to set.
      * @param bookLists The associated bookLists to set.
      * @param reviews The list of reviews to set.
      */
-    public User(String pseudo, String password, String email, String country, String city, Profile profile,
+    public User(String pseudo, String password, String email, String country, String city,
                 Map<String, BookList> bookLists, List<Review> reviews) {
         this.pseudo = pseudo;
         this.password = password;
         this.email = email;
         this.country = country;
         this.city = city;
-        this.profile = profile;
         this.bookLists = bookLists;
         this.reviews = reviews;
     }
@@ -90,12 +83,11 @@ public final class User extends DBEntity {
      * @param email The email to set.
      * @param country The country name to set.
      * @param city the city name to set.
-     * @param profile The associated profile to set.
      * @param bookLists The associated bookLists to set.
      * @param reviews The list of reviews to set.
      * @param deleted The boolean value to set.
      */
-    public User(int id, String pseudo, String password, String email, String country, String city, Profile profile,
+    public User(int id, String pseudo, String password, String email, String country, String city,
                 Map<String, BookList> bookLists, List<Review> reviews, boolean deleted) {
         super(id, deleted);
 
@@ -104,7 +96,6 @@ public final class User extends DBEntity {
         this.email = email;
         this.country = country;
         this.city = city;
-        this.profile = profile;
         this.bookLists = bookLists;
         this.reviews = reviews;
     }
@@ -197,24 +188,6 @@ public final class User extends DBEntity {
      */
     public void setCity(String newCity) {
         this.city = newCity;
-    }
-
-    /**
-     * Gets the profile attribute.
-     *
-     * @return The Profile value of profile attribute.
-     */
-    public Profile getProfile() {
-        return this.profile;
-    }
-
-    /**
-     * Sets the profile attribute.
-     *
-     * @param newProfile The new Profile value to set.
-     */
-    public void setProfile(Profile newProfile) {
-        this.profile = newProfile;
     }
 
     /**
