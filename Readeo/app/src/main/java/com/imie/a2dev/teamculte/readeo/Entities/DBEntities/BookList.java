@@ -18,11 +18,6 @@ public final class BookList extends DBEntity {
     private List<Book> books;
 
     /**
-     * Stores the owner of the book list.
-     */
-    private User user;
-
-    /**
      * BookList's default constructor.
      */
     public BookList() {
@@ -34,12 +29,10 @@ public final class BookList extends DBEntity {
      *
      * @param type The type to set.
      * @param books The list of books to set.
-     * @param user The user related to the book list to set.
      */
-    public BookList(String type, List<Book> books, User user) {
+    public BookList(String type, List<Book> books) {
         this.type = type;
         this.books = books;
-        this.user = user;
     }
 
     /**
@@ -48,15 +41,13 @@ public final class BookList extends DBEntity {
      * @param id The id to set.
      * @param type The type to set below (read, reading, to read).
      * @param books The list of books to set.
-     * @param user The user to set.
      * @param deleted The deleted status to set.
      */
-    public BookList(int id, String type, List<Book> books, User user, boolean deleted) {
+    public BookList(int id, String type, List<Book> books, boolean deleted) {
         super(id, deleted);
 
         this.type = type;
         this.books = books;
-        this.user = user;
     }
 
     /**
@@ -93,23 +84,5 @@ public final class BookList extends DBEntity {
      */
     public void setBooks(List<Book> newBooks) {
         this.books = newBooks;
-    }
-
-    /**
-     * Gets the user attribute.
-     *
-     * @return The User value of user attribute.
-     */
-    public User getUser() {
-        return this.user;
-    }
-
-    /**
-     * Sets the user attribute.
-     *
-     * @param newUser The new User value to set.
-     */
-    public void setUser(User newUser) {
-        this.user = newUser;
     }
 }

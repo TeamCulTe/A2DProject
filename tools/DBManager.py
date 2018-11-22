@@ -15,14 +15,12 @@ class DbManager:
     TBL_AUTHOR = {"name": "Author", "fields": ["id_author", "name_author", "deleted"]}
     TBL_BOOK = {"name": "Book", "fields": ["id_book", "id_author", "id_book", "title", "cover", "summary",
                                            "date_published", "deleted"]}
-    TBL_BOOKLIST = {"name": "BookList", "fields": ["id_book", "id_user", "type", "deleted"]}
-    TBL_CATEGRORY = {"name": "Category", "fields": ["id_category", "name_category", "deleted"]}
-    TBL_CITY = {"name": "City", "fields": ["id_city", "name_city", "deleted"]}
+    TBL_CATEGORY = {"name": "Category", "fields": ["id_category", "name_category", "deleted"]}
     TBL_COUNTRY = {"name": "Country", "fields": ["id_country", "name_country", "deleted"]}
-    TBL_PROFILE = {"name": "Profile", "fields": ["id_profile", "id_user", "avatar", "description", "deleted"]}
+    TBL_WRITER = {"name": "Writer", "fields": ["id_author", "id_book"]}
 
     """
-    DbManager's constructor getting the required info to connnect to a database.
+    DbManager's constructor getting the required info to connect to a database.
     :param host The host to connect.
     :param user The user who's getting connected.
     :param password The password of the user trying to connect.
