@@ -13,10 +13,9 @@ class DbManager:
     DB_HOST = "localhost:8889"
 
     TBL_AUTHOR = {"name": "Author", "fields": ["id_author", "name_author", "deleted"]}
-    TBL_BOOK = {"name": "Book", "fields": ["id_book", "id_author", "id_book", "title", "cover", "summary",
-                                           "date_published", "deleted"]}
+    TBL_BOOK = {"name": "Book", "fields": ["id_book", "id_category", "title", "cover", "summary", "date_published",
+                                           "deleted"]}
     TBL_CATEGORY = {"name": "Category", "fields": ["id_category", "name_category", "deleted"]}
-    TBL_COUNTRY = {"name": "Country", "fields": ["id_country", "name_country", "deleted"]}
     TBL_WRITER = {"name": "Writer", "fields": ["id_author", "id_book"]}
 
     """
