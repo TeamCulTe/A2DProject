@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:8889
--- Generation Time: Nov 22, 2018 at 12:00 PM
+-- Generation Time: Dec 05, 2018 at 03:12 PM
 -- Server version: 5.6.38
 -- PHP Version: 7.2.1
 
@@ -25,6 +25,14 @@ CREATE TABLE `Author` (
   `name_author` varchar(50) NOT NULL,
   `deleted` tinyint(1) NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `Author`
+--
+
+INSERT INTO `Author` (`id_author`, `name_author`, `deleted`) VALUES
+(9, 'G. Gordon Liddy', 0),
+(11, 'G. K. Chesterton', 0);
 
 -- --------------------------------------------------------
 
@@ -66,6 +74,13 @@ CREATE TABLE `Category` (
   `name_category` varchar(50) NOT NULL,
   `deleted` tinyint(1) NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `Category`
+--
+
+INSERT INTO `Category` (`id_category`, `name_category`, `deleted`) VALUES
+(7, 'History', 0);
 
 -- --------------------------------------------------------
 
@@ -307,42 +322,42 @@ ALTER TABLE `User`
 -- Constraints for table `Book`
 --
 ALTER TABLE `Book`
-  ADD CONSTRAINT `Book_Category0_FK` FOREIGN KEY (`id_category`) REFERENCES `read`.`Category` (`id_category`);
+  ADD CONSTRAINT `Book_Category0_FK` FOREIGN KEY (`id_category`) REFERENCES `Category` (`id_category`);
 
 --
 -- Constraints for table `BookList`
 --
 ALTER TABLE `BookList`
-  ADD CONSTRAINT `BookList_Book0_FK` FOREIGN KEY (`id_book`) REFERENCES `book` (`id_book`),
-  ADD CONSTRAINT `BookList_User1_FK` FOREIGN KEY (`id_user`) REFERENCES `user` (`id_user`);
+  ADD CONSTRAINT `BookList_Book0_FK` FOREIGN KEY (`id_book`) REFERENCES `Book` (`id_book`),
+  ADD CONSTRAINT `BookList_User1_FK` FOREIGN KEY (`id_user`) REFERENCES `User` (`id_user`);
 
 --
 -- Constraints for table `Profile`
 --
 ALTER TABLE `Profile`
-  ADD CONSTRAINT `Profile_User0_FK` FOREIGN KEY (`id_user`) REFERENCES `read`.`User` (`id_user`);
+  ADD CONSTRAINT `Profile_User0_FK` FOREIGN KEY (`id_user`) REFERENCES `User` (`id_user`);
 
 --
 -- Constraints for table `Quote`
 --
 ALTER TABLE `Quote`
-  ADD CONSTRAINT `Quote_Book1_FK` FOREIGN KEY (`id_book`) REFERENCES `read`.`Book` (`id_book`),
-  ADD CONSTRAINT `Quote_User0_FK` FOREIGN KEY (`id_user`) REFERENCES `read`.`User` (`id_user`);
+  ADD CONSTRAINT `Quote_Book1_FK` FOREIGN KEY (`id_book`) REFERENCES `Book` (`id_book`),
+  ADD CONSTRAINT `Quote_User0_FK` FOREIGN KEY (`id_user`) REFERENCES `User` (`id_user`);
 
 --
 -- Constraints for table `Review`
 --
 ALTER TABLE `Review`
-  ADD CONSTRAINT `Review_Book0_FK` FOREIGN KEY (`id_book`) REFERENCES `read`.`Book` (`id_book`),
-  ADD CONSTRAINT `Review_User1_FK` FOREIGN KEY (`id_user`) REFERENCES `read`.`User` (`id_user`);
+  ADD CONSTRAINT `Review_Book0_FK` FOREIGN KEY (`id_book`) REFERENCES `Book` (`id_book`),
+  ADD CONSTRAINT `Review_User1_FK` FOREIGN KEY (`id_user`) REFERENCES `User` (`id_user`);
 
 --
 -- Constraints for table `User`
 --
 ALTER TABLE `User`
-  ADD CONSTRAINT `User_City2_FK` FOREIGN KEY (`id_city`) REFERENCES `read`.`City` (`id_city`),
-  ADD CONSTRAINT `User_Country1_FK` FOREIGN KEY (`id_country`) REFERENCES `read`.`Country` (`id_country`),
-  ADD CONSTRAINT `User_Profile0_FK` FOREIGN KEY (`id_profile`) REFERENCES `read`.`Profile` (`id_profile`);
+  ADD CONSTRAINT `User_City2_FK` FOREIGN KEY (`id_city`) REFERENCES `City` (`id_city`),
+  ADD CONSTRAINT `User_Country1_FK` FOREIGN KEY (`id_country`) REFERENCES `Country` (`id_country`),
+  ADD CONSTRAINT `User_Profile0_FK` FOREIGN KEY (`id_profile`) REFERENCES `Profile` (`id_profile`);
 
 --
 -- Constraints for table `Writer`
