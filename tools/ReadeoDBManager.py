@@ -79,7 +79,7 @@ class ReadeoDBManager:
             cursor.execute(query, (book_dict["category"],))
         except mysql.connector.errors.IntegrityError as e:
             print(e)
-            pass
+            return
 
         self.connector.commit()
         cursor.close()
@@ -95,18 +95,23 @@ class ReadeoDBManager:
                                                                       ReadeoDBManager.TBL_CATEGORY["fields"][1])
         cursor.execute(category_query, (book_dict["category"],))
 
-        category_id = cursor.fetchone()[0]
+        category_id = cursor.fetchone()
+
+        if category_id is None:
+            print(u"Error while querying \"{}\" category id.\n".format(book_dict["category"]))
+            return
+
         book_fields = ReadeoDBManager.TBL_BOOK["fields"]
         book_query = """INSERT INTO {} ({}, {}, {}, {}, {}) VALUES({}, %s, %s, %s, %s)""".format(
             ReadeoDBManager.TBL_BOOK["name"], book_fields[1], book_fields[2], book_fields[3],
-            book_fields[4], book_fields[5], category_id)
+            book_fields[4], book_fields[5], category_id[0])
 
         try:
             cursor.execute(book_query, (book_dict["title"], book_dict["cover"], book_dict["summary"],
                            book_dict["date_published"]))
         except mysql.connector.errors.IntegrityError as e:
             print(e)
-            pass
+            return
 
         self.connector.commit()
         cursor.close()
@@ -124,7 +129,13 @@ class ReadeoDBManager:
                                                                               book_fields[2], book_fields[5])
         cursor.execute(book_query, (book_dict["title"], book_dict["date_published"]))
 
-        book_id = cursor.fetchone()[0]
+        book_id = cursor.fetchone()
+
+        if book_id is None:
+            print(u"Error while querying \"{}\" book written in {} id.\n".format(book_dict["title"],
+                                                                                book_dict["date_published"]))
+            return
+
         author_fields = ReadeoDBManager.TBL_AUTHOR["fields"]
         author_query = """SELECT {} FROM {} WHERE {} = %s""".format(author_fields[0],
                                                                     ReadeoDBManager.TBL_AUTHOR["name"],
@@ -133,7 +144,13 @@ class ReadeoDBManager:
 
         for author in book_dict["authors"]:
             cursor.execute(author_query, (author,))
-            authors_id.append(cursor.fetchone()[0])
+
+            author_id = cursor.fetchone()
+
+            if author_id is None:
+                print(u"Error while querying \"{}\" author id.\n".format(author))
+                continue
+            authors_id.append(author_id[0])
 
         writer_fields = ReadeoDBManager.TBL_WRITER["fields"]
         writer_query = """INSERT INTO {} ({}, {}) VALUES(%s, %s)""".format(ReadeoDBManager.TBL_WRITER["name"],
@@ -141,7 +158,7 @@ class ReadeoDBManager:
 
         for author_id in authors_id:
             try:
-                cursor.execute(writer_query, (author_id, book_id))
+                cursor.execute(writer_query, (author_id, book_id[0]))
             except mysql.connector.errors.IntegrityError as e:
                 print(e)
                 continue
@@ -162,7 +179,11 @@ class ReadeoDBManager:
             if type(book_dict) is not dict:
                 raise TypeError("The list should contains only dict objects.")
 
-            self.insert_authors(book_dict)
-            self.insert_category(book_dict)
-            self.insert_book(book_dict)
-            self.insert_writers(book_dict)
+            try:
+                self.insert_authors(book_dict)
+                self.insert_category(book_dict)
+                self.insert_book(book_dict)
+                self.insert_writers(book_dict)
+            except UnicodeDecodeError or UnicodeEncodeError as e:
+                print("An error append while decoding unicode, aborting current book.\n")
+                print(e)

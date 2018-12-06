@@ -24,7 +24,7 @@ class BookGetter:
 
     # Default query parameters.
     DEFAULT_PARAMETERS = {"printType": "books", INDEX_PARAMETER: 0,
-                          RESULTS_PARAMETER: MAX_PAGINATION}
+                          RESULTS_PARAMETER: MAX_PAGINATION, "q": ""}
 
     # Defaults filters values (need to be formatted).
     AUTHOR_FILTER = "+inauthor:{}"
@@ -39,7 +39,10 @@ class BookGetter:
     :param parameters The dict of parameters (key) and values (value) to set.
     :param use_default ? Defines if using the default parameters or not
     """
-    def __init__(self, category, parameters, use_default=True):
+    def __init__(self, category, parameters=None, use_default=True):
+        if parameters is None:
+            parameters = dict()
+            
         if type(parameters) != dict:
             raise TypeError("The parameters parameter should be instance of dict.")
 
@@ -185,13 +188,5 @@ class BookGetter:
     """
     def query_filtered_books(self, filter_key, filter_value):
         self.add_filter(filter_key, filter_value)
+
         return self.query_books(True)
-
-
-b = BookGetter("volumes", {"q": "+intitle:\"Was\""}, use_default=True)
-r = ReadeoDBManager.ReadeoDBManager()
-r.insert_all(b.query_books())
-r.close_connector()
-for book in b.query_books():
-    print book
-
