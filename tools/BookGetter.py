@@ -2,6 +2,7 @@
 
 import requests
 import json
+import ReadeoDBManager
 
 """
 Class used to query Google's book API depending on the BookGetter's attributes values.
@@ -123,13 +124,17 @@ class BookGetter:
             data = elt["volumeInfo"]
             keys = data.keys()
             summary = data["description"] if "description" in keys else None
-            categories = data["categories"] if "categories" in keys else None
+            category = data["categories"][0] if "categories" in keys else None
             authors = data["authors"] if "authors" in keys else None
             cover = data["imageLinks"]["smallThumbnail"] if "imageLinks" in keys else None
             date_published = (data["publishedDate"] if len(data["publishedDate"]) <= 4 else data["publishedDate"][:4]) \
                 if "publishedDate" in keys else None
-            current_book = {"title": data["title"], "author": authors, "date_published": date_published,
-                            "cover": cover, "summary": summary, "category": categories}
+
+            if category is None or authors is None or date_published is None or summary is None or cover is None:
+                continue
+
+            current_book = {"title": data["title"], "authors": authors, "date_published": date_published,
+                            "cover": cover, "summary": summary, "category": category}
 
             book_lst.append(current_book)
 
@@ -183,7 +188,10 @@ class BookGetter:
         return self.query_books(True)
 
 
-b = BookGetter("volumes", {"q": "+intitle:\"Was\"", "langRestriction": "es"}, use_default=True)
+b = BookGetter("volumes", {"q": "+intitle:\"Was\""}, use_default=True)
+r = ReadeoDBManager.ReadeoDBManager()
+r.insert_all(b.query_books())
+r.close_connector()
 for book in b.query_books():
     print book
-print b.cpt
+
