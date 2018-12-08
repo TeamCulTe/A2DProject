@@ -42,7 +42,7 @@ class BookGetter:
     def __init__(self, category, parameters=None, use_default=True):
         if parameters is None:
             parameters = dict()
-            
+
         if type(parameters) != dict:
             raise TypeError("The parameters parameter should be instance of dict.")
 
@@ -147,7 +147,7 @@ class BookGetter:
     Queries the built API url to get JSON books response filtered to get only the needed info. Also define the 
     results attribute in order to paginate and query all the books.
     :param log ? Defines if the URL used to query the API is displayed or not.
-    :return The json response of the query.
+    :return The json filtered response of the query.
     """
     def query_books(self, log=False):
         end = False
@@ -185,8 +185,19 @@ class BookGetter:
     From a filter type, query the book API and return the needed information.
     :param filter_type The type of filter to apply (author, title, category).
     :param filter_value The string filter to apply.
+    :return The filtered json response of the query.
     """
     def query_filtered_books(self, filter_key, filter_value):
         self.add_filter(filter_key, filter_value)
+
+        return self.query_books(True)
+
+    """
+    From a string filter, apply the associated parameter and query the book API to get the needed info.
+    :param content_filter The string to filter on (in the data's content).
+    :return The filtered json response of the query.
+    """
+    def query_content_filtered_books(self, content_filter):
+        self.add_parameter("q", content_filter)
 
         return self.query_books(True)

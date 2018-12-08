@@ -5,6 +5,11 @@ from string import ascii_uppercase
 book_getter = BookGetter("volumes", {"q": ""}, use_default=True)
 db_manager = ReadeoDBManager()
 
+# Query all books on content from A to Z
+for letter in ascii_uppercase:
+    book_list = book_getter.query_content_filtered_books(letter)
+    db_manager.insert_all(book_list)
+
 # Query all books on author name from A to Z
 for letter in ascii_uppercase:
     book_list = book_getter.query_filtered_books(BookGetter.AUTHOR_FILTER, letter)
