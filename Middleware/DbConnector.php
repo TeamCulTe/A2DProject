@@ -8,7 +8,7 @@
 
 class DbConnector
 {
-    private $host;
+    private $socket;
     private $userName;
     private $password;
     private $dbName;
@@ -16,7 +16,7 @@ class DbConnector
 
     public function __construct()
     {
-        $this->host = "localhost";
+        $this->socket = "/Applications/MAMP/tmp/mysql/mysql.sock";
         $this->userName = "root";
         $this->password = "root";
         $this->dbName = "Readeo";
@@ -25,13 +25,13 @@ class DbConnector
 
     public functIon getConnector()
     {
-        $connectStr = "mysql:dbname=" . $this->dbName . ";host=" . $this->host  . ";port=" . $this->port . ";charset=utf-8";
+        $connectStr = "mysql:dbname=" . $this->dbName . ";unix_socket=" . $this->socket  . ";port=" . $this->port . ";charset=utf8";
 
         try
         {
             $db = new PDO($connectStr, $this->userName, $this->password);
 
-            return db;
+            return $db;
         }
         catch (PDOException $error)
         {

@@ -8,7 +8,7 @@
 
 abstract class DbManager
 {
-    private $db;
+    protected $db;
 
     public function __construct(PDO $db)
     {
