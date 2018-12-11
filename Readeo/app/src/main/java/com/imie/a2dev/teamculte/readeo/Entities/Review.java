@@ -1,4 +1,4 @@
-package com.imie.a2dev.teamculte.readeo.Entities.DBEntities;
+package com.imie.a2dev.teamculte.readeo.Entities;
 
 /**
  * Final class representing a review written by an user for a specific book.

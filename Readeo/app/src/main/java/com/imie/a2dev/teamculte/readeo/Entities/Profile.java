@@ -1,4 +1,4 @@
-package com.imie.a2dev.teamculte.readeo.Entities.DBEntities;
+package com.imie.a2dev.teamculte.readeo.Entities;
 
 /**
  * Final class representing the profile of an user with its related information.

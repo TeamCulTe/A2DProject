@@ -1,4 +1,4 @@
-package com.imie.a2dev.teamculte.readeo.Entities.DBEntities;
+package com.imie.a2dev.teamculte.readeo.Entities;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,9 +8,9 @@ import java.util.List;
  */
 public final class BookList extends DBEntity {
     /**
-     * Defines the type of the book list among "read", "reading", "to read".
+     * Defines the label of the book list among "read", "reading", "to read".
      */
-    private String type;
+    private String label;
 
     /**
      * Stores the books associated to the book list.
@@ -27,11 +27,11 @@ public final class BookList extends DBEntity {
     /**
      * BookList's nearly full filled constructor providing all attributes values except for the database related ones.
      *
-     * @param type The type to set.
+     * @param label The label to set.
      * @param books The list of books to set.
      */
-    public BookList(String type, List<Book> books) {
-        this.type = type;
+    public BookList(String label, List<Book> books) {
+        this.label = label;
         this.books = books;
     }
 
@@ -39,33 +39,33 @@ public final class BookList extends DBEntity {
      * BookList's full filled constructor, providing all the attribute's values.
      *
      * @param id The id to set.
-     * @param type The type to set below (read, reading, to read).
+     * @param label The label to set below (read, reading, to read).
      * @param books The list of books to set.
      * @param deleted The deleted status to set.
      */
-    public BookList(int id, String type, List<Book> books, boolean deleted) {
+    public BookList(int id, String label, List<Book> books, boolean deleted) {
         super(id, deleted);
 
-        this.type = type;
+        this.label = label;
         this.books = books;
     }
 
     /**
-     * Gets the type attribute.
+     * Gets the label attribute.
      *
-     * @return The String value of type attribute.
+     * @return The String value of label attribute.
      */
-    public String getType() {
-        return this.type;
+    public String getLabel() {
+        return this.label;
     }
 
     /**
-     * Sets the type attribute.
+     * Sets the label attribute.
      *
-     * @param newType The new String value to set.
+     * @param newLabel The new String value to set.
      */
-    public void setType(String newType) {
-        this.type = newType;
+    public void setLabel(String newLabel) {
+        this.label = newLabel;
     }
 
     /**

@@ -1,4 +1,4 @@
-package com.imie.a2dev.teamculte.readeo.Entities.DBEntities;
+package com.imie.a2dev.teamculte.readeo.Entities;
 
 import java.util.ArrayList;
 import java.util.List;
