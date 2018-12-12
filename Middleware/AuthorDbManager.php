@@ -16,12 +16,12 @@ class AuthorDbManager extends DbManager
     /**
      * Stores the associated database fields.
      */
-    const FIELDS = ["id_author", "name", "deleted"];
+    const FIELDS = ["id_author", "name_author", "deleted"];
 
     /**
      * Stores the placeholders for prepared queries.
      */
-    const PLACE_HOLDERS = [":id", ":name"];
+    const PLACEHOLDERS = [":idA", ":nameA"];
 
     /**
      * Stores the associated table name.
@@ -35,10 +35,10 @@ class AuthorDbManager extends DbManager
     public function create(string $name)
     {
         $statement = sprintf("INSERT INTO %s(%s) VALUE(%s)",
-            static::TABLE, static::FIELDS[1], static::PLACE_HOLDERS[1]);
+            static::TABLE, static::FIELDS[1], static::PLACEHOLDERS[1]);
         $req = $this->db->prepare($statement);
 
-        $req->bindValue(static::PLACE_HOLDERS[1], $name, PDO::PARAM_STR);
+        $req->bindValue(static::PLACEHOLDERS[1], $name, PDO::PARAM_STR);
         $req->execute();
     }
 
@@ -51,10 +51,10 @@ class AuthorDbManager extends DbManager
     public function getAuthor(int $id)
     {
         $statement = sprintf("SELECT %s FROM %s WHERE %s = %s AND deleted = 0",
-            static::FIELDS[1], static::TABLE, static::FIELDS[0], static::PLACE_HOLDERS[0]);
+            static::FIELDS[1], static::TABLE, static::FIELDS[0], static::PLACEHOLDERS[0]);
         $req = $this->db->prepare($statement);
         
-        $req->bindValue(static::PLACE_HOLDERS[0], $id, PDO::PARAM_INT);
+        $req->bindValue(static::PLACEHOLDERS[0], $id, PDO::PARAM_INT);
         $req->execute();
 
         $response = $req->fetchAll(PDO::FETCH_ASSOC);
@@ -70,11 +70,11 @@ class AuthorDbManager extends DbManager
     public function update(int $id, string $name)
     {
         $statement = sprintf("UPDATE %s SET %s = %s WHERE %s = %s", static::TABLE,
-            static::FIELDS[1], static::PLACE_HOLDERS[1], static::FIELDS[0], static::PLACE_HOLDERS[0]);
+            static::FIELDS[1], static::PLACEHOLDERS[1], static::FIELDS[0], static::PLACEHOLDERS[0]);
         $req = $this->db->prepare($statement);
 
-        $req->bindValue(static::PLACE_HOLDERS[0], $id, PDO::PARAM_INT);
-        $req->bindValue(static::PLACE_HOLDERS[1], $name, PDO::PARAM_STR);
+        $req->bindValue(static::PLACEHOLDERS[0], $id, PDO::PARAM_INT);
+        $req->bindValue(static::PLACEHOLDERS[1], $name, PDO::PARAM_STR);
         $req->execute();
     }
 
@@ -85,10 +85,10 @@ class AuthorDbManager extends DbManager
     public function softDelete(int $id)
     {
         $statement = sprintf("UPDATE %s SET deleted = 1 WHERE %s = %s",
-            static::TABLE, static::FIELDS[0], static::PLACE_HOLDERS[0]);
+            static::TABLE, static::FIELDS[0], static::PLACEHOLDERS[0]);
         $req = $this->db->prepare($statement);
 
-        $req->bindValue(static::PLACE_HOLDERS[0], $id, PDO::PARAM_INT);
+        $req->bindValue(static::PLACEHOLDERS[0], $id, PDO::PARAM_INT);
         $req->execute();
     }
 
@@ -99,10 +99,10 @@ class AuthorDbManager extends DbManager
     public function delete(int $id)
     {
         $statement = sprintf("DELETE FROM %s WHERE %s = %s",
-            static::TABLE, static::FIELDS[0], static::PLACE_HOLDERS[0]);
+            static::TABLE, static::FIELDS[0], static::PLACEHOLDERS[0]);
         $req = $this->db->prepare($statement);
 
-        $req->bindValue(static::PLACE_HOLDERS[0], $id, PDO::PARAM_INT);
+        $req->bindValue(static::PLACEHOLDERS[0], $id, PDO::PARAM_INT);
         $req->execute();
     }
 }

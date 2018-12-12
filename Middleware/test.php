@@ -1,4 +1,7 @@
 <?php
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
 /**
  * Created by PhpStorm.
@@ -8,9 +11,9 @@
  */
 
 include "DbConnector.php";
-include "AuthorDbManager.php";
+include "CategoryDbManager.php";
 
 $dbConnector = new DbConnector();
-$a = new AuthorDbManager($dbConnector->getConnector());
-$r = $a->getName(1);
+$a = new CategoryDbManager($dbConnector->getConnector());
+$r = $a->getCategory(7);
 var_dump($r);

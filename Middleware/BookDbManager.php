@@ -6,6 +6,8 @@
  * Time: 14:08
  */
 
+require_once "DbManager.php";
+
 /**
  * DAO Class BookDbManager, used to manage books in database (CRUD).
  */
@@ -19,7 +21,7 @@ class BookDbManager extends DbManager
     /**
      * Stores the placeholders for prepared queries.
      */
-    const PLACE_HOLDERS = [":idB", ":idC", ":title", ":cover", ":summary", ":date"];
+    const PLACEHOLDERS = [":idB", ":idC", ":title", ":cover", ":summary", ":date"];
 
     /**
      * Stores the associated table name.
@@ -38,15 +40,15 @@ class BookDbManager extends DbManager
     {
         $statement = sprintf("INSERT INTO %s(%s, %s, %s, %s, %s) VALUES (%s, %s, %s, %s, %s)",
             static::TABLE, static::FIELDS[1], static::FIELDS[2], static::FIELDS[3], static::FIELDS[4],
-            static::FIELDS[5], static::PLACE_HOLDERS[1], static::PLACE_HOLDERS[2], static::PLACE_HOLDERS[3],
-            static::PLACE_HOLDERS[4],  static::PLACE_HOLDERS[5]);
+            static::FIELDS[5], static::PLACEHOLDERS[1], static::PLACEHOLDERS[2], static::PLACEHOLDERS[3],
+            static::PLACEHOLDERS[4], static::PLACEHOLDERS[5]);
         $req = $this->db->prepare($statement);
 
-        $req->bindValue(static::PLACE_HOLDERS[1], $idCategory, PDO::PARAM_INT);
-        $req->bindValue(static::PLACE_HOLDERS[2], $title, PDO::PARAM_STR);
-        $req->bindValue(static::PLACE_HOLDERS[3], $cover, PDO::PARAM_STR);
-        $req->bindValue(static::PLACE_HOLDERS[4], $summary, PDO::PARAM_STR);
-        $req->bindValue(static::PLACE_HOLDERS[5], $date, PDO::PARAM_STR);
+        $req->bindValue(static::PLACEHOLDERS[1], $idCategory, PDO::PARAM_INT);
+        $req->bindValue(static::PLACEHOLDERS[2], $title, PDO::PARAM_STR);
+        $req->bindValue(static::PLACEHOLDERS[3], $cover, PDO::PARAM_STR);
+        $req->bindValue(static::PLACEHOLDERS[4], $summary, PDO::PARAM_STR);
+        $req->bindValue(static::PLACEHOLDERS[5], $date, PDO::PARAM_STR);
         $req->execute();
     }
 
@@ -59,10 +61,30 @@ class BookDbManager extends DbManager
     {
         $statement = sprintf("SELECT %s, %s, %s, %s, %s FROM %s WHERE %s = %s AND deleted = 0",
             static::FIELDS[1], static::FIELDS[2], static::FIELDS[3], static::FIELDS[4], static::FIELDS[5],
-            static::TABLE, static::FIELDS[0], static::PLACE_HOLDERS[0]);
+            static::TABLE, static::FIELDS[0], static::PLACEHOLDERS[0]);
         $req = $this->db->prepare($statement);
 
-        $req->bindValue(static::PLACE_HOLDERS[0], $id, PDO::PARAM_INT);
+        $req->bindValue(static::PLACEHOLDERS[0], $id, PDO::PARAM_INT);
+        $req->execute();
+
+        $response = $req->fetchAll(PDO::FETCH_ASSOC);
+
+        return (!empty($response)) ? json_encode($response) : null;
+    }
+
+    /**
+     * From a category id, gets the associated books info.
+     * @param int $idCategory The id of the wished book's info.
+     * @return null|string The json response if the id match else null.
+     */
+    public function getCategoryBooks(int $idCategory)
+    {
+        $statement = sprintf("SELECT %s, %s, %s, %s, %s FROM %s WHERE %s = %s AND deleted = 0",
+            static::FIELDS[0], static::FIELDS[2], static::FIELDS[3], static::FIELDS[4], static::FIELDS[5],
+            static::TABLE, static::FIELDS[1], static::PLACEHOLDERS[1]);
+        $req = $this->db->prepare($statement);
+
+        $req->bindValue(static::PLACEHOLDERS[1], $idCategory, PDO::PARAM_INT);
         $req->execute();
 
         $response = $req->fetchAll(PDO::FETCH_ASSOC);
@@ -79,12 +101,12 @@ class BookDbManager extends DbManager
     public function getBookId(string $title, string $date)
     {
         $statement = sprintf("SELECT %s FROM %s WHERE %s = %s AND %s = %s AND deleted = 0",
-            static::FIELDS[0],static::TABLE, static::FIELDS[1], static::PLACE_HOLDERS[1], static::FIELDS[5],
-            static::PLACE_HOLDERS[5]);
+            static::FIELDS[0],static::TABLE, static::FIELDS[1], static::PLACEHOLDERS[1], static::FIELDS[5],
+            static::PLACEHOLDERS[5]);
         $req = $this->db->prepare($statement);
 
-        $req->bindValue(static::PLACE_HOLDERS[1], $title, PDO::PARAM_STR);
-        $req->bindValue(static::PLACE_HOLDERS[5], $date, PDO::PARAM_STR);
+        $req->bindValue(static::PLACEHOLDERS[1], $title, PDO::PARAM_STR);
+        $req->bindValue(static::PLACEHOLDERS[5], $date, PDO::PARAM_STR);
         $req->execute();
 
         $response = $req->fetchAll(PDO::FETCH_ASSOC);
@@ -104,18 +126,18 @@ class BookDbManager extends DbManager
     public function update(int $id, int $idCategory, string $title, string $cover, string $summary, string $date)
     {
         $statement = sprintf("UPDATE %s SET %s = %s, %s = %s, %s = %s, %s = %s, %s = %s WHERE %s = %s",
-            static::TABLE, static::FIELDS[1], static::PLACE_HOLDERS[1], static::FIELDS[2],
-            static::PLACE_HOLDERS[2], static::FIELDS[3], static::PLACE_HOLDERS[3], static::FIELDS[4],
-            static::PLACE_HOLDERS[4], static::FIELDS[5], static::PLACE_HOLDERS[5], static::FIELDS[0],
-            static::PLACE_HOLDERS[0]);
+            static::TABLE, static::FIELDS[1], static::PLACEHOLDERS[1], static::FIELDS[2],
+            static::PLACEHOLDERS[2], static::FIELDS[3], static::PLACEHOLDERS[3], static::FIELDS[4],
+            static::PLACEHOLDERS[4], static::FIELDS[5], static::PLACEHOLDERS[5], static::FIELDS[0],
+            static::PLACEHOLDERS[0]);
         $req = $this->db->prepare($statement);
 
-        $req->bindValue(static::PLACE_HOLDERS[0], $id, PDO::PARAM_INT);
-        $req->bindValue(static::PLACE_HOLDERS[1], $idCategory, PDO::PARAM_STR);
-        $req->bindValue(static::PLACE_HOLDERS[2], $title, PDO::PARAM_STR);
-        $req->bindValue(static::PLACE_HOLDERS[3], $cover, PDO::PARAM_STR);
-        $req->bindValue(static::PLACE_HOLDERS[4], $summary, PDO::PARAM_STR);
-        $req->bindValue(static::PLACE_HOLDERS[5], $date, PDO::PARAM_STR);
+        $req->bindValue(static::PLACEHOLDERS[0], $id, PDO::PARAM_INT);
+        $req->bindValue(static::PLACEHOLDERS[1], $idCategory, PDO::PARAM_INT);
+        $req->bindValue(static::PLACEHOLDERS[2], $title, PDO::PARAM_STR);
+        $req->bindValue(static::PLACEHOLDERS[3], $cover, PDO::PARAM_STR);
+        $req->bindValue(static::PLACEHOLDERS[4], $summary, PDO::PARAM_STR);
+        $req->bindValue(static::PLACEHOLDERS[5], $date, PDO::PARAM_STR);
         $req->execute();
     }
 
@@ -126,10 +148,10 @@ class BookDbManager extends DbManager
     public function softDelete(int $id)
     {
         $statement = sprintf("UPDATE %s SET deleted = 1 WHERE %s = %s",
-            static::TABLE, static::FIELDS[0], static::PLACE_HOLDERS[0]);
+            static::TABLE, static::FIELDS[0], static::PLACEHOLDERS[0]);
         $req = $this->db->prepare($statement);
 
-        $req->bindValue(static::PLACE_HOLDERS[0], $id, PDO::PARAM_INT);
+        $req->bindValue(static::PLACEHOLDERS[0], $id, PDO::PARAM_INT);
         $req->execute();
     }
 
@@ -140,10 +162,10 @@ class BookDbManager extends DbManager
     public function delete(int $id)
     {
         $statement = sprintf("DELETE FROM %s WHERE %s = %s",
-            static::TABLE, static::FIELDS[0], static::PLACE_HOLDERS[0]);
+            static::TABLE, static::FIELDS[0], static::PLACEHOLDERS[0]);
         $req = $this->db->prepare($statement);
 
-        $req->bindValue(static::PLACE_HOLDERS[0], $id, PDO::PARAM_INT);
+        $req->bindValue(static::PLACEHOLDERS[0], $id, PDO::PARAM_INT);
         $req->execute();
     }
 }
