@@ -62,6 +62,25 @@ class CategoryDbManager extends DbManager
     }
 
     /**
+     * Gets the category id associated to the name given in parameter.
+     * @param string $name The name of the category to get.
+     * @return null|string The json response if exists else null.
+     */
+    public function getCategoryId(string $name)
+    {
+        $statement = sprintf("SELECT %s FROM %s WHERE %s = %s AND deleted = 0",
+            static::FIELDS[0], static::TABLE, static::FIELDS[1], static::PLACEHOLDERS[1]);
+        $req = $this->db->prepare($statement);
+
+        $req->bindValue(static::PLACEHOLDERS[1], $name, PDO::PARAM_INT);
+        $req->execute();
+
+        $response = $req->fetchAll(PDO::FETCH_ASSOC);
+
+        return (!empty($response)) ? json_encode($response) : null;
+    }
+
+    /**
      * From an id, updates the name of the associated category.
      * @param int $id The id of the category to update.
      * @param string $name The new name to set.

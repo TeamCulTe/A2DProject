@@ -128,22 +128,6 @@ class WriterDbManager extends DbManager
     }
 
     /**
-     * Deletes a writer from the database.
-     * @param int $idAuthor The id of the author.
-     * @param int $idBook The id of the book.
-     */
-    public function delete(int $idAuthor, int $idBook)
-    {
-        $statement = sprintf("DELETE FROM %s WHERE %s = %s",
-            static::TABLE, static::FIELDS[0], static::PLACEHOLDERS[0], static::FIELDS[1], static::PLACEHOLDERS[1]);
-        $req = $this->db->prepare($statement);
-
-        $req->bindValue(static::PLACEHOLDERS[0], $idAuthor, PDO::PARAM_INT);
-        $req->bindValue(static::PLACEHOLDERS[1], $idBook, PDO::PARAM_INT);
-        $req->execute();
-    }
-
-    /**
      * Deletes all writers entries from a specific author id.
      * @param int $idAuthor The id of the author.
      */
@@ -167,7 +151,7 @@ class WriterDbManager extends DbManager
             static::TABLE, static::FIELDS[1], static::PLACEHOLDERS[1]);
         $req = $this->db->prepare($statement);
 
-        $req->bindValue(static::PLACEHOLDERS[0], $idBook, PDO::PARAM_INT);
+        $req->bindValue(static::PLACEHOLDERS[1], $idBook, PDO::PARAM_INT);
         $req->execute();
     }
 }

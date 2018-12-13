@@ -109,10 +109,10 @@ class BookListDbManager extends DbManager
     public function deleteBookBookLists(int $idBook)
     {
         $statement = sprintf("DELETE FROM %s WHERE %s = %s",
-            static::TABLE, static::FIELDS[3], static::PLACEHOLDERS[3]);
+            static::TABLE, static::FIELDS[2], static::PLACEHOLDERS[2]);
         $req = $this->db->prepare($statement);
 
-        $req->bindValue(static::PLACEHOLDERS[3], $idBook, PDO::PARAM_INT);
+        $req->bindValue(static::PLACEHOLDERS[2], $idBook, PDO::PARAM_INT);
         $req->execute();
     }
 

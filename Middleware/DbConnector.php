@@ -74,6 +74,9 @@ class DbConnector
         {
             $db = new PDO($connectStr, $this->userName, $this->password);
 
+            $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
+
             return $db;
         }
         catch (PDOException $error)

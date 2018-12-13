@@ -35,8 +35,8 @@ class ProfileDbManager extends DbManager
      */
     public function create(string $avatar, string $description)
     {
-        $statement = sprintf("INSERT INTO %s(%s, %s, %s) VALUES(%s, %s, %s)",
-            static::TABLE, static::FIELDS[1], static::PLACEHOLDERS[1], static::FIELDS[2], static::PLACEHOLDERS[2]);
+        $statement = sprintf("INSERT INTO %s(%s, %s) VALUES(%s, %s)",
+            static::TABLE, static::FIELDS[1], static::FIELDS[2], static::PLACEHOLDERS[1], static::PLACEHOLDERS[2]);
         $req = $this->db->prepare($statement);
 
         $req->bindValue(static::PLACEHOLDERS[1], $avatar, PDO::PARAM_STR);
@@ -62,6 +62,25 @@ class ProfileDbManager extends DbManager
         $response = $req->fetchAll(PDO::FETCH_ASSOC);
 
         return (!empty($response)) ? json_encode($response) : null;
+    }
+
+    /**
+     * From an id, updates the associated profile's values.
+     * @param int $id The id of the profile to update.
+     * @param string $avatar The new avatar to set.
+     * @param string $description The new description to set.
+     */
+    public function update(int $id, string $avatar, string $description)
+    {
+        $statement = sprintf("UPDATE %s SET %s = %s, %s = %s WHERE %s = %s", static::TABLE,
+            static::FIELDS[1], static::PLACEHOLDERS[1], static::FIELDS[2], static::PLACEHOLDERS[2], static::FIELDS[0],
+            static::PLACEHOLDERS[0]);
+        $req = $this->db->prepare($statement);
+
+        $req->bindValue(static::PLACEHOLDERS[0], $id, PDO::PARAM_INT);
+        $req->bindValue(static::PLACEHOLDERS[1], $avatar, PDO::PARAM_STR);
+        $req->bindValue(static::PLACEHOLDERS[2], $description, PDO::PARAM_STR);
+        $req->execute();
     }
 
     /**

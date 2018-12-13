@@ -101,11 +101,11 @@ class BookDbManager extends DbManager
     public function getBookId(string $title, string $date)
     {
         $statement = sprintf("SELECT %s FROM %s WHERE %s = %s AND %s = %s AND deleted = 0",
-            static::FIELDS[0],static::TABLE, static::FIELDS[1], static::PLACEHOLDERS[1], static::FIELDS[5],
+            static::FIELDS[0],static::TABLE, static::FIELDS[2], static::PLACEHOLDERS[2], static::FIELDS[5],
             static::PLACEHOLDERS[5]);
         $req = $this->db->prepare($statement);
 
-        $req->bindValue(static::PLACEHOLDERS[1], $title, PDO::PARAM_STR);
+        $req->bindValue(static::PLACEHOLDERS[2], $title, PDO::PARAM_STR);
         $req->bindValue(static::PLACEHOLDERS[5], $date, PDO::PARAM_STR);
         $req->execute();
 

@@ -62,6 +62,25 @@ class BookListTypeDbManager extends DbManager
     }
 
     /**
+     * Gets the book list type id associated to the label given in parameter.
+     * @param string $label The label of the book list type to get.
+     * @return null|string The json response if exists else null.
+     */
+    public function getBookListTypeId(string $label)
+    {
+        $statement = sprintf("SELECT %s FROM %s WHERE %s = %s",
+            static::FIELDS[0], static::TABLE, static::FIELDS[1], static::PLACEHOLDERS[1]);
+        $req = $this->db->prepare($statement);
+
+        $req->bindValue(static::PLACEHOLDERS[1], $label, PDO::PARAM_INT);
+        $req->execute();
+
+        $response = $req->fetchAll(PDO::FETCH_ASSOC);
+
+        return (!empty($response)) ? json_encode($response) : null;
+    }
+
+    /**
      * From an id, updates the label of the associated book list.
      * @param int $id The id of the book list to update.
      * @param string $label The new label to set.

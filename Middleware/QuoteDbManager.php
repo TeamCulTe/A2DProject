@@ -146,25 +146,6 @@ class QuoteDbManager extends DbManager
     }
 
     /**
-     * Updates a quote text matching to the user id and the book id given in parameter.
-     * @param int $idUser The id of the user who wrote quote to update.
-     * @param int $idBook The id of the book related to the quote to update.
-     * @param string $quote The new text to set.
-     */
-    public function updateUserBookQuote(int $idUser, int $idBook, string $quote)
-    {
-        $statement = sprintf("UPDATE %s SET %s = %s WHERE %s = %s AND %s = %s", static::TABLE,
-            static::FIELDS[3], static::PLACEHOLDERS[3], static::FIELDS[1], static::PLACEHOLDERS[1], static::FIELDS[2],
-            static::PLACEHOLDERS[2]);
-        $req = $this->db->prepare($statement);
-
-        $req->bindValue(static::PLACEHOLDERS[1], $idUser, PDO::PARAM_INT);
-        $req->bindValue(static::PLACEHOLDERS[2], $idBook, PDO::PARAM_INT);
-        $req->bindValue(static::PLACEHOLDERS[3], $quote, PDO::PARAM_STR);
-        $req->execute();
-    }
-
-    /**
      * From an id given in parameter, soft delete the associated quote.
      * @param int $id The id of the quote to delete.
      */

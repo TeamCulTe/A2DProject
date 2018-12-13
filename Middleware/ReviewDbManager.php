@@ -33,7 +33,7 @@ class ReviewDbManager extends DbManager
      * @param int $idUser The id of the user who owns the review list.
      * @param int $idBook The id of the book.
      * @param string $review The review to set.
-     * @param bool $shared The review to set.
+     * @param bool $shared The review's shared status to set.
      */
     public function create(int $idUser, int $idBook, string $review, bool $shared)
     {
@@ -44,8 +44,8 @@ class ReviewDbManager extends DbManager
 
         $req->bindValue(static::PLACEHOLDERS[0], $idUser, PDO::PARAM_INT);
         $req->bindValue(static::PLACEHOLDERS[1], $idBook, PDO::PARAM_INT);
-        $req->bindValue(static::PLACEHOLDERS[2], $shared, PDO::PARAM_BOOL);
-        $req->bindValue(static::PLACEHOLDERS[3], $review, PDO::PARAM_STR);
+        $req->bindValue(static::PLACEHOLDERS[2], $review, PDO::PARAM_STR);
+        $req->bindValue(static::PLACEHOLDERS[3], $shared, PDO::PARAM_INT);
         $req->execute();
     }
 
@@ -78,7 +78,7 @@ class ReviewDbManager extends DbManager
      */
     public function getBookReviews(int $idBook)
     {
-        $statement = sprintf("SELECT %s, %s, %s FROM %s WHERE %s = %s AND %s = %s AND deleted = 0",
+        $statement = sprintf("SELECT %s, %s, %s FROM %s WHERE %s = %s AND deleted = 0",
             static::FIELDS[0], static::FIELDS[2], static::FIELDS[3], static::TABLE, static::FIELDS[1],
             static::PLACEHOLDERS[1]);
         $req = $this->db->prepare($statement);
@@ -98,7 +98,7 @@ class ReviewDbManager extends DbManager
      */
     public function getUserReviews(int $idUser)
     {
-        $statement = sprintf("SELECT %s, %s, %s FROM %s WHERE %s = %s AND %s = %s AND deleted = 0",
+        $statement = sprintf("SELECT %s, %s, %s FROM %s WHERE %s = %s AND deleted = 0",
             static::FIELDS[1], static::FIELDS[2], static::FIELDS[3], static::TABLE, static::FIELDS[0],
             static::PLACEHOLDERS[0]);
         $req = $this->db->prepare($statement);
@@ -145,35 +145,95 @@ class ReviewDbManager extends DbManager
 
         $req->bindValue(static::PLACEHOLDERS[0], $idUser, PDO::PARAM_INT);
         $req->bindValue(static::PLACEHOLDERS[1], $idBook, PDO::PARAM_INT);
-        $req->bindValue(static::PLACEHOLDERS[3], $shared, PDO::PARAM_BOOL);
+        $req->bindValue(static::PLACEHOLDERS[3], $shared, PDO::PARAM_INT);
         $req->execute();
     }
 
     /**
-     * From an id given in parameter, soft delete the associated review.
-     * @param int $id The id of the review to delete.
+     * From a couple of id given in parameter, soft delete the associated review.
+     * @param int $idUser The id of user.
+     * @param int $idBook The id of the book.
      */
-    public function softDelete(int $id)
+    public function softDelete(int $idUser, $idBook)
     {
-        $statement = sprintf("UPDATE %s SET deleted = 1 WHERE %s = %s",
-            static::TABLE, static::FIELDS[0], static::PLACEHOLDERS[0]);
+        $statement = sprintf("UPDATE %s SET deleted = 1 WHERE %s = %s AND %s = %s",
+            static::TABLE, static::FIELDS[0], static::PLACEHOLDERS[0], static::FIELDS[1], static::PLACEHOLDERS[1]);
         $req = $this->db->prepare($statement);
 
-        $req->bindValue(static::PLACEHOLDERS[0], $id, PDO::PARAM_INT);
+        $req->bindValue(static::PLACEHOLDERS[0], $idUser, PDO::PARAM_INT);
+        $req->bindValue(static::PLACEHOLDERS[1], $idBook, PDO::PARAM_INT);
+        $req->execute();
+    }
+
+    /**
+     * From a user id given in parameter, soft delete the associated reviews.
+     * @param int $idUser The id of user.
+     */
+    public function softDeleteUserReviews(int $idUser)
+    {
+        $statement = sprintf("UPDATE %s SET deleted = 1 WHERE %s = %s",
+            static::TABLE, static::FIELDS[0], static::PLACEHOLDERS[0], static::FIELDS[0], static::PLACEHOLDERS[0]);
+        $req = $this->db->prepare($statement);
+
+        $req->bindValue(static::PLACEHOLDERS[0], $idUser, PDO::PARAM_INT);
+        $req->execute();
+    }
+
+    /**
+     * From a book id given in parameter, soft delete the associated reviews.
+     * @param int $idBook The id of the book.
+     */
+    public function softDeleteBooksReviews(int $idBook)
+    {
+        $statement = sprintf("UPDATE %s SET deleted = 1 WHERE %s = %s",
+            static::TABLE, static::FIELDS[1], static::PLACEHOLDERS[1]);
+        $req = $this->db->prepare($statement);
+
+        $req->bindValue(static::PLACEHOLDERS[1], $idBook, PDO::PARAM_INT);
         $req->execute();
     }
 
     /**
      * Deletes a review from the database.
-     * @param int $id The id of the review to delete.
+     * @param int $idUser The id of user.
+     * @param int $idBook The id of the book.
      */
-    public function delete(int $id)
+    public function delete(int $idUser, $idBook)
+    {
+        $statement = sprintf("DELETE FROM %s WHERE %s = %s AND %s = %s",
+            static::TABLE, static::FIELDS[0], static::PLACEHOLDERS[0], static::FIELDS[1], static::PLACEHOLDERS[1]);
+        $req = $this->db->prepare($statement);
+
+        $req->bindValue(static::PLACEHOLDERS[0], $idUser, PDO::PARAM_INT);
+        $req->bindValue(static::PLACEHOLDERS[1], $idBook, PDO::PARAM_INT);
+        $req->execute();
+    }
+
+    /**
+     * Deletes all reviews associated to a specific user from the database.
+     * @param int $idUser The id of user.
+     */
+    public function deleteUserReviews(int $idUser)
     {
         $statement = sprintf("DELETE FROM %s WHERE %s = %s",
             static::TABLE, static::FIELDS[0], static::PLACEHOLDERS[0]);
         $req = $this->db->prepare($statement);
 
-        $req->bindValue(static::PLACEHOLDERS[0], $id, PDO::PARAM_INT);
+        $req->bindValue(static::PLACEHOLDERS[0], $idUser, PDO::PARAM_INT);
+        $req->execute();
+    }
+
+    /**
+     * Deletes all reviews associated to a specific book from the database.
+     * @param int $idBook The id of the book.
+     */
+    public function deleteBookReviews(int $idBook)
+    {
+        $statement = sprintf("DELETE FROM %s WHERE %s = %s",
+            static::TABLE, static::FIELDS[1], static::PLACEHOLDERS[1]);
+        $req = $this->db->prepare($statement);
+
+        $req->bindValue(static::PLACEHOLDERS[1], $idBook, PDO::PARAM_INT);
         $req->execute();
     }
 }
