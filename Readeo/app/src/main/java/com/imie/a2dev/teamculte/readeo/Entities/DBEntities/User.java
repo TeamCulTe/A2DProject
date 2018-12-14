@@ -25,6 +25,11 @@ public final class User extends DBEntity {
     private String email;
 
     /**
+     * Stores the user's profile.
+     */
+    private Profile profile;
+
+    /**
      * Stores the user's country of living.
      */
     private String country;
@@ -58,16 +63,18 @@ public final class User extends DBEntity {
      * @param pseudo The pseudo to set.
      * @param password The password to set.
      * @param email The email to set.
+     * @param profile The profile to set.
      * @param country The country name to set.
      * @param city the city name to set.
      * @param bookLists The associated bookLists to set.
      * @param reviews The list of reviews to set.
      */
-    public User(String pseudo, String password, String email, String country, String city,
+    public User(String pseudo, String password, String email, Profile profile, String country, String city,
                 Map<String, BookList> bookLists, List<Review> reviews) {
         this.pseudo = pseudo;
         this.password = password;
         this.email = email;
+        this.profile = profile;
         this.country = country;
         this.city = city;
         this.bookLists = bookLists;
@@ -81,19 +88,21 @@ public final class User extends DBEntity {
      * @param pseudo The pseudo to set.
      * @param password The password to set.
      * @param email The email to set.
+     * @param profile The profile to set.
      * @param country The country name to set.
      * @param city the city name to set.
      * @param bookLists The associated bookLists to set.
      * @param reviews The list of reviews to set.
      * @param deleted The boolean value to set.
      */
-    public User(int id, String pseudo, String password, String email, String country, String city,
+    public User(int id, String pseudo, String password, String email, Profile profile, String country, String city,
                 Map<String, BookList> bookLists, List<Review> reviews, boolean deleted) {
         super(id, deleted);
 
         this.pseudo = pseudo;
         this.password = password;
         this.email = email;
+        this.profile = profile;
         this.country = country;
         this.city = city;
         this.bookLists = bookLists;
@@ -152,6 +161,24 @@ public final class User extends DBEntity {
      */
     public void setEmail(String newEmail) {
         this.email = newEmail;
+    }
+
+    /**
+     * Gets the profile attribute.
+     *
+     * @return The Profile value of profile attribute.
+     */
+    public Profile getProfile() {
+        return this.profile;
+    }
+
+    /**
+     * Sets the profile attribute.
+     *
+     * @param newProfile The new Profile value to set.
+     */
+    public void setProfile(Profile newProfile) {
+        this.profile = newProfile;
     }
 
     /**
