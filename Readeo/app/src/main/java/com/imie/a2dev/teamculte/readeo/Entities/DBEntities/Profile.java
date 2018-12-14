@@ -15,11 +15,6 @@ public final class Profile extends DBEntity {
     private String avatar;
 
     /**
-     * Stores the owner of the profile.
-     */
-    private User user;
-
-    /**
      * Profile's default constructor.
      */
     public Profile() {
@@ -31,12 +26,10 @@ public final class Profile extends DBEntity {
      *
      * @param description The description to set.
      * @param avatar The path of the avatar to set.
-     * @param user The user to set.
      */
-    public Profile(String description, String avatar, User user) {
+    public Profile(String description, String avatar) {
         this.description = description;
         this.avatar = avatar;
-        this.user = user;
     }
 
     /**
@@ -53,7 +46,6 @@ public final class Profile extends DBEntity {
 
         this.description = description;
         this.avatar = avatar;
-        this.user = user;
     }
 
     /**
@@ -90,23 +82,5 @@ public final class Profile extends DBEntity {
      */
     public void setAvatar(String newAvatar) {
         this.avatar = newAvatar;
-    }
-
-    /**
-     * Gets the user attribute.
-     *
-     * @return The User value of user attribute.
-     */
-    public User getUser() {
-        return this.user;
-    }
-
-    /**
-     * Sets the user attribute.
-     *
-     * @param newUser The new User value to set.
-     */
-    public void setUser(User newUser) {
-        this.user = newUser;
     }
 }
