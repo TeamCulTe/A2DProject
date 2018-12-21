@@ -172,6 +172,11 @@ class ReadeoDBManager:
     :param book_dicts The list of dictionary containing the information on books.
     """
     def insert_all(self, book_dicts):
+        if book_dicts is None:
+            print("No results to insert, skipping.\n")
+
+            return
+
         if type(book_dicts) is not list:
             raise TypeError("The parameter should be a list.")
 
