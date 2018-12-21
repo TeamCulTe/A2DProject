@@ -159,8 +159,11 @@ class BookGetter:
             response = requests.get(url)
 
             if response.status_code != 200:
-                raise Exception("An error occurred contacting {}.\nThe server returned a {} response status.".format(
+                print("An error occurred contacting {}.\nThe server returned a {} response status.".format(
                     url, response.status_code))
+
+                if response.status_code == 403:
+                    raise ServerError("The maximum number of query has been reached.\nStopped at {}".format(url))
 
             if log:
                 print("Queried URL : {}\n".format(url))
@@ -168,6 +171,11 @@ class BookGetter:
             results = json.loads(response.content, encoding="UTF-8")
 
             if first_query:
+                if "totalItems" not in results.keys():
+                    print("No \"totalItem\" key, skipping.\n")
+
+                    return
+
                 self.results = results["totalItems"]
                 first_query = False
 
@@ -201,3 +209,7 @@ class BookGetter:
         self.add_parameter("q", content_filter)
 
         return self.query_books(True)
+
+
+class ServerError(Exception):
+    pass
