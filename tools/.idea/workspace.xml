@@ -2,16 +2,40 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2572280d-6f36-4598-b250-da7e19ff7e7d" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/../Readeo/app/src/main/java/com/imie/a2dev/teamculte/readeo/Entities/DBEntities/PrivateUser.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../Readeo/app/src/main/java/com/imie/a2dev/teamculte/readeo/Entities/DBEntities/Book.java" beforeDir="false" afterPath="$PROJECT_DIR$/../Readeo/app/src/main/java/com/imie/a2dev/teamculte/readeo/Entities/DBEntities/Book.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../Readeo/app/src/main/java/com/imie/a2dev/teamculte/readeo/Entities/DBEntities/BookList.java" beforeDir="false" afterPath="$PROJECT_DIR$/../Readeo/app/src/main/java/com/imie/a2dev/teamculte/readeo/Entities/DBEntities/BookList.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../Readeo/app/src/main/java/com/imie/a2dev/teamculte/readeo/Entities/DBEntities/DBEntity.java" beforeDir="false" afterPath="$PROJECT_DIR$/../Readeo/app/src/main/java/com/imie/a2dev/teamculte/readeo/Entities/DBEntities/DBEntity.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Readeo/app/src/main/java/com/imie/a2dev/teamculte/readeo/Entities/DBEntities/PrivateUser.java" beforeDir="false" afterPath="$PROJECT_DIR$/../Readeo/app/src/main/java/com/imie/a2dev/teamculte/readeo/Entities/DBEntities/PrivateUser.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../Readeo/app/src/main/java/com/imie/a2dev/teamculte/readeo/Entities/DBEntities/Profile.java" beforeDir="false" afterPath="$PROJECT_DIR$/../Readeo/app/src/main/java/com/imie/a2dev/teamculte/readeo/Entities/DBEntities/Profile.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../Readeo/app/src/main/java/com/imie/a2dev/teamculte/readeo/Entities/DBEntities/Quote.java" beforeDir="false" afterPath="$PROJECT_DIR$/../Readeo/app/src/main/java/com/imie/a2dev/teamculte/readeo/Entities/DBEntities/Quote.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../Readeo/app/src/main/java/com/imie/a2dev/teamculte/readeo/Entities/DBEntities/Review.java" beforeDir="false" afterPath="$PROJECT_DIR$/../Readeo/app/src/main/java/com/imie/a2dev/teamculte/readeo/Entities/DBEntities/Review.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Readeo/app/src/main/java/com/imie/a2dev/teamculte/readeo/Entities/DBEntities/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/../Readeo/app/src/main/java/com/imie/a2dev/teamculte/readeo/Entities/DBEntities/User.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/book_extract_script.py" beforeDir="false" afterPath="$PROJECT_DIR$/book_extract_script.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/extract.conf" beforeDir="false" afterPath="$PROJECT_DIR$/extract.conf" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ReadeoCppLib/.idea/dictionaries/mahsyaj.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ReadeoCppLib/app/CMakeLists.txt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ReadeoCppLib/app/build.gradle" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ReadeoCppLib/app/proguard-rules.pro" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ReadeoCppLib/app/src/main/cpp/native-lib.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ReadeoCppLib/app/src/main/cpp/readeo_library/Entities/Book.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ReadeoCppLib/app/src/main/cpp/readeo_library/Entities/Book.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ReadeoCppLib/app/src/main/cpp/readeo_library/Entities/BookList.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ReadeoCppLib/app/src/main/cpp/readeo_library/Entities/BookList.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ReadeoCppLib/app/src/main/cpp/readeo_library/Entities/Entity.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ReadeoCppLib/app/src/main/cpp/readeo_library/Entities/Entity.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ReadeoCppLib/app/src/main/cpp/readeo_library/Entities/PrivateUser.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ReadeoCppLib/app/src/main/cpp/readeo_library/Entities/PrivateUser.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ReadeoCppLib/app/src/main/cpp/readeo_library/Entities/Profile.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ReadeoCppLib/app/src/main/cpp/readeo_library/Entities/Profile.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ReadeoCppLib/app/src/main/cpp/readeo_library/Entities/PublicUser.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ReadeoCppLib/app/src/main/cpp/readeo_library/Entities/PublicUser.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ReadeoCppLib/app/src/main/cpp/readeo_library/Entities/Quote.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ReadeoCppLib/app/src/main/cpp/readeo_library/Entities/Quote.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ReadeoCppLib/app/src/main/cpp/readeo_library/Entities/Review.cpp" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ReadeoCppLib/app/src/main/cpp/readeo_library/Entities/Review.h" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ReadeoCppLib/app/src/main/java/com/imie/a2dev/teamculte/readeocpplib/MainActivity.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ReadeoCppLib/app/src/main/res/layout/activity_main.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ReadeoCppLib/build.gradle" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ReadeoCppLib/gradle.properties" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ReadeoCppLib/gradle/wrapper/gradle-wrapper.properties" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../ReadeoCppLib/settings.gradle" beforeDir="false" />
     </list>
     <list id="14859c05-ae93-416e-bbe8-cdeeb98e3df8" name="Default" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -99,8 +123,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/extract.conf">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="90">
-              <caret line="6" column="20" selection-start-line="6" selection-start-column="20" selection-end-line="6" selection-end-column="20" />
+            <state relative-caret-position="285">
+              <caret line="19" column="10" lean-forward="true" selection-start-line="19" selection-start-column="10" selection-end-line="19" selection-end-column="10" />
             </state>
           </provider>
         </entry>
@@ -249,22 +273,21 @@
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="23" width="1680" height="1027" extended-state="0" />
-    <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.18009768" />
+      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.18009768" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" sideWeight="0.4993895" weight="0.32941177" />
-      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.4908425" visible="true" weight="0.26524064" />
+      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.4908425" weight="0.26524064" />
       <window_info anchor="bottom" id="Debug" order="3" sideWeight="0.496337" weight="0.16684492" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
       <window_info anchor="bottom" id="TODO" order="6" />
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Database Changes" order="8" show_stripe_button="false" />
-      <window_info anchor="bottom" id="Terminal" order="9" sideWeight="0.496337" weight="0.17967914" />
-      <window_info anchor="bottom" id="Event Log" order="10" sideWeight="0.50915754" side_tool="true" visible="true" weight="0.26524064" />
+      <window_info active="true" anchor="bottom" id="Terminal" order="9" sideWeight="0.4957265" visible="true" weight="0.17967914" />
+      <window_info anchor="bottom" id="Event Log" order="10" sideWeight="0.50427353" side_tool="true" visible="true" weight="0.17967914" />
       <window_info anchor="bottom" id="Version Control" order="11" sideWeight="0.4993895" weight="0.32941177" />
       <window_info anchor="bottom" id="Python Console" order="12" sideWeight="0.4981685" weight="0.32941177" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
@@ -358,8 +381,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/extract.conf">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="90">
-          <caret line="6" column="20" selection-start-line="6" selection-start-column="20" selection-end-line="6" selection-end-column="20" />
+        <state relative-caret-position="285">
+          <caret line="19" column="10" lean-forward="true" selection-start-line="19" selection-start-column="10" selection-end-line="19" selection-end-column="10" />
         </state>
       </provider>
     </entry>

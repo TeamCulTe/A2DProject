@@ -1,0 +1,6 @@
+Time log jeremy.
+
+Middleware : 18h
+ReadeoCppLib : 3h58
+Readeo : 5m
+tools : 5h
