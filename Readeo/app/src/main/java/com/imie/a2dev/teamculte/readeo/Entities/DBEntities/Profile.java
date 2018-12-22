@@ -18,31 +18,29 @@ public final class Profile extends DBEntity {
      * Profile's default constructor.
      */
     public Profile() {
-
+        super();
     }
 
     /**
      * Profile's nearly full filled constructor, providing all attributes values, except for database related ones.
-     *
      * @param description The description to set.
      * @param avatar The path of the avatar to set.
      */
     public Profile(String description, String avatar) {
+        super();
+
         this.description = description;
         this.avatar = avatar;
     }
 
     /**
      * Profile's full filled constructor, providing all attributes values.
-     *
      * @param id The id to set.
      * @param description The description to set.
      * @param avatar The path of the avatar to set.
-     * @param user The user to set.
-     * @param deleted The boolean value of the deleted attribute to set.
      */
-    public Profile(int id, String description, String avatar, User user, boolean deleted) {
-        super(id, deleted);
+    public Profile(int id, String description, String avatar) {
+        super(id);
 
         this.description = description;
         this.avatar = avatar;
@@ -50,7 +48,6 @@ public final class Profile extends DBEntity {
 
     /**
      * Gets the description attribute.
-     *
      * @return The String value of description attribute.
      */
     public String getDescription() {
@@ -59,7 +56,6 @@ public final class Profile extends DBEntity {
 
     /**
      * Sets the description attribute.
-     *
      * @param newDescription The new String value to set.
      */
     public void setDescription(String newDescription) {
@@ -68,7 +64,6 @@ public final class Profile extends DBEntity {
 
     /**
      * Gets the avatar attribute.
-     *
      * @return The String value of avatar attribute.
      */
     public String getAvatar() {
@@ -77,7 +72,6 @@ public final class Profile extends DBEntity {
 
     /**
      * Sets the avatar attribute.
-     *
      * @param newAvatar The new String value to set.
      */
     public void setAvatar(String newAvatar) {

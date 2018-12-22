@@ -21,30 +21,31 @@ public final class BookList extends DBEntity {
      * BookList's default constructor.
      */
     public BookList() {
+        super();
+
         this.books = new ArrayList<>();
     }
 
     /**
      * BookList's nearly full filled constructor providing all attributes values except for the database related ones.
-     *
      * @param type The type to set.
      * @param books The list of books to set.
      */
     public BookList(String type, List<Book> books) {
+        super();
+
         this.type = type;
         this.books = books;
     }
 
     /**
      * BookList's full filled constructor, providing all the attribute's values.
-     *
      * @param id The id to set.
      * @param type The type to set below (read, reading, to read).
      * @param books The list of books to set.
-     * @param deleted The deleted status to set.
      */
-    public BookList(int id, String type, List<Book> books, boolean deleted) {
-        super(id, deleted);
+    public BookList(int id, String type, List<Book> books) {
+        super(id);
 
         this.type = type;
         this.books = books;
@@ -52,7 +53,6 @@ public final class BookList extends DBEntity {
 
     /**
      * Gets the type attribute.
-     *
      * @return The String value of type attribute.
      */
     public String getType() {
@@ -61,7 +61,6 @@ public final class BookList extends DBEntity {
 
     /**
      * Sets the type attribute.
-     *
      * @param newType The new String value to set.
      */
     public void setType(String newType) {
@@ -70,7 +69,6 @@ public final class BookList extends DBEntity {
 
     /**
      * Gets the books attribute.
-     *
      * @return The List<Book> value of books attribute.
      */
     public List<Book> getBooks() {
@@ -79,7 +77,6 @@ public final class BookList extends DBEntity {
 
     /**
      * Sets the books attribute.
-     *
      * @param newBooks The new List<Book> value to set.
      */
     public void setBooks(List<Book> newBooks) {

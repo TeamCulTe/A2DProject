@@ -51,6 +51,8 @@ public final class Book extends DBEntity {
      * Book's default constructor.
      */
     public Book() {
+        super();
+
         this.quotes = new ArrayList<>();
         this.reviews = new ArrayList<>();
     }
@@ -58,7 +60,6 @@ public final class Book extends DBEntity {
     /**
      * Book's nearly full filled constructor, feeding all attributes except the one related to database (id and
      * deleted).
-     *
      * @param title The title to set.
      * @param author The author to set.
      * @param cover The cover to set.
@@ -68,8 +69,16 @@ public final class Book extends DBEntity {
      * @param quotes The list of quotes to set.
      * @param reviews The list of reviews to set.
      */
-    public Book(String title, String author, String cover, String summary, int datePublished, String category,
-                List<Quote> quotes, List<Review> reviews) {
+    public Book(String title,
+                String author,
+                String cover,
+                String summary,
+                int datePublished,
+                String category,
+                List<Quote> quotes,
+                List<Review> reviews) {
+        super();
+
         this.title = title;
         this.author = author;
         this.cover = cover;
@@ -82,7 +91,6 @@ public final class Book extends DBEntity {
 
     /**
      * Book's full filled constructor, feeding all attributes.
-     *
      * @param id The id to set.
      * @param title The title to set.
      * @param author The author to set.
@@ -92,11 +100,17 @@ public final class Book extends DBEntity {
      * @param category The category to set.
      * @param quotes The list of quotes to set.
      * @param reviews The list of reviews to set.
-     * @param deleted The boolean value defining if the element is deleted or not.
      */
-    public Book(int id, String title, String author, String cover, String summary, int datePublished, String category,
-                List<Quote> quotes, List<Review> reviews, boolean deleted) {
-        super(id, deleted);
+    public Book(int id,
+                String title,
+                String author,
+                String cover,
+                String summary,
+                int datePublished,
+                String category,
+                List<Quote> quotes,
+                List<Review> reviews) {
+        super(id);
 
         this.title = title;
         this.author = author;
@@ -110,7 +124,6 @@ public final class Book extends DBEntity {
 
     /**
      * Gets the title attribute.
-     *
      * @return The String value of title attribute.
      */
     public String getTitle() {
@@ -119,7 +132,6 @@ public final class Book extends DBEntity {
 
     /**
      * Sets the title attribute.
-     *
      * @param newTitle The new String value to set.
      */
     public void setTitle(String newTitle) {
@@ -128,7 +140,6 @@ public final class Book extends DBEntity {
 
     /**
      * Gets the author attribute.
-     *
      * @return The String value of author attribute.
      */
     public String getAuthor() {
@@ -137,7 +148,6 @@ public final class Book extends DBEntity {
 
     /**
      * Sets the author attribute.
-     *
      * @param newAuthor The new String value to set.
      */
     public void setAuthor(String newAuthor) {
@@ -146,7 +156,6 @@ public final class Book extends DBEntity {
 
     /**
      * Gets the cover attribute.
-     *
      * @return The String value of cover attribute.
      */
     public String getCover() {
@@ -155,7 +164,6 @@ public final class Book extends DBEntity {
 
     /**
      * Sets the cover attribute.
-     *
      * @param newCover The new String value to set.
      */
     public void setCover(String newCover) {
@@ -164,7 +172,6 @@ public final class Book extends DBEntity {
 
     /**
      * Gets the summary attribute.
-     *
      * @return The String value of summary attribute.
      */
     public String getSummary() {
@@ -173,7 +180,6 @@ public final class Book extends DBEntity {
 
     /**
      * Sets the summary attribute.
-     *
      * @param newSummary The new String value to set.
      */
     public void setSummary(String newSummary) {
@@ -182,7 +188,6 @@ public final class Book extends DBEntity {
 
     /**
      * Gets the datePublished attribute.
-     *
      * @return The int value of datePublished attribute.
      */
     public int getDatePublished() {
@@ -191,7 +196,6 @@ public final class Book extends DBEntity {
 
     /**
      * Sets the datePublished attribute.
-     *
      * @param newDatePublished The new int value to set.
      */
     public void setDatePublished(int newDatePublished) {
@@ -200,7 +204,6 @@ public final class Book extends DBEntity {
 
     /**
      * Gets the category attribute.
-     *
      * @return The String value of category attribute.
      */
     public String getCategory() {
@@ -209,7 +212,6 @@ public final class Book extends DBEntity {
 
     /**
      * Sets the category attribute.
-     *
      * @param newCategory The new String value to set.
      */
     public void setCategory(String newCategory) {
@@ -218,7 +220,6 @@ public final class Book extends DBEntity {
 
     /**
      * Gets the quotes attribute.
-     *
      * @return The List<Quote> value of quotes attribute.
      */
     public List<Quote> getQuotes() {
@@ -227,7 +228,6 @@ public final class Book extends DBEntity {
 
     /**
      * Sets the quotes attribute.
-     *
      * @param newQuotes The new List<Quote> value to set.
      */
     public void setQuotes(List<Quote> newQuotes) {
@@ -236,7 +236,6 @@ public final class Book extends DBEntity {
 
     /**
      * Gets the reviews attribute.
-     *
      * @return The List<Review> value of reviews attribute.
      */
     public List<Review> getReviews() {
@@ -245,7 +244,6 @@ public final class Book extends DBEntity {
 
     /**
      * Sets the reviews attribute.
-     *
      * @param newReviews The new List<Review> value to set.
      */
     public void setReviews(List<Review> newReviews) {

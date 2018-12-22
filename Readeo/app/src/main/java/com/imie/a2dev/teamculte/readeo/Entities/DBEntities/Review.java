@@ -24,17 +24,18 @@ public final class Review extends DBEntity {
      * Review's default constructor.
      */
     public Review() {
-
+        super();
     }
 
     /**
      * Review's nearly full filled constructor, providing all attributes values, except for database related ones.
-     *
      * @param review The review to set.
      * @param author The name of the author to set.
      * @param shared The value defining if the review is shared or not.
      */
     public Review(String review, String author, boolean shared) {
+        super();
+
         this.review = review;
         this.author = author;
         this.shared = shared;
@@ -42,13 +43,12 @@ public final class Review extends DBEntity {
 
     /**
      * Review's full filled constructor, providing all attributes values.
-     *
      * @param review The review to set.
      * @param author The user to set.
      * @param shared The value defining if the review is shared or not.
      */
-    public Review(int id, String review, String author, boolean shared, boolean deleted) {
-        super(id, deleted);
+    public Review(int id, String review, String author, boolean shared) {
+        super(id);
 
         this.review = review;
         this.author = author;
@@ -57,7 +57,6 @@ public final class Review extends DBEntity {
 
     /**
      * Gets the review attribute.
-     *
      * @return The String value of review attribute.
      */
     public String getReview() {
@@ -66,7 +65,6 @@ public final class Review extends DBEntity {
 
     /**
      * Sets the review attribute.
-     *
      * @param newReview The new String value to set.
      */
     public void setReview(String newReview) {
@@ -75,7 +73,6 @@ public final class Review extends DBEntity {
 
     /**
      * Gets the author attribute.
-     *
      * @return The String value of author attribute.
      */
     public String getAuthor() {
@@ -84,7 +81,6 @@ public final class Review extends DBEntity {
 
     /**
      * Sets the author attribute.
-     *
      * @param newAuthor The new User value to set.
      */
     public void setAuthor(String newAuthor) {
@@ -93,8 +89,7 @@ public final class Review extends DBEntity {
 
     /**
      * Gets the shared attribute.
-     *
-     * @return The boolean value of the shared attribute.
+     * @return The boolean value of the sgit hared attribute.
      */
     public boolean isShared() {
         return this.shared;
@@ -102,7 +97,6 @@ public final class Review extends DBEntity {
 
     /**
      * Sets the shared attribute.
-     *
      * @param newShared The new boolean value to set.
      */
     public void setPublic(boolean newShared) {

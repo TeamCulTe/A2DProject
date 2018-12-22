@@ -10,31 +10,22 @@ public abstract class DBEntity {
     private int id;
 
     /**
-     * Defines if the entity is deleted or not (soft deletion).
-     */
-    private boolean deleted = false;
-
-    /**
      * DBEntity's default constructor.
      */
     protected DBEntity() {
-
+        this.id = 0;
     }
 
     /**
      * DBEntity's full filled constructor initializing all the database related attributes.
-     *
      * @param id The id to set.
-     * @param deleted The boolean value defining if the element is deleted or not.
      */
-    protected DBEntity(int id, boolean deleted) {
+    protected DBEntity(int id) {
         this.id = id;
-        this.deleted = deleted;
     }
 
     /**
      * Gets the id attribute.
-     *
      * @return The int value of id attribute.
      */
     public final int getId() {
@@ -43,28 +34,9 @@ public abstract class DBEntity {
 
     /**
      * Sets the id attribute.
-     *
      * @param newId The new int value to set.
      */
     public final void setId(int newId) {
         this.id = newId;
-    }
-
-    /**
-     * Gets the deleted attribute.
-     *
-     * @return The boolean value of deleted attribute.
-     */
-    public final boolean isDeleted() {
-        return this.deleted;
-    }
-
-    /**
-     * Sets the deleted attribute.
-     *
-     * @param newDeleted The new boolean value to set.
-     */
-    public final void setDeleted(boolean newDeleted) {
-        this.deleted = newDeleted;
     }
 }
