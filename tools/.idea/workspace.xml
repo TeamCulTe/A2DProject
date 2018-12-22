@@ -2,42 +2,16 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2572280d-6f36-4598-b250-da7e19ff7e7d" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/../ReadeoCppLib/.idea/dictionaries/mahsyaj.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../ReadeoCppLib/app/CMakeLists.txt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../ReadeoCppLib/app/build.gradle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../ReadeoCppLib/app/proguard-rules.pro" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../ReadeoCppLib/app/src/main/cpp/native-lib.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../ReadeoCppLib/app/src/main/cpp/readeo_library/Entities/Book.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../ReadeoCppLib/app/src/main/cpp/readeo_library/Entities/Book.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../ReadeoCppLib/app/src/main/cpp/readeo_library/Entities/BookList.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../ReadeoCppLib/app/src/main/cpp/readeo_library/Entities/BookList.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../ReadeoCppLib/app/src/main/cpp/readeo_library/Entities/Entity.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../ReadeoCppLib/app/src/main/cpp/readeo_library/Entities/Entity.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../ReadeoCppLib/app/src/main/cpp/readeo_library/Entities/PrivateUser.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../ReadeoCppLib/app/src/main/cpp/readeo_library/Entities/PrivateUser.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../ReadeoCppLib/app/src/main/cpp/readeo_library/Entities/Profile.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../ReadeoCppLib/app/src/main/cpp/readeo_library/Entities/Profile.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../ReadeoCppLib/app/src/main/cpp/readeo_library/Entities/PublicUser.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../ReadeoCppLib/app/src/main/cpp/readeo_library/Entities/PublicUser.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../ReadeoCppLib/app/src/main/cpp/readeo_library/Entities/Quote.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../ReadeoCppLib/app/src/main/cpp/readeo_library/Entities/Quote.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../ReadeoCppLib/app/src/main/cpp/readeo_library/Entities/Review.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../ReadeoCppLib/app/src/main/cpp/readeo_library/Entities/Review.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../ReadeoCppLib/app/src/main/java/com/imie/a2dev/teamculte/readeocpplib/MainActivity.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../ReadeoCppLib/app/src/main/res/layout/activity_main.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../ReadeoCppLib/build.gradle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../ReadeoCppLib/gradle.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../ReadeoCppLib/gradle/wrapper/gradle-wrapper.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../ReadeoCppLib/settings.gradle" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/extract.conf" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../Readeo/.idea/vcs.xml" beforeDir="false" />
+      <change afterPath="$PROJECT_DIR$/../Readeo/app/src/main/java/com/imie/a2dev/teamculte/readeo/Entities/DBEntities/PrivateUser.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Readeo/app/src/main/java/com/imie/a2dev/teamculte/readeo/Entities/DBEntities/Book.java" beforeDir="false" afterPath="$PROJECT_DIR$/../Readeo/app/src/main/java/com/imie/a2dev/teamculte/readeo/Entities/DBEntities/Book.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Readeo/app/src/main/java/com/imie/a2dev/teamculte/readeo/Entities/DBEntities/BookList.java" beforeDir="false" afterPath="$PROJECT_DIR$/../Readeo/app/src/main/java/com/imie/a2dev/teamculte/readeo/Entities/DBEntities/BookList.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Readeo/app/src/main/java/com/imie/a2dev/teamculte/readeo/Entities/DBEntities/DBEntity.java" beforeDir="false" afterPath="$PROJECT_DIR$/../Readeo/app/src/main/java/com/imie/a2dev/teamculte/readeo/Entities/DBEntities/DBEntity.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../Readeo/app/src/main/java/com/imie/a2dev/teamculte/readeo/Entities/DBEntities/Profile.java" beforeDir="false" afterPath="$PROJECT_DIR$/../Readeo/app/src/main/java/com/imie/a2dev/teamculte/readeo/Entities/DBEntities/Profile.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../common_docs/A2DevProjectDiagram.jpg" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/BookGetter.py" beforeDir="false" afterPath="$PROJECT_DIR$/BookGetter.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ReadeoDBManager.py" beforeDir="false" afterPath="$PROJECT_DIR$/ReadeoDBManager.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Readeo/app/src/main/java/com/imie/a2dev/teamculte/readeo/Entities/DBEntities/Quote.java" beforeDir="false" afterPath="$PROJECT_DIR$/../Readeo/app/src/main/java/com/imie/a2dev/teamculte/readeo/Entities/DBEntities/Quote.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Readeo/app/src/main/java/com/imie/a2dev/teamculte/readeo/Entities/DBEntities/Review.java" beforeDir="false" afterPath="$PROJECT_DIR$/../Readeo/app/src/main/java/com/imie/a2dev/teamculte/readeo/Entities/DBEntities/Review.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../Readeo/app/src/main/java/com/imie/a2dev/teamculte/readeo/Entities/DBEntities/User.java" beforeDir="false" afterPath="$PROJECT_DIR$/../Readeo/app/src/main/java/com/imie/a2dev/teamculte/readeo/Entities/DBEntities/User.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/book_extract_script.py" beforeDir="false" afterPath="$PROJECT_DIR$/book_extract_script.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/log.txt" beforeDir="false" afterPath="$PROJECT_DIR$/log.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/extract.conf" beforeDir="false" afterPath="$PROJECT_DIR$/extract.conf" afterDir="false" />
     </list>
     <list id="14859c05-ae93-416e-bbe8-cdeeb98e3df8" name="Default" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -47,7 +21,7 @@
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
   <component name="CoverageDataManager">
-    <SUITE FILE_PATH="coverage/tools$Unnamed.coverage" NAME="Unnamed Coverage Results" MODIFIED="1545402773957" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/tools$Unnamed.coverage" NAME="Unnamed Coverage Results" MODIFIED="1545477604401" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
   <component name="FUSProjectUsageTrigger">
     <session id="1670709266">
@@ -65,31 +39,31 @@
       </usages-collector>
       <usages-collector id="statistics.file.extensions.open">
         <counts>
-          <entry key="conf" value="1" />
-          <entry key="py" value="5" />
+          <entry key="conf" value="2" />
+          <entry key="py" value="7" />
           <entry key="txt" value="1" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.open">
         <counts>
-          <entry key="Ini" value="1" />
+          <entry key="Ini" value="2" />
           <entry key="PLAIN_TEXT" value="1" />
-          <entry key="Python" value="5" />
+          <entry key="Python" value="7" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.extensions.edit">
         <counts>
           <entry key="Python Console" value="164" />
-          <entry key="conf" value="535" />
-          <entry key="py" value="6410" />
+          <entry key="conf" value="538" />
+          <entry key="py" value="6415" />
           <entry key="txt" value="11" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.file.types.edit">
         <counts>
-          <entry key="Ini" value="535" />
+          <entry key="Ini" value="538" />
           <entry key="PLAIN_TEXT" value="11" />
-          <entry key="Python" value="6574" />
+          <entry key="Python" value="6579" />
         </counts>
       </usages-collector>
       <usages-collector id="statistics.vcs.git.usages">
@@ -102,19 +76,10 @@
   <component name="FileEditorManager">
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/BookGetter.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-5">
-              <caret line="178" selection-start-line="178" selection-end-line="178" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/book_extract_script.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="-215">
-              <caret line="22" lean-forward="true" selection-start-line="22" selection-end-line="22" />
+            <state relative-caret-position="630">
+              <caret line="42" column="25" lean-forward="true" selection-start-line="42" selection-start-column="25" selection-end-line="42" selection-end-column="25" />
               <folding>
                 <element signature="e#0#46#0" expanded="true" />
               </folding>
@@ -122,20 +87,20 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/extract.conf">
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/BookGetter.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="180">
-              <caret line="12" lean-forward="true" selection-start-line="12" selection-end-line="12" />
+            <state relative-caret-position="17">
+              <caret line="178" selection-start-line="178" selection-end-line="178" />
             </state>
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/log.txt">
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/extract.conf">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="45">
-              <caret line="3" lean-forward="true" selection-start-line="3" selection-end-line="3" />
+            <state relative-caret-position="90">
+              <caret line="6" column="20" selection-start-line="6" selection-start-column="20" selection-end-line="6" selection-end-column="20" />
             </state>
           </provider>
         </entry>
@@ -283,15 +248,15 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="-1" y="23" width="1680" height="1027" extended-state="0" />
+    <frame x="0" y="23" width="1680" height="1027" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" visible="true" weight="0.17643468" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" visible="true" weight="0.18009768" />
       <window_info id="Structure" order="1" side_tool="true" weight="0.25" />
       <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="bottom" id="Message" order="0" />
       <window_info anchor="bottom" id="Find" order="1" sideWeight="0.4993895" weight="0.32941177" />
-      <window_info active="true" anchor="bottom" id="Run" order="2" sideWeight="0.4920635" visible="true" weight="0.26524064" />
+      <window_info anchor="bottom" id="Run" order="2" sideWeight="0.4908425" visible="true" weight="0.26524064" />
       <window_info anchor="bottom" id="Debug" order="3" sideWeight="0.496337" weight="0.16684492" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
@@ -299,7 +264,7 @@
       <window_info anchor="bottom" id="Docker" order="7" show_stripe_button="false" />
       <window_info anchor="bottom" id="Database Changes" order="8" show_stripe_button="false" />
       <window_info anchor="bottom" id="Terminal" order="9" sideWeight="0.496337" weight="0.17967914" />
-      <window_info anchor="bottom" id="Event Log" order="10" sideWeight="0.50793654" side_tool="true" visible="true" weight="0.26524064" />
+      <window_info anchor="bottom" id="Event Log" order="10" sideWeight="0.50915754" side_tool="true" visible="true" weight="0.26524064" />
       <window_info anchor="bottom" id="Version Control" order="11" sideWeight="0.4993895" weight="0.32941177" />
       <window_info anchor="bottom" id="Python Console" order="12" sideWeight="0.4981685" weight="0.32941177" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
@@ -367,23 +332,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/BookGetter.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-5">
-          <caret line="178" selection-start-line="178" selection-end-line="178" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/book_extract_script.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-215">
-          <caret line="22" lean-forward="true" selection-start-line="22" selection-end-line="22" />
-          <folding>
-            <element signature="e#0#46#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/log.txt">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="45">
@@ -391,10 +339,27 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/book_extract_script.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="630">
+          <caret line="42" column="25" lean-forward="true" selection-start-line="42" selection-start-column="25" selection-end-line="42" selection-end-column="25" />
+          <folding>
+            <element signature="e#0#46#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/BookGetter.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="17">
+          <caret line="178" selection-start-line="178" selection-end-line="178" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/extract.conf">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="180">
-          <caret line="12" lean-forward="true" selection-start-line="12" selection-end-line="12" />
+        <state relative-caret-position="90">
+          <caret line="6" column="20" selection-start-line="6" selection-start-column="20" selection-end-line="6" selection-end-column="20" />
         </state>
       </provider>
     </entry>

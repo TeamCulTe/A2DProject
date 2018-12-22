@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Final class representing an user of the application.
+ * Final class representing a public user of the application (without password and reviews).
  */
-public final class User extends DBEntity {
+public class PublicUser extends DBEntity {
     /**
      * Stores the user's pseudo.
      */
@@ -52,14 +52,13 @@ public final class User extends DBEntity {
     /**
      * User's default constructor.
      */
-    public User() {
+    public PublicUser() {
         this.bookLists = new HashMap<>();
         this.reviews = new ArrayList<>();
     }
 
     /**
      * User's nearly full filled constructor, providing all attributes values, except for database related ones.
-     *
      * @param pseudo The pseudo to set.
      * @param password The password to set.
      * @param email The email to set.
@@ -69,8 +68,8 @@ public final class User extends DBEntity {
      * @param bookLists The associated bookLists to set.
      * @param reviews The list of reviews to set.
      */
-    public User(String pseudo, String password, String email, Profile profile, String country, String city,
-                Map<String, BookList> bookLists, List<Review> reviews) {
+    public PublicUser(String pseudo, String password, String email, Profile profile, String country, String city,
+                      Map<String, BookList> bookLists, List<Review> reviews) {
         this.pseudo = pseudo;
         this.password = password;
         this.email = email;
@@ -83,7 +82,6 @@ public final class User extends DBEntity {
 
     /**
      * User's full filled constructor, providing all attributes values.
-     *
      * @param id The id to set.
      * @param pseudo The pseudo to set.
      * @param password The password to set.
@@ -93,11 +91,10 @@ public final class User extends DBEntity {
      * @param city the city name to set.
      * @param bookLists The associated bookLists to set.
      * @param reviews The list of reviews to set.
-     * @param deleted The boolean value to set.
      */
-    public User(int id, String pseudo, String password, String email, Profile profile, String country, String city,
-                Map<String, BookList> bookLists, List<Review> reviews, boolean deleted) {
-        super(id, deleted);
+    public PublicUser(int id, String pseudo, String password, String email, Profile profile, String country, String city,
+                      Map<String, BookList> bookLists, List<Review> reviews) {
+        super(id);
 
         this.pseudo = pseudo;
         this.password = password;
@@ -111,7 +108,6 @@ public final class User extends DBEntity {
 
     /**
      * Gets the pseudo attribute.
-     *
      * @return The String value of pseudo attribute.
      */
     public String getPseudo() {
@@ -120,7 +116,6 @@ public final class User extends DBEntity {
 
     /**
      * Sets the pseudo attribute.
-     *
      * @param newPseudo The new String value to set.
      */
     public void setPseudo(String newPseudo) {
@@ -129,7 +124,6 @@ public final class User extends DBEntity {
 
     /**
      * Gets the password attribute.
-     *
      * @return The String value of password attribute.
      */
     public String getPassword() {
@@ -138,7 +132,6 @@ public final class User extends DBEntity {
 
     /**
      * Sets the password attribute.
-     *
      * @param newPassword The new String value to set.
      */
     public void setPassword(String newPassword) {
@@ -147,7 +140,6 @@ public final class User extends DBEntity {
 
     /**
      * Gets the emai attribute.
-     *
      * @return The String value of emai attribute.
      */
     public String getEmail() {
@@ -156,7 +148,6 @@ public final class User extends DBEntity {
 
     /**
      * Sets the email attribute.
-     *
      * @param newEmail The new String value to set.
      */
     public void setEmail(String newEmail) {
@@ -165,7 +156,6 @@ public final class User extends DBEntity {
 
     /**
      * Gets the profile attribute.
-     *
      * @return The Profile value of profile attribute.
      */
     public Profile getProfile() {
@@ -174,7 +164,6 @@ public final class User extends DBEntity {
 
     /**
      * Sets the profile attribute.
-     *
      * @param newProfile The new Profile value to set.
      */
     public void setProfile(Profile newProfile) {
@@ -183,7 +172,6 @@ public final class User extends DBEntity {
 
     /**
      * Gets the country attribute.
-     *
      * @return The String value of country attribute.
      */
     public String getCountry() {
@@ -192,7 +180,6 @@ public final class User extends DBEntity {
 
     /**
      * Sets the country attribute.
-     *
      * @param newCountry The new String value to set.
      */
     public void setCountry(String newCountry) {
@@ -201,7 +188,6 @@ public final class User extends DBEntity {
 
     /**
      * Gets the city attribute.
-     *
      * @return The String value of city attribute.
      */
     public String getCity() {
@@ -210,7 +196,6 @@ public final class User extends DBEntity {
 
     /**
      * Sets the city attribute.
-     *
      * @param newCity The new String value to set.
      */
     public void setCity(String newCity) {
@@ -219,7 +204,6 @@ public final class User extends DBEntity {
 
     /**
      * Gets the bookLists attribute.
-     *
      * @return The Map<String, BookList> value of bookLists attribute.
      */
     public Map<String, BookList> getBookLists() {
@@ -228,7 +212,6 @@ public final class User extends DBEntity {
 
     /**
      * Sets the bookLists attribute.
-     *
      * @param newBookLists The new Map<String, BookList> value to set.
      */
     public void setBookLists(Map<String, BookList> newBookLists) {
@@ -237,7 +220,6 @@ public final class User extends DBEntity {
 
     /**
      * Gets the reviews attribute.
-     *
      * @return The List<Review> value of reviews attribute.
      */
     public List<Review> getReviews() {
@@ -246,7 +228,6 @@ public final class User extends DBEntity {
 
     /**
      * Sets the reviews attribute.
-     *
      * @param newReviews The new List<Review> value to set.
      */
     public void setReviews(List<Review> newReviews) {

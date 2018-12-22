@@ -35,7 +35,7 @@ for elt in ["CONTENT", "AUTHOR", "TITLE", "CATEGORY"]:
                     book_list = book_getter.query_content_filtered_books("{}{}".format(upper, lower))
 
                     db_manager.insert_all(book_list)
-                except ServerError:
+                except ServerError as e:
                     update_indexes(elt, first_start, second_start)
                     print(e.message)
                     exit(1)
