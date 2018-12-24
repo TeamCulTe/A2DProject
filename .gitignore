@@ -2,3 +2,7 @@
 Readeo/.idea/*
 Middleware/.idea/*
 tools/.idea/*
+.DS_Store
+Readeo/.DS_Store
+Middleware/.DS_Store
+tools/.DS_Store
