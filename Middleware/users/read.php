@@ -42,6 +42,14 @@ elseif (isset($_POST[$pseudo]))
 {
     $response = $dbManager->getUserId($_POST[$pseudo]);
 }
+elseif (isset($_POST["start"]) && isset($_POST["end"]) && isset($_POST[$publicMode]))
+{
+    $response = $dbManager->queryAllPublicPaginated($_POST["start"], $_POST["end"]);
+}
+elseif (isset($_POST[$publicMode]))
+{
+    $response = $dbManager->queryAllPublic();
+}
 elseif (isset($_POST["start"]) && isset($_POST["end"]))
 {
     $response = $dbManager->queryAllPaginated($_POST["start"], $_POST["end"]);
