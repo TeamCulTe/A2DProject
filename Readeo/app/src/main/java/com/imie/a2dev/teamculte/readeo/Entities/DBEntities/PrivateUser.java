@@ -1,5 +1,6 @@
 package com.imie.a2dev.teamculte.readeo.Entities.DBEntities;
 
+import com.imie.a2dev.teamculte.readeo.Entities.BookList;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,6 +14,21 @@ public final class PrivateUser extends PublicUser {
      * Stores the user's hashed password.
      */
     private String password;
+
+    /**
+     * Stores the user's email address.
+     */
+    private String email;
+
+    /**
+     * Stores the user's country name.
+     */
+    private String country;
+
+    /**
+     * Stores the user's city name.
+     */
+    private String city;
 
     /**
      * Stores the user's book lists.
@@ -45,11 +61,20 @@ public final class PrivateUser extends PublicUser {
      * @param bookLists The associated bookLists to set.
      * @param reviews The list of reviews to set.
      */
-    public PrivateUser(String pseudo, String password, String email, Profile profile, String country, String city,
-                       Map<String, BookList> bookLists, List<Review> reviews) {
-        super(pseudo, email, profile, country, city);
+    public PrivateUser(String pseudo,
+                       String password,
+                       String email,
+                       Profile profile,
+                       String country,
+                       String city,
+                       Map<String, BookList> bookLists,
+                       List<Review> reviews) {
+        super(pseudo, profile);
 
         this.password = password;
+        this.email = email;
+        this.country = country;
+        this.city = city;
         this.bookLists = bookLists;
         this.reviews = reviews;
     }
@@ -66,11 +91,21 @@ public final class PrivateUser extends PublicUser {
      * @param bookLists The associated bookLists to set.
      * @param reviews The list of reviews to set.
      */
-    public PrivateUser(int id, String pseudo, String password, String email, Profile profile, String country, String city,
-                       Map<String, BookList> bookLists, List<Review> reviews) {
-        super(id, pseudo, email, profile, country, city);
+    public PrivateUser(int id,
+                       String pseudo,
+                       String password,
+                       String email,
+                       Profile profile,
+                       String country,
+                       String city,
+                       Map<String, BookList> bookLists,
+                       List<Review> reviews) {
+        super(id, pseudo, profile);
 
         this.password = password;
+        this.email = email;
+        this.country = country;
+        this.city = city;
         this.bookLists = bookLists;
         this.reviews = reviews;
     }
@@ -84,11 +119,27 @@ public final class PrivateUser extends PublicUser {
     }
 
     /**
-     * Sets the password attribute.
-     * @param newPassword The new String value to set.
+     * Gets the email attribute.
+     * @return The String value of email attribute.
      */
-    public void setPassword(String newPassword) {
-        this.password = newPassword;
+    public String getEmail() {
+        return this.email;
+    }
+
+    /**
+     * Gets the country attribute.
+     * @return The String value of country attribute.
+     */
+    public String getCountry() {
+        return this.country;
+    }
+
+    /**
+     * Gets the city attribute.
+     * @return The String value of city attribute.
+     */
+    public String getCity() {
+        return this.city;
     }
 
     /**
@@ -100,19 +151,51 @@ public final class PrivateUser extends PublicUser {
     }
 
     /**
-     * Sets the bookLists attribute.
-     * @param newBookLists The new Map<String, BookList> value to set.
-     */
-    public void setBookLists(Map<String, BookList> newBookLists) {
-        this.bookLists = newBookLists;
-    }
-
-    /**
      * Gets the reviews attribute.
      * @return The List<Review> value of reviews attribute.
      */
     public List<Review> getReviews() {
         return this.reviews;
+    }
+
+    /**
+     * Sets the password attribute.
+     * @param newPassword The new String value to set.
+     */
+    public void setPassword(String newPassword) {
+        this.password = newPassword;
+    }
+
+    /**
+     * Sets the email attribute.
+     * @param newEmail The new String value to set.
+     */
+    public void setEmail(String newEmail) {
+        this.email = newEmail;
+    }
+
+    /**
+     * Sets the country attribute.
+     * @param newCountry The new String value to set.
+     */
+    public void setCountry(String newCountry) {
+        this.country = newCountry;
+    }
+
+    /**
+     * Sets the city attribute.
+     * @param newCity The new String value to set.
+     */
+    public void setCity(String newCity) {
+        this.city = newCity;
+    }
+
+    /**
+     * Sets the bookLists attribute.
+     * @param newBookLists The new Map<String, BookList> value to set.
+     */
+    public void setBookLists(Map<String, BookList> newBookLists) {
+        this.bookLists = newBookLists;
     }
 
     /**

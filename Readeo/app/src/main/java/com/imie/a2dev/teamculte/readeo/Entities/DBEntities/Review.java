@@ -1,18 +1,26 @@
 package com.imie.a2dev.teamculte.readeo.Entities.DBEntities;
 
+import android.database.Cursor;
+import android.database.sqlite.SQLiteException;
+import android.util.Log;
+import com.imie.a2dev.teamculte.readeo.App;
+import com.imie.a2dev.teamculte.readeo.DBManagers.ReviewDBManager;
+import com.imie.a2dev.teamculte.readeo.DBManagers.UserDBManager;
+import static android.content.ContentValues.TAG;
+
 /**
  * Final class representing a review written by an user for a specific book.
  */
 public final class Review extends DBEntity {
     /**
-     * Stores the review's text.
-     */
-    private String review;
-
-    /**
      * Stores the author's pseudo.
      */
     private String author;
+
+    /**
+     * Stores the review's text.
+     */
+    private String review;
 
     /**
      * Not yet implemented.
@@ -29,46 +37,47 @@ public final class Review extends DBEntity {
 
     /**
      * Review's nearly full filled constructor, providing all attributes values, except for database related ones.
-     * @param review The review to set.
      * @param author The name of the author to set.
+     * @param review The review to set.
      * @param shared The value defining if the review is shared or not.
      */
-    public Review(String review, String author, boolean shared) {
+    public Review(String author, String review, boolean shared) {
         super();
 
-        this.review = review;
         this.author = author;
+        this.review = review;
         this.shared = shared;
     }
 
     /**
      * Review's full filled constructor, providing all attributes values.
+     * @param author The name of the author to set.
      * @param review The review to set.
-     * @param author The user to set.
      * @param shared The value defining if the review is shared or not.
      */
     public Review(int id, String review, String author, boolean shared) {
         super(id);
 
-        this.review = review;
         this.author = author;
+        this.review = review;
         this.shared = shared;
     }
 
     /**
-     * Gets the review attribute.
-     * @return The String value of review attribute.
+     * Review's full filled constructor providing all its attributes values from the result of a database query.
+     * @param result The result of the query.
      */
-    public String getReview() {
-        return this.review;
+    public Review(Cursor result) {
+        this.init(result, true);
     }
 
     /**
-     * Sets the review attribute.
-     * @param newReview The new String value to set.
+     * Review's full filled constructor providing all its attributes values from the result of a database query.
+     * @param result The result of the query.
+     * @param close Defines if the cursor should be closed or not.
      */
-    public void setReview(String newReview) {
-        this.review = newReview;
+    public Review(Cursor result, boolean close) {
+        this.init(result, close);
     }
 
     /**
@@ -80,11 +89,11 @@ public final class Review extends DBEntity {
     }
 
     /**
-     * Sets the author attribute.
-     * @param newAuthor The new User value to set.
+     * Gets the review attribute.
+     * @return The String value of review attribute.
      */
-    public void setAuthor(String newAuthor) {
-        this.author = newAuthor;
+    public String getReview() {
+        return this.review;
     }
 
     /**
@@ -96,10 +105,47 @@ public final class Review extends DBEntity {
     }
 
     /**
+     * Sets the author attribute.
+     * @param newAuthor The new User value to set.
+     */
+    public void setAuthor(String newAuthor) {
+        this.author = newAuthor;
+    }
+
+    /**
+     * Sets the review attribute.
+     * @param newReview The new String value to set.
+     */
+    public void setReview(String newReview) {
+        this.review = newReview;
+    }
+
+    /**
      * Sets the shared attribute.
      * @param newShared The new boolean value to set.
      */
-    public void setPublic(boolean newShared) {
+    public void setShared(boolean newShared) {
         this.shared = newShared;
+    }
+
+    @Override
+    protected void init(Cursor result, boolean close) {
+        try {
+            if (result.isFirst()) {
+                result.moveToNext();
+            }
+
+            this.id = result.getInt(result.getColumnIndexOrThrow(ReviewDBManager.BOOK));
+            this.author = new UserDBManager(App.getAppContext()).SQLiteGetField(UserDBManager.PSEUDO,
+                    result.getInt(result.getColumnIndexOrThrow(ReviewDBManager.USER)));
+            this.review = result.getString(result.getColumnIndexOrThrow(ReviewDBManager.REVIEW));
+            this.shared = true;
+
+            if (close) {
+                result.close();
+            }
+        } catch (SQLiteException e) {
+            Log.e(TAG, e.getMessage());
+        }
     }
 }
