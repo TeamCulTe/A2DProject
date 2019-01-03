@@ -1,5 +1,7 @@
 package com.imie.a2dev.teamculte.readeo.Entities.DBEntities;
 
+import android.database.Cursor;
+
 /**
  * Abstract class defining the base attributes of the database entities classes.
  */
@@ -7,7 +9,7 @@ public abstract class DBEntity {
     /**
      * Stores the database identifier.
      */
-    private int id;
+    protected int id;
 
     /**
      * DBEntity's default constructor.
@@ -39,4 +41,12 @@ public abstract class DBEntity {
     public final void setId(int newId) {
         this.id = newId;
     }
+
+    /**
+     * Initializes all the entity attributes values from the result of a database query
+     * closes the cursor if close is true.
+     * @param result The result of the query.
+     * @param close Defines if the cursor should be closed or not.
+     */
+    protected abstract void init(Cursor result, boolean close);
 }

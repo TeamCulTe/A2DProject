@@ -1,7 +1,13 @@
 package com.imie.a2dev.teamculte.readeo.Entities.DBEntities;
 
+import android.database.Cursor;
+import android.database.sqlite.SQLiteException;
+import android.util.Log;
+import com.imie.a2dev.teamculte.readeo.DBManagers.UserDBManager;
+import static android.content.ContentValues.TAG;
+
 /**
- * Final class representing a public user of the application (without password for security reasons, book lists and
+ * Final class representing a public user of the application (without personal data, book lists and
  * reviews).
  */
 public class PublicUser extends DBEntity {
@@ -11,24 +17,9 @@ public class PublicUser extends DBEntity {
     private String pseudo;
 
     /**
-     * Stores the user's email.
-     */
-    private String email;
-
-    /**
      * Stores the user's profile.
      */
     private Profile profile;
-
-    /**
-     * Stores the user's country of living.
-     */
-    private String country;
-
-    /**
-     * Stores the city in which the user lives.
-     */
-    private String city;
 
     /**
      * User's default constructor.
@@ -40,38 +31,43 @@ public class PublicUser extends DBEntity {
     /**
      * User's nearly full filled constructor, providing all attributes values, except for database related ones.
      * @param pseudo The pseudo to set.
-     * @param email The email to set.
      * @param profile The profile to set.
-     * @param country The country name to set.
-     * @param city the city name to set.
      */
-    public PublicUser(String pseudo, String email, Profile profile, String country, String city) {
+    public PublicUser(String pseudo, Profile profile) {
         super();
 
         this.pseudo = pseudo;
-        this.email = email;
         this.profile = profile;
-        this.country = country;
-        this.city = city;
     }
 
     /**
      * User's full filled constructor, providing all attributes values.
      * @param id The id to set.
      * @param pseudo The pseudo to set.
-     * @param email The email to set.
      * @param profile The profile to set.
-     * @param country The country name to set.
-     * @param city the city name to set.
      */
-    public PublicUser(int id, String pseudo, String email, Profile profile, String country, String city) {
+    public PublicUser(int id, String pseudo, Profile profile) {
         super(id);
 
         this.pseudo = pseudo;
-        this.email = email;
         this.profile = profile;
-        this.country = country;
-        this.city = city;
+    }
+
+    /**
+     * PublicUser's full filled constructor providing all its attributes values from the result of a database query.
+     * @param result The result of the query.
+     */
+    public PublicUser(Cursor result) {
+        this.init(result, true);
+    }
+
+    /**
+     * PublicUser's full filled constructor providing all its attributes values from the result of a database query.
+     * @param result The result of the query.
+     * @param close Defines if the cursor should be closed or not.
+     */
+    public PublicUser(Cursor result, boolean close) {
+        this.init(result, close);
     }
 
     /**
@@ -83,35 +79,19 @@ public class PublicUser extends DBEntity {
     }
 
     /**
-     * Sets the pseudo attribute.
-     * @param newPseudo The new String value to set.
-     */
-    public void setPseudo(String newPseudo) {
-        this.pseudo = newPseudo;
-    }
-
-    /**
-     * Gets the emai attribute.
-     * @return The String value of emai attribute.
-     */
-    public String getEmail() {
-        return this.email;
-    }
-
-    /**
-     * Sets the email attribute.
-     * @param newEmail The new String value to set.
-     */
-    public void setEmail(String newEmail) {
-        this.email = newEmail;
-    }
-
-    /**
      * Gets the profile attribute.
      * @return The Profile value of profile attribute.
      */
     public Profile getProfile() {
         return this.profile;
+    }
+
+    /**
+     * Sets the pseudo attribute.
+     * @param newPseudo The new String value to set.
+     */
+    public void setPseudo(String newPseudo) {
+        this.pseudo = newPseudo;
     }
 
     /**
@@ -122,35 +102,22 @@ public class PublicUser extends DBEntity {
         this.profile = newProfile;
     }
 
-    /**
-     * Gets the country attribute.
-     * @return The String value of country attribute.
-     */
-    public String getCountry() {
-        return this.country;
-    }
+    @Override
+    protected void init(Cursor result, boolean close) {
+        try {
+            if (result.isFirst()) {
+                result.moveToNext();
+            }
 
-    /**
-     * Sets the country attribute.
-     * @param newCountry The new String value to set.
-     */
-    public void setCountry(String newCountry) {
-        this.country = newCountry;
-    }
+            this.id = result.getInt(result.getColumnIndexOrThrow(UserDBManager.ID));
+            this.pseudo = result.getString(result.getColumnIndexOrThrow(UserDBManager.PSEUDO));
+            this.profile = new Profile(result, false);
 
-    /**
-     * Gets the city attribute.
-     * @return The String value of city attribute.
-     */
-    public String getCity() {
-        return this.city;
-    }
-
-    /**
-     * Sets the city attribute.
-     * @param newCity The new String value to set.
-     */
-    public void setCity(String newCity) {
-        this.city = newCity;
+            if (close) {
+                result.close();
+            }
+        } catch (SQLiteException e) {
+            Log.e(TAG, e.getMessage());
+        }
     }
 }

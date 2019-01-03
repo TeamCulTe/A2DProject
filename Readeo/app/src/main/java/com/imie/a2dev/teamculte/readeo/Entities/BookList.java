@@ -1,5 +1,8 @@
-package com.imie.a2dev.teamculte.readeo.Entities.DBEntities;
+package com.imie.a2dev.teamculte.readeo.Entities;
 
+import android.database.Cursor;
+import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Book;
+import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.DBEntity;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -60,14 +63,6 @@ public final class BookList extends DBEntity {
     }
 
     /**
-     * Sets the type attribute.
-     * @param newType The new String value to set.
-     */
-    public void setType(String newType) {
-        this.type = newType;
-    }
-
-    /**
      * Gets the books attribute.
      * @return The List<Book> value of books attribute.
      */
@@ -76,10 +71,23 @@ public final class BookList extends DBEntity {
     }
 
     /**
+     * Sets the type attribute.
+     * @param newType The new String value to set.
+     */
+    public void setType(String newType) {
+        this.type = newType;
+    }
+
+    /**
      * Sets the books attribute.
      * @param newBooks The new List<Book> value to set.
      */
     public void setBooks(List<Book> newBooks) {
         this.books = newBooks;
+    }
+
+    @Override
+    protected void init(Cursor result, boolean close) {
+        // Not used as the BookList is a MySQL entity, not an SQLite one.
     }
 }
