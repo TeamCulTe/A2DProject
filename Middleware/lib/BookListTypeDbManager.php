@@ -16,12 +16,12 @@ class BookListTypeDbManager extends DbManager
     /**
      * Stores the associated database fields.
      */
-    const FIELDS = ["id_book_list_type", "label", "deleted"];
+    const FIELDS = ["id_book_list_type", "name", "deleted"];
 
     /**
      * Stores the placeholders for prepared queries.
      */
-    const PLACEHOLDERS = [":idBLT", ":label"];
+    const PLACEHOLDERS = [":idBLT", ":name"];
 
     /**
      * Stores the associated table name.
@@ -30,16 +30,16 @@ class BookListTypeDbManager extends DbManager
 
     /**
      * Creates a book list type in the database.
-     * @param string $label The label of the book list type.
+     * @param string $name The name of the book list type.
      * @return true|false True if success else false.
      */
-    public function create(string $label)
+    public function create(string $name)
     {
         $statement = sprintf("INSERT INTO %s(%s) VALUE(%s)",
             static::TABLE, static::FIELDS[1], static::PLACEHOLDERS[1]);
         $req = $this->db->prepare($statement);
 
-        $req->bindValue(static::PLACEHOLDERS[1], $label, PDO::PARAM_STR);
+        $req->bindValue(static::PLACEHOLDERS[1], $name, PDO::PARAM_STR);
 
         return $req->execute();
     }
@@ -64,17 +64,17 @@ class BookListTypeDbManager extends DbManager
     }
 
     /**
-     * Gets the book list type id associated to the label given in parameter.
-     * @param string $label The label of the book list type to get.
+     * Gets the book list type id associated to the name given in parameter.
+     * @param string $name The name of the book list type to get.
      * @return null|string The json response if exists else null.
      */
-    public function getBookListTypeId(string $label)
+    public function getBookListTypeId(string $name)
     {
         $statement = sprintf("SELECT %s FROM %s WHERE %s = %s",
             static::FIELDS[0], static::TABLE, static::FIELDS[1], static::PLACEHOLDERS[1]);
         $req = $this->db->prepare($statement);
 
-        $req->bindValue(static::PLACEHOLDERS[1], $label, PDO::PARAM_INT);
+        $req->bindValue(static::PLACEHOLDERS[1], $name, PDO::PARAM_INT);
         $req->execute();
 
         $response = $req->fetchAll(PDO::FETCH_ASSOC);
@@ -83,19 +83,19 @@ class BookListTypeDbManager extends DbManager
     }
 
     /**
-     * From an id, updates the label of the associated book list.
+     * From an id, updates the name of the associated book list.
      * @param int $id The id of the book list to update.
-     * @param string $label The new label to set.
+     * @param string $name The new name to set.
      * @return true|false True if success else false.
      */
-    public function update(int $id, string $label)
+    public function update(int $id, string $name)
     {
         $statement = sprintf("UPDATE %s SET %s = %s WHERE %s = %s", static::TABLE,
             static::FIELDS[1], static::PLACEHOLDERS[1], static::FIELDS[0], static::PLACEHOLDERS[0]);
         $req = $this->db->prepare($statement);
 
         $req->bindValue(static::PLACEHOLDERS[0], $id, PDO::PARAM_INT);
-        $req->bindValue(static::PLACEHOLDERS[1], $label, PDO::PARAM_STR);
+        $req->bindValue(static::PLACEHOLDERS[1], $name, PDO::PARAM_STR);
 
         return $req->execute();
     }

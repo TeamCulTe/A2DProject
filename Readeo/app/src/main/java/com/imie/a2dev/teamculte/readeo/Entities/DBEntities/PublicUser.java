@@ -3,8 +3,8 @@ package com.imie.a2dev.teamculte.readeo.Entities.DBEntities;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.util.Log;
+import com.imie.a2dev.teamculte.readeo.DBManagers.DBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.UserDBManager;
-import static android.content.ContentValues.TAG;
 
 /**
  * Final class representing a public user of the application (without personal data, book lists and
@@ -14,12 +14,12 @@ public class PublicUser extends DBEntity {
     /**
      * Stores the user's pseudo.
      */
-    private String pseudo;
+    protected String pseudo;
 
     /**
      * Stores the user's profile.
      */
-    private Profile profile;
+    protected Profile profile;
 
     /**
      * User's default constructor.
@@ -117,7 +117,7 @@ public class PublicUser extends DBEntity {
                 result.close();
             }
         } catch (SQLiteException e) {
-            Log.e(TAG, e.getMessage());
+            Log.e(DBManager.SQLITE_TAG, e.getMessage());
         }
     }
 }

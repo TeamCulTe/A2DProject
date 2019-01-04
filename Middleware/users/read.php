@@ -12,11 +12,11 @@ if (isset($_POST[$email]) && isset($_POST[$publicMode]))
 {
     if ($_POST[$publicMode] == true)
     {
-        $response = $dbManager->getUserFromEmail($_POST[$email]);
-    }
-    else
-    {
         $response = $dbManager->getPublicUserFromEmail($_POST[$email]);
+    }
+    elseif ($_POST[$publicMode] == false)
+    {
+        $response = $dbManager->getUserFromEmail($_POST[$email]);
     }
 }
 elseif (isset($_POST[$idUser]))
@@ -34,9 +34,9 @@ elseif (isset($_POST[$pseudo]) && isset($_POST[$publicMode]))
         $response = $dbManager->getUserFromPseudo($_POST[$pseudo]);
     }
 }
-elseif (isset($_POST[$pseudo]) && isset($_POST[$password]))
+elseif (isset($_POST[$email]) && isset($_POST[$password]))
 {
-    $response = $dbManager->getUserFromAuth($_POST[$pseudo], $_POST[$password]);
+    $response = $dbManager->getUserFromAuth($_POST[$email], $_POST[$password]);
 }
 elseif (isset($_POST[$pseudo]))
 {
@@ -46,7 +46,7 @@ elseif (isset($_POST["start"]) && isset($_POST["end"]) && isset($_POST[$publicMo
 {
     $response = $dbManager->queryAllPublicPaginated($_POST["start"], $_POST["end"]);
 }
-elseif (isset($_POST[$publicMode]))
+elseif (isset($_POST[$publicMode]) && $_POST[$publicMode] == true)
 {
     $response = $dbManager->queryAllPublic();
 }

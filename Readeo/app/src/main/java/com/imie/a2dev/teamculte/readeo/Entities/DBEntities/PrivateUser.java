@@ -1,6 +1,16 @@
 package com.imie.a2dev.teamculte.readeo.Entities.DBEntities;
 
-import com.imie.a2dev.teamculte.readeo.Entities.BookList;
+import android.content.Context;
+import android.util.Log;
+import com.imie.a2dev.teamculte.readeo.App;
+import com.imie.a2dev.teamculte.readeo.DBManagers.CityDBManager;
+import com.imie.a2dev.teamculte.readeo.DBManagers.CountryDBManager;
+import com.imie.a2dev.teamculte.readeo.DBManagers.DBManager;
+import com.imie.a2dev.teamculte.readeo.DBManagers.ReviewDBManager;
+import com.imie.a2dev.teamculte.readeo.DBManagers.UserDBManager;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -21,14 +31,14 @@ public final class PrivateUser extends PublicUser {
     private String email;
 
     /**
-     * Stores the user's country name.
+     * Stores the user's country.
      */
-    private String country;
+    private Country country;
 
     /**
-     * Stores the user's city name.
+     * Stores the user's city.
      */
-    private String city;
+    private City city;
 
     /**
      * Stores the user's book lists.
@@ -56,8 +66,8 @@ public final class PrivateUser extends PublicUser {
      * @param password The password to set.
      * @param email The email to set.
      * @param profile The profile to set.
-     * @param country The country name to set.
-     * @param city the city name to set.
+     * @param country The country to set.
+     * @param city the city to set.
      * @param bookLists The associated bookLists to set.
      * @param reviews The list of reviews to set.
      */
@@ -65,8 +75,8 @@ public final class PrivateUser extends PublicUser {
                        String password,
                        String email,
                        Profile profile,
-                       String country,
-                       String city,
+                       Country country,
+                       City city,
                        Map<String, BookList> bookLists,
                        List<Review> reviews) {
         super(pseudo, profile);
@@ -86,8 +96,8 @@ public final class PrivateUser extends PublicUser {
      * @param password The password to set.
      * @param email The email to set.
      * @param profile The profile to set.
-     * @param country The country name to set.
-     * @param city the city name to set.
+     * @param country The country to set.
+     * @param city the city to set.
      * @param bookLists The associated bookLists to set.
      * @param reviews The list of reviews to set.
      */
@@ -96,8 +106,8 @@ public final class PrivateUser extends PublicUser {
                        String password,
                        String email,
                        Profile profile,
-                       String country,
-                       String city,
+                       Country country,
+                       City city,
                        Map<String, BookList> bookLists,
                        List<Review> reviews) {
         super(id, pseudo, profile);
@@ -128,17 +138,17 @@ public final class PrivateUser extends PublicUser {
 
     /**
      * Gets the country attribute.
-     * @return The String value of country attribute.
+     * @return The Country value of country attribute.
      */
-    public String getCountry() {
+    public Country getCountry() {
         return this.country;
     }
 
     /**
      * Gets the city attribute.
-     * @return The String value of city attribute.
+     * @return The City value of city attribute.
      */
-    public String getCity() {
+    public City getCity() {
         return this.city;
     }
 
@@ -176,17 +186,17 @@ public final class PrivateUser extends PublicUser {
 
     /**
      * Sets the country attribute.
-     * @param newCountry The new String value to set.
+     * @param newCountry The new Country value to set.
      */
-    public void setCountry(String newCountry) {
+    public void setCountry(Country newCountry) {
         this.country = newCountry;
     }
 
     /**
      * Sets the city attribute.
-     * @param newCity The new String value to set.
+     * @param newCity The new City value to set.
      */
-    public void setCity(String newCity) {
+    public void setCity(City newCity) {
         this.city = newCity;
     }
 
@@ -204,5 +214,26 @@ public final class PrivateUser extends PublicUser {
      */
     public void setReviews(List<Review> newReviews) {
         this.reviews = newReviews;
+    }
+
+    /**
+     * Initializes the user from a JSON response object.
+     * @param object The JSON response from the API.
+     */
+    public void init(JSONObject object) {
+        try {
+            Context context = App.getAppContext();
+
+            this.id = object.getInt(UserDBManager.ID);
+            this.pseudo = object.getString(UserDBManager.PSEUDO);
+            this.password = object.getString(UserDBManager.PASSWORD);
+            this.email = object.getString(UserDBManager.EMAIL);
+            this.city = new CityDBManager(context).loadSQLite(object.getInt(UserDBManager.CITY));
+            this.country = new CountryDBManager(context).loadSQLite(object.getInt(UserDBManager.COUNTRY));
+            this.reviews = new ReviewDBManager(context).loadSQLiteUser(this.id);
+            // TODO : See how to get book lists.
+        } catch (JSONException e) {
+            Log.e(DBManager.JSON_TAG, e.getMessage());
+        }
     }
 }

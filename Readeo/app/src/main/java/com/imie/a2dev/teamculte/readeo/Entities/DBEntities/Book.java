@@ -6,12 +6,12 @@ import android.database.sqlite.SQLiteException;
 import android.util.Log;
 import com.imie.a2dev.teamculte.readeo.App;
 import com.imie.a2dev.teamculte.readeo.DBManagers.BookDBManager;
+import com.imie.a2dev.teamculte.readeo.DBManagers.DBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.QuoteDBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.ReviewDBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.WriterDBManager;
 import java.util.ArrayList;
 import java.util.List;
-import static android.content.ContentValues.TAG;
 
 /**
  * Final class representing a book from the application.
@@ -294,15 +294,15 @@ public final class Book extends DBEntity {
             this.summary = result.getString(result.getColumnIndexOrThrow(BookDBManager.SUMMARY));
             this.datePublished = result.getInt(result.getColumnIndexOrThrow(BookDBManager.DATE));
             this.category = new Category(result, false);
-            this.reviews = new ReviewDBManager(context).SQLiteLoadBook(this.id);
-            this.quotes = new QuoteDBManager(context).SQLiteLoadBook(this.id);
-            this.authors = new WriterDBManager(context).SQLiteLoadAuthors(this.id);
+            this.reviews = new ReviewDBManager(context).loadSQLiteBook(this.id);
+            this.quotes = new QuoteDBManager(context).loadSQLiteBook(this.id);
+            this.authors = new WriterDBManager(context).loadSQLiteAuthors(this.id);
 
             if (close) {
                 result.close();
             }
         } catch (SQLiteException e) {
-            Log.e(TAG, e.getMessage());
+            Log.e(DBManager.SQLITE_TAG, e.getMessage());
         }
     }
 }

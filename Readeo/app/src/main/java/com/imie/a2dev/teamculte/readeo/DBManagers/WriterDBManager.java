@@ -6,8 +6,13 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import com.android.volley.Response;
+import com.imie.a2dev.teamculte.readeo.APIManager;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Author;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Book;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,6 +36,11 @@ public final class WriterDBManager extends DBManager {
     public static final String BOOK = BookDBManager.ID;
 
     /**
+     * Stores the base of the users API url.
+     */
+    private final String baseUrl = APIManager.API_URL + APIManager.WRITERS;
+
+    /**
      * UserDBManager's constructor.
      * @param context The associated context.
      */
@@ -39,11 +49,11 @@ public final class WriterDBManager extends DBManager {
     }
 
     /**
-     * From a java entity creates the associated entity into the database.
-     * @param entity The model to store into the database.
+     * From a java book creates the associated writers into the database.
+     * @param entity The model to use.
      * @return true if success else false.
      */
-    public boolean SQLiteCreate(@NonNull Book entity) {
+    public boolean createSQLiteBook(@NonNull Book entity) {
         try {
             ContentValues data;
 
@@ -59,7 +69,7 @@ public final class WriterDBManager extends DBManager {
 
             return true;
         } catch (SQLiteException e) {
-            Log.e(TAG, e.getMessage());
+            Log.e(SQLITE_TAG, e.getMessage());
 
             return false;
         }
@@ -70,7 +80,7 @@ public final class WriterDBManager extends DBManager {
      * @param idBook The id of the book.
      * @return The list of entities if exists else else an empty ArrayList.
      */
-    public List<Author> SQLiteLoadAuthors(int idBook) {
+    public List<Author> loadSQLiteAuthors(int idBook) {
         try {
             ArrayList<Author> authors = new ArrayList<>();
             String[] selectArgs = {String.valueOf(idBook)};
@@ -85,7 +95,7 @@ public final class WriterDBManager extends DBManager {
 
             return authors;
         } catch (SQLiteException e) {
-            Log.e(TAG, e.getMessage());
+            Log.e(SQLITE_TAG, e.getMessage());
 
             return null;
         }
@@ -96,7 +106,7 @@ public final class WriterDBManager extends DBManager {
      * @param idAuthor The id of the author.
      * @return The list of entities if exists else an empty ArrayList.
      */
-    public List<Book> SQLiteLoadBooks(int idAuthor) {
+    public List<Book> loadSQLiteBooks(int idAuthor) {
         try {
             ArrayList<Book> books = new ArrayList<>();
             String[] selectArgs = {String.valueOf(idAuthor)};
@@ -111,7 +121,7 @@ public final class WriterDBManager extends DBManager {
 
             return books;
         } catch (SQLiteException e) {
-            Log.e(TAG, e.getMessage());
+            Log.e(SQLITE_TAG, e.getMessage());
 
             return null;
         }
@@ -123,14 +133,14 @@ public final class WriterDBManager extends DBManager {
      * @param idBook The id of the book.
      * @return True if success else false.
      */
-    public boolean SQLiteDelete(int idAuthor, int idBook) {
+    public boolean deleteSQLite(int idAuthor, int idBook) {
         try {
             String whereClause = String.format("%s = ? AND %s = ?", AUTHOR, BOOK);
             String[] whereArgs = new String[]{String.valueOf(idAuthor), String.valueOf(idBook)};
 
             return this.database.delete(TABLE, whereClause, whereArgs) != 0;
         } catch (SQLiteException e) {
-            Log.e(TAG, e.getMessage());
+            Log.e(SQLITE_TAG, e.getMessage());
 
             return false;
         }
@@ -141,14 +151,14 @@ public final class WriterDBManager extends DBManager {
      * @param id The id from which delete the entries.
      * @return True if success else false.
      */
-    public boolean SQLiteDelete(int id, String filter) {
+    public boolean deleteSQLite(int id, String filter) {
         try {
             String whereClause = String.format("%s = ?", filter);
             String[] whereArgs = new String[]{String.valueOf(id)};
 
             return this.database.delete(TABLE, whereClause, whereArgs) != 0;
         } catch (SQLiteException e) {
-            Log.e(TAG, e.getMessage());
+            Log.e(SQLITE_TAG, e.getMessage());
 
             return false;
         }
@@ -159,14 +169,14 @@ public final class WriterDBManager extends DBManager {
      * @param id The id of the author.
      * @return True if success else false.
      */
-    public boolean SQLiteDeleteAuthor(int id) {
+    public boolean deleteSQLiteAuthor(int id) {
         try {
             String whereClause = String.format("%s = ?", AUTHOR);
             String[] whereArgs = new String[]{String.valueOf(id)};
 
             return this.database.delete(TABLE, whereClause, whereArgs) != 0;
         } catch (SQLiteException e) {
-            Log.e(TAG, e.getMessage());
+            Log.e(SQLITE_TAG, e.getMessage());
 
             return false;
         }
@@ -177,16 +187,39 @@ public final class WriterDBManager extends DBManager {
      * @param id The id of the book.
      * @return True if success else false.
      */
-    public boolean SQLiteDeleteBook(int id) {
+    public boolean deleteSQLiteBook(int id) {
         try {
             String whereClause = String.format("%s = ?", BOOK);
             String[] whereArgs = new String[]{String.valueOf(id)};
 
             return this.database.delete(TABLE, whereClause, whereArgs) != 0;
         } catch (SQLiteException e) {
-            Log.e(TAG, e.getMessage());
+            Log.e(SQLITE_TAG, e.getMessage());
 
             return false;
+        }
+    }
+
+    /**
+     * From the API, query the list of all writers from the MySQL database in order to stores it into the SQLite
+     * database.
+     */
+    public void importAllFromMySQL() {
+        super.importAllFromMySQL(baseUrl + APIManager.READ);
+    }
+
+    @Override
+    protected void createSQLite(@NonNull JSONObject entity) {
+        try {
+            ContentValues data = new ContentValues();
+
+            data.put(AUTHOR, entity.getInt(AUTHOR));
+            data.put(BOOK, entity.getInt(BOOK));
+            this.database.insertOrThrow(TABLE, null, data);
+        } catch (SQLiteException e) {
+            Log.e(SQLITE_TAG, e.getMessage());
+        } catch (JSONException e) {
+            Log.e(SQLITE_TAG, e.getMessage());
         }
     }
 }

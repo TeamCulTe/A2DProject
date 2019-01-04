@@ -6,7 +6,11 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import com.imie.a2dev.teamculte.readeo.APIManager;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Category;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,6 +34,11 @@ public final class CategoryDBManager extends DBManager {
     public static final String NAME =  "name_category";
 
     /**
+     * Stores the base of the categories API url.
+     */
+    private final String baseUrl = APIManager.API_URL + APIManager.CATEGORIES;
+
+    /**
      * CategoryDBManager's constructor.
      * @param context The associated context.
      */
@@ -42,7 +51,7 @@ public final class CategoryDBManager extends DBManager {
      * @param entity The model to store into the database.
      * @return true if success else false.
      */
-    public boolean SQLiteCreate(@NonNull Category entity) {
+    public boolean createSQLite(@NonNull Category entity) {
         try {
             ContentValues data = new ContentValues();
 
@@ -52,7 +61,7 @@ public final class CategoryDBManager extends DBManager {
 
             return true;
         } catch (SQLiteException e) {
-            Log.e(TAG, e.getMessage());
+            Log.e(SQLITE_TAG, e.getMessage());
 
             return false;
         }
@@ -64,8 +73,8 @@ public final class CategoryDBManager extends DBManager {
      * @param id The id of the db entity to access.
      * @return The value of the field.
      */
-    public String SQLiteGetField(String field, int id) {
-        return this.SQLiteGetField(field, TABLE, ID, id);
+    public String getSQLiteField(String field, int id) {
+        return this.getSQLiteField(field, TABLE, ID, id);
     }
 
     /**
@@ -73,15 +82,17 @@ public final class CategoryDBManager extends DBManager {
      * @param entity The model to update into the database.
      * @return true if success else false.
      */
-    public boolean SQLiteUpdate(@NonNull Category entity) {
+    public boolean updateSQLite(@NonNull Category entity) {
         try {
             ContentValues data = new ContentValues();
             String whereClause = String.format("%s = ?", ID);
             String[] whereArgs = new String[]{String.valueOf(entity.getId())};
 
+            data.put(NAME, entity.getName());
+
             return this.database.update(TABLE, data, whereClause, whereArgs) != 0;
         } catch (SQLiteException e) {
-            Log.e(TAG, e.getMessage());
+            Log.e(SQLITE_TAG, e.getMessage());
 
             return false;
         }
@@ -92,7 +103,7 @@ public final class CategoryDBManager extends DBManager {
      * @param id The id of entity to load from the database.
      * @return The loaded entity if exists else null.
      */
-    public Category SQLiteLoad(int id) {
+    public Category loadSQLite(int id) {
         try {
             String[] selectArgs = {String.valueOf(id)};
             String query = String.format(SIMPLE_QUERY_ALL, TABLE, ID);
@@ -100,7 +111,7 @@ public final class CategoryDBManager extends DBManager {
 
             return new Category(result);
         } catch (SQLiteException e) {
-            Log.e(TAG, e.getMessage());
+            Log.e(SQLITE_TAG, e.getMessage());
 
             return null;
         }
@@ -111,14 +122,14 @@ public final class CategoryDBManager extends DBManager {
      * @param id The id of the entity to delete.
      * @return true if success else false.
      */
-    public boolean SQLiteDelete(int id) {
+    public boolean deleteSQLite(int id) {
         try {
             String whereClause = String.format("%s = ?", ID);
             String[] whereArgs = new String[]{String.valueOf(id)};
 
             return this.database.delete(TABLE, whereClause, whereArgs) != 0;
         } catch (SQLiteException e) {
-            Log.e(TAG, e.getMessage());
+            Log.e(SQLITE_TAG, e.getMessage());
 
             return false;
         }
@@ -128,7 +139,7 @@ public final class CategoryDBManager extends DBManager {
      * Query all the categories from the database.
      * @return The list of categories.
      */
-    public List<Category> queryAll() {
+    public List<Category> queryAllSQLite() {
         List<Category> categories = new ArrayList<>();
 
         try {
@@ -139,9 +150,32 @@ public final class CategoryDBManager extends DBManager {
             }
 
         } catch (SQLiteException e) {
-            Log.e(TAG, e.getMessage());
+            Log.e(SQLITE_TAG, e.getMessage());
         }
 
         return categories;
+    }
+
+    /**
+     * From the API, query the list of all categories from the MySQL database in order to stores it into the SQLite
+     * database.
+     */
+    public void importAllFromMySQL() {
+        super.importAllFromMySQL(baseUrl + APIManager.READ);
+    }
+
+    @Override
+    protected void createSQLite(@NonNull JSONObject entity) {
+        try {
+            ContentValues data = new ContentValues();
+
+            data.put(ID, entity.getInt(ID));
+            data.put(NAME, entity.getString(NAME));
+            this.database.insertOrThrow(TABLE, null, data);
+        } catch (SQLiteException e) {
+            Log.e(SQLITE_TAG, e.getMessage());
+        } catch (JSONException e) {
+            Log.e(SQLITE_TAG, e.getMessage());
+        }
     }
 }

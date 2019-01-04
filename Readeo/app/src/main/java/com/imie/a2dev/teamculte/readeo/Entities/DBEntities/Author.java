@@ -4,7 +4,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.util.Log;
 import com.imie.a2dev.teamculte.readeo.DBManagers.AuthorDBManager;
-import static android.content.ContentValues.TAG;
+import com.imie.a2dev.teamculte.readeo.DBManagers.DBManager;
 
 /**
  * Final class representing an author from the application.
@@ -81,7 +81,7 @@ public final class Author extends DBEntity {
                 result.close();
             }
         } catch (SQLiteException e) {
-            Log.e(TAG, e.getMessage());
+            Log.e(DBManager.SQLITE_TAG, e.getMessage());
         }
     }
 }
