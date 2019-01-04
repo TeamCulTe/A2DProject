@@ -80,8 +80,8 @@ public final class ProfileDBManager extends DBManager {
      * @param id The id of the db entity to access.
      * @return The value of the field.
      */
-    public String getSQLiteField(String field, int id) {
-        return this.getSQLiteField(field, TABLE, ID, id);
+    public String getFieldSQLite(String field, int id) {
+        return this.getFieldSQLite(field, TABLE, ID, id);
     }
 
     /**
@@ -232,7 +232,7 @@ public final class ProfileDBManager extends DBManager {
     }
 
     /**
-     * Delete a profile entity in MySQL database.
+     * Deletes a profile entity in MySQL database.
      * @param id The id of the entity to delete.
      */
     public void deleteMySQL(int id) {
@@ -242,7 +242,17 @@ public final class ProfileDBManager extends DBManager {
     }
 
     /**
-     * Delete a profile entity in MySQL database.
+     * Restores a profile entity in MySQL database.
+     * @param id The id of the entity to restore.
+     */
+    public void restoreMySQL(int id) {
+        String url = String.format(baseUrl + APIManager.RESTORE + ID + "=%s", id);
+
+        super.requestString(url, null);
+    }
+
+    /**
+     * Deletes a profile entity in MySQL database.
      * @param profile The profile to delete.
      */
     public void deleteMySQL(Profile profile) {

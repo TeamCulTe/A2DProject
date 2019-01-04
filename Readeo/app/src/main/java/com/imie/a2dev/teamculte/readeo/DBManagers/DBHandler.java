@@ -47,6 +47,17 @@ public final class DBHandler extends SQLiteOpenHelper {
             CategoryDBManager.ID);
 
     /**
+     * Defines the book list type create table statement.
+     */
+    private static final String BOOK_LIST_TYPE_TABLE_STATEMENT = String.format("CREATE TABLE IF NOT EXISTS %s (%s " +
+                    "INTEGER " +
+                    "PRIMARY KEY, %s TEXT(%s) UNIQUE NOT NULL);",
+            BookListTypeDBManager.TABLE,
+            BookListTypeDBManager.ID,
+            BookListTypeDBManager.NAME,
+            LABEL_SIZE);
+
+    /**
      * Defines the category create table statement.
      */
     private static final String CATEGORY_TABLE_STATEMENT = String.format("CREATE TABLE IF NOT EXISTS %s (%s INTEGER " +
@@ -61,9 +72,9 @@ public final class DBHandler extends SQLiteOpenHelper {
      */
     private static final String CITY_TABLE_STATEMENT = String.format("CREATE TABLE IF NOT EXISTS %s (%s INTEGER " +
                     "PRIMARY KEY, %s TEXT(%s) UNIQUE NOT NULL);",
-            CategoryDBManager.TABLE,
-            CategoryDBManager.ID,
-            CategoryDBManager.NAME,
+            CityDBManager.TABLE,
+            CityDBManager.ID,
+            CityDBManager.NAME,
             LABEL_SIZE);
 
     /**
@@ -71,9 +82,9 @@ public final class DBHandler extends SQLiteOpenHelper {
      */
     private static final String COUNTRY_TABLE_STATEMENT = String.format("CREATE TABLE IF NOT EXISTS %s (%s INTEGER " +
                     "PRIMARY KEY, %s TEXT(%s) UNIQUE NOT NULL);",
-            CategoryDBManager.TABLE,
-            CategoryDBManager.ID,
-            CategoryDBManager.NAME,
+            CountryDBManager.TABLE,
+            CountryDBManager.ID,
+            CountryDBManager.NAME,
             LABEL_SIZE);
 
     /**
@@ -195,6 +206,13 @@ public final class DBHandler extends SQLiteOpenHelper {
         db.execSQL(BOOK_TABLE_STATEMENT);
         db.execSQL(String.format(INDEX_STATEMENT, BookDBManager.TITLE, BookDBManager.TABLE, BookDBManager.TITLE));
 
+        //BookListType table
+        db.execSQL(BOOK_LIST_TYPE_TABLE_STATEMENT);
+        db.execSQL(String.format(INDEX_STATEMENT,
+                BookListTypeDBManager.NAME,
+                BookListTypeDBManager.TABLE,
+                BookListTypeDBManager.NAME));
+
         //Category table
         db.execSQL(CATEGORY_TABLE_STATEMENT);
         db.execSQL(String.format(INDEX_STATEMENT,
@@ -235,9 +253,9 @@ public final class DBHandler extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int i, int i1) {
-
         db.execSQL(String.format(DROP_STATEMENT, AuthorDBManager.TABLE));
         db.execSQL(String.format(DROP_STATEMENT, BookDBManager.TABLE));
+        db.execSQL(String.format(DROP_STATEMENT, BookListTypeDBManager.TABLE));
         db.execSQL(String.format(DROP_STATEMENT, CategoryDBManager.TABLE));
         db.execSQL(String.format(DROP_STATEMENT, CityDBManager.TABLE));
         db.execSQL(String.format(DROP_STATEMENT, CountryDBManager.TABLE));

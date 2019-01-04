@@ -153,7 +153,7 @@ public final class Review extends DBEntity {
             }
 
             this.id = result.getInt(result.getColumnIndexOrThrow(ReviewDBManager.BOOK));
-            this.author = new UserDBManager(App.getAppContext()).getSQLiteField(UserDBManager.PSEUDO,
+            this.author = new UserDBManager(App.getAppContext()).getFieldSQLite(UserDBManager.PSEUDO,
                     result.getInt(result.getColumnIndexOrThrow(ReviewDBManager.USER)));
             this.review = result.getString(result.getColumnIndexOrThrow(ReviewDBManager.REVIEW));
             this.shared = true;

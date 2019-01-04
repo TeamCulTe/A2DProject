@@ -294,8 +294,8 @@ public final class Book extends DBEntity {
             this.summary = result.getString(result.getColumnIndexOrThrow(BookDBManager.SUMMARY));
             this.datePublished = result.getInt(result.getColumnIndexOrThrow(BookDBManager.DATE));
             this.category = new Category(result, false);
-            this.reviews = new ReviewDBManager(context).loadSQLiteBook(this.id);
-            this.quotes = new QuoteDBManager(context).loadSQLiteBook(this.id);
+            this.reviews = new ReviewDBManager(context).loadBookSQLite(this.id);
+            this.quotes = new QuoteDBManager(context).loadBookSQLite(this.id);
             this.authors = new WriterDBManager(context).loadSQLiteAuthors(this.id);
 
             if (close) {

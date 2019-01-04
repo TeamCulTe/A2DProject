@@ -85,8 +85,8 @@ public final class QuoteDBManager extends DBManager {
      * @param id The id of the db entity to access.
      * @return The value of the field.
      */
-    public String getSQLiteField(String field, int id) {
-        return this.getSQLiteField(field, TABLE, ID, id);
+    public String getFieldSQLite(String field, int id) {
+        return this.getFieldSQLite(field, TABLE, ID, id);
     }
 
     /**
@@ -134,7 +134,7 @@ public final class QuoteDBManager extends DBManager {
      * @param idBook The id of the book.
      * @return The list of entities if exists else an empty ArrayList.
      */
-    public List<Quote> loadSQLiteBook(int idBook) {
+    public List<Quote> loadBookSQLite(int idBook) {
         return this.loadSQLite(idBook, BOOK);
     }
 
@@ -143,7 +143,7 @@ public final class QuoteDBManager extends DBManager {
      * @param idUser The id of the user.
      * @return The list of entities if exists else an empty ArrayList.
      */
-    public List<Quote> loadSQLiteUser(int idUser) {
+    public List<Quote> loadUserSQLite(int idUser) {
         return this.loadSQLite(idUser, USER);
     }
 
@@ -170,7 +170,7 @@ public final class QuoteDBManager extends DBManager {
      * @param id The id of the user.
      * @return True if success else false.
      */
-    public boolean deleteSQLiteAuthor(int id) {
+    public boolean deleteUserSQLite(int id) {
         try {
             String whereClause = String.format("%s = ?", USER);
             String[] whereArgs = new String[]{String.valueOf(id)};
@@ -188,7 +188,7 @@ public final class QuoteDBManager extends DBManager {
      * @param id The id of the book.
      * @return True if success else false.
      */
-    public boolean deleteSQLiteBook(int id) {
+    public boolean deleteBookSQLite(int id) {
         try {
             String whereClause = String.format("%s = ?", BOOK);
             String[] whereArgs = new String[]{String.valueOf(id)};
@@ -321,7 +321,7 @@ public final class QuoteDBManager extends DBManager {
     }
 
     /**
-     * Delete a quote entity in MySQL database.
+     * Deletes a quote entity in MySQL database.
      * @param id The id of the entity to delete.
      */
     public void deleteMySQL(int id) {
@@ -331,7 +331,37 @@ public final class QuoteDBManager extends DBManager {
     }
 
     /**
-     * Delete a quote entity in MySQL database.
+     * Deletes all quote entities in MySQL database from a specific user.
+     * @param idUser The id of the user.
+     */
+    public void deleteUserMySQL(int idUser) {
+        String url = String.format(baseUrl + APIManager.DELETE + USER + "=%s", idUser);
+
+        super.requestString(url, null);
+    }
+
+    /**
+     * Restores a quote entity in MySQL database.
+     * @param id The id of the entity to delete.
+     */
+    public void restoreMySQL(int id) {
+        String url = String.format(baseUrl + APIManager.RESTORE + ID + "=%s", id);
+
+        super.requestString(url, null);
+    }
+
+    /**
+     * Restores all quote entities in MySQL database from a specific user.
+     * @param idUser The id of the user.
+     */
+    public void restoreUserMySQL(int idUser) {
+        String url = String.format(baseUrl + APIManager.RESTORE + USER + "=%s", idUser);
+
+        super.requestString(url, null);
+    }
+
+    /**
+     * Deletes a quote entity in MySQL database.
      * @param quote The quote to delete.
      */
     public void deleteMySQL(Quote quote) {

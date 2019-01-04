@@ -101,8 +101,8 @@ public final class UserDBManager extends DBManager {
      * @param id The id of the db entity to access.
      * @return The value of the field.
      */
-    public String getSQLiteField(String field, int id) {
-        return this.getSQLiteField(field, TABLE, ID, id);
+    public String getFieldSQLite(String field, int id) {
+        return this.getFieldSQLite(field, TABLE, ID, id);
     }
 
     /**
@@ -111,8 +111,8 @@ public final class UserDBManager extends DBManager {
      * @param id The pseudo of the db entity to access.
      * @return The value of the field.
      */
-    public String getSQLiteField(String field, String id) {
-        return this.getSQLiteField(field, TABLE, PSEUDO, id);
+    public String getFieldSQLite(String field, String id) {
+        return this.getFieldSQLite(field, TABLE, PSEUDO, id);
     }
 
     /**
@@ -121,7 +121,7 @@ public final class UserDBManager extends DBManager {
      * @return The id associated to the pseudo.
      */
     public int SQLiteGetId(String pseudo) {
-        return Integer.valueOf(this.getSQLiteField(ID, pseudo));
+        return Integer.valueOf(this.getFieldSQLite(ID, pseudo));
     }
 
     /**
@@ -304,7 +304,7 @@ public final class UserDBManager extends DBManager {
     }
 
     /**
-     * Delete a user entity in MySQL database.
+     * Deletes a user entity in MySQL database.
      * @param email The email of the user to delete.
      * @param password The password of the user to delete.
      */
@@ -315,7 +315,28 @@ public final class UserDBManager extends DBManager {
     }
 
     /**
-     * Delete a user entity in MySQL database.
+     * Restores a user entity in MySQL database.
+     * @param email The email of the user to restore.
+     * @param password The password of the user to derestorelete.
+     */
+    public void restoreMySQL(String email, String password) {
+        String url = String.format(baseUrl + APIManager.RESTORE + EMAIL + "=%s&" + PASSWORD + "=%s", email, password);
+
+        super.requestString(url, null);
+    }
+
+    /**
+     * Restores a user from MySQL database.
+     * @param idUser The id of the user to restore.
+     */
+    public void restoreMySQL(int idUser) {
+        String url = String.format(baseUrl + APIManager.RESTORE + ID + "=%s", idUser);
+
+        super.requestString(url, null);
+    }
+
+    /**
+     * Deletes a user entity in MySQL database.
      * @param user The user to delete.
      */
     public void deleteMySQL(PrivateUser user) {

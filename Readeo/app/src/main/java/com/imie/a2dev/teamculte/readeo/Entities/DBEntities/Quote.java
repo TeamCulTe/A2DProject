@@ -154,7 +154,7 @@ public final class Quote extends DBEntity {
 
             this.id = result.getInt(result.getColumnIndexOrThrow(QuoteDBManager.ID));
             this.bookId = result.getInt(result.getColumnIndexOrThrow(QuoteDBManager.BOOK));
-            this.author = new UserDBManager(App.getAppContext()).getSQLiteField(UserDBManager.PSEUDO,
+            this.author = new UserDBManager(App.getAppContext()).getFieldSQLite(UserDBManager.PSEUDO,
                     result.getInt(result.getColumnIndexOrThrow(QuoteDBManager.USER)));
             this.quote = result.getString(result.getColumnIndexOrThrow(QuoteDBManager.QUOTE));
 

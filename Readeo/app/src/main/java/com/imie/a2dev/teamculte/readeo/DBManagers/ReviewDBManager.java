@@ -92,7 +92,7 @@ public final class ReviewDBManager extends DBManager {
      * @param idBook The id of the book.
      * @return The value of the field.
      */
-    public String getSQLiteField(String field, int idUser, int idBook) {
+    public String getFieldSQLite(String field, int idUser, int idBook) {
         try {
             String[] selectArgs = {String.valueOf(idUser), String.valueOf(idBook)};
             String query = String.format(DOUBLE_QUERY_FIELD, field, TABLE, USER, BOOK);
@@ -159,7 +159,7 @@ public final class ReviewDBManager extends DBManager {
      * @param idBook The id of the book.
      * @return The list of entities if exists else else an empty ArrayList.
      */
-    public List<Review> loadSQLiteBook(int idBook) {
+    public List<Review> loadBookSQLite(int idBook) {
         return this.loadSQLite(idBook, BOOK);
     }
 
@@ -168,7 +168,7 @@ public final class ReviewDBManager extends DBManager {
      * @param idUser The id of the user.
      * @return The list of entities if exists else an empty ArrayList.
      */
-    public List<Review> loadSQLiteUser(int idUser) {
+    public List<Review> loadUserSQLite(int idUser) {
         return this.loadSQLite(idUser, USER);
     }
 
@@ -196,7 +196,7 @@ public final class ReviewDBManager extends DBManager {
      * @param id The id of the user.
      * @return True if success else false.
      */
-    public boolean deleteSQLiteAuthor(int id) {
+    public boolean deleteUserSQLite(int id) {
         try {
             String whereClause = String.format("%s = ?", USER);
             String[] whereArgs = new String[]{String.valueOf(id)};
@@ -214,7 +214,7 @@ public final class ReviewDBManager extends DBManager {
      * @param id The id of the book.
      * @return True if success else false.
      */
-    public boolean deleteSQLiteBook(int id) {
+    public boolean deleteBookSQLite(int id) {
         try {
             String whereClause = String.format("%s = ?", BOOK);
             String[] whereArgs = new String[]{String.valueOf(id)};
@@ -353,7 +353,7 @@ public final class ReviewDBManager extends DBManager {
     }
 
     /**
-     * Delete a review entity in MySQL database.
+     * Deletes a review entity in MySQL database.
      * @param idUser The id of the user.
      * @param idBook The id of the book.
      */
@@ -364,7 +364,38 @@ public final class ReviewDBManager extends DBManager {
     }
 
     /**
-     * Delete a review entity in MySQL database.
+     * Deletes all reviews entities in MySQL database from a specific user.
+     * @param idUser The id of the user.
+     */
+    public void deleteUserMySQL(int idUser) {
+        String url = String.format(baseUrl + APIManager.DELETE + USER + "=%s", idUser);
+
+        super.requestString(url, null);
+    }
+
+    /**
+     * Restores a quote entity in MySQL database.
+     * @param idUser The id of the user.
+     * @param idBook The id of the book.
+     */
+    public void restoreMySQL(int idUser, int idBook) {
+        String url = String.format(baseUrl + APIManager.RESTORE + USER + "=%s&" + BOOK + "=%s", idUser, idBook);
+
+        super.requestString(url, null);
+    }
+
+    /**
+     * Restores all quote entities in MySQL database from a specific user.
+     * @param idUser The id of the user.
+     */
+    public void restoreUserMySQL(int idUser) {
+        String url = String.format(baseUrl + APIManager.RESTORE + USER + "=%s", idUser);
+
+        super.requestString(url, null);
+    }
+
+    /**
+     * Deletes a review entity in MySQL database.
      * @param review The review to delete.
      */
     public void deleteMySQL(Review review) {

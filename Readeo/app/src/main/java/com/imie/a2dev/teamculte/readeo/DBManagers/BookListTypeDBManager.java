@@ -7,7 +7,7 @@ import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import com.imie.a2dev.teamculte.readeo.APIManager;
-import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Country;
+import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.BookListType;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -15,34 +15,34 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Manager class used to manage the country entities from databases.
+ * Manager class used to manage the book list type entities from databases.
  */
-public final class CountryDBManager extends DBManager {
+public final class BookListTypeDBManager extends DBManager {
     /**
-     * Defines the country's table name.
+     * Defines the book list type's table name.
      */
-    public static final String TABLE =  "Country";
+    public static final String TABLE =  "BookListType";
 
     /**
-     * Defines the country's id field.
+     * Defines the book list type's id field.
      */
-    public static final String ID =  "id_country";
+    public static final String ID =  "id_book_list_type";
 
     /**
-     * Defines the country's name field.
+     * Defines the book list type's name field.
      */
-    public static final String NAME =  "name_country";
+    public static final String NAME =  "name_book_list_type";
 
     /**
      * Stores the base of the categories API url.
      */
-    private final String baseUrl = APIManager.API_URL + APIManager.COUNTRIES;
+    private final String baseUrl = APIManager.API_URL + APIManager.BOOK_LIST_TYPES;
 
     /**
      * CategoryDBManager's constructor.
      * @param context The associated context.
      */
-    public CountryDBManager(Context context) {
+    public BookListTypeDBManager(Context context) {
         super(context);
     }
 
@@ -51,7 +51,7 @@ public final class CountryDBManager extends DBManager {
      * @param entity The model to store into the database.
      * @return true if success else false.
      */
-    public boolean createSQLite(@NonNull Country entity) {
+    public boolean createSQLite(@NonNull BookListType entity) {
         try {
             ContentValues data = new ContentValues();
 
@@ -82,7 +82,7 @@ public final class CountryDBManager extends DBManager {
      * @param entity The model to update into the database.
      * @return true if success else false.
      */
-    public boolean updateSQLite(@NonNull Country entity) {
+    public boolean updateSQLite(@NonNull BookListType entity) {
         try {
             ContentValues data = new ContentValues();
             String whereClause = String.format("%s = ?", ID);
@@ -103,13 +103,13 @@ public final class CountryDBManager extends DBManager {
      * @param id The id of entity to load from the database.
      * @return The loaded entity if exists else null.
      */
-    public Country loadSQLite(int id) {
+    public BookListType loadSQLite(int id) {
         try {
             String[] selectArgs = {String.valueOf(id)};
             String query = String.format(SIMPLE_QUERY_ALL, TABLE, ID);
             Cursor result = this.database.rawQuery(query, selectArgs);
 
-            return new Country(result);
+            return new BookListType(result);
         } catch (SQLiteException e) {
             Log.e(SQLITE_TAG, e.getMessage());
 
@@ -136,24 +136,24 @@ public final class CountryDBManager extends DBManager {
     }
 
     /**
-     * Queries all the country from the database.
-     * @return The list of country.
+     * Queries all the book list type from the database.
+     * @return The list of book list type.
      */
-    public List<Country> queryAllSQLite() {
-        List<Country> cities = new ArrayList<>();
+    public List<BookListType> queryAllSQLite() {
+        List<BookListType> bookListTypes = new ArrayList<>();
 
         try {
             Cursor result = this.database.rawQuery(String.format(QUERY_ALL, TABLE), null);
 
             while (result.moveToNext()) {
-                cities.add(new Country(result));
+                bookListTypes.add(new BookListType(result));
             }
 
         } catch (SQLiteException e) {
             Log.e(SQLITE_TAG, e.getMessage());
         }
 
-        return cities;
+        return bookListTypes;
     }
 
     /**

@@ -344,8 +344,7 @@ class UserDbManager extends DbManager
     public function softDeleteFromAuth(string $email, string $password)
     {
         $statement = sprintf("UPDATE %s SET deleted = 1 WHERE %s = %s AND %s = %s",
-            static::TABLE, static::FIELDS[2], static::PLACEHOLDERS[2], static::FIELDS[3],
-            static::PLACEHOLDERS[3]);
+            static::TABLE, static::FIELDS[2], static::PLACEHOLDERS[2], static::FIELDS[3], static::PLACEHOLDERS[3]);
         $req = $this->db->prepare($statement);
 
         $req->bindValue(static::PLACEHOLDERS[3], $email, PDO::PARAM_STR);
@@ -366,6 +365,25 @@ class UserDbManager extends DbManager
         $req = $this->db->prepare($statement);
 
         $req->bindValue(static::PLACEHOLDERS[0], $id, PDO::PARAM_INT);
+
+        return $req->execute();
+    }
+
+    /**
+     * From an email and a password given in parameter, restore the associated soft deleted user.
+     * @param string $email The email of the user to restore.
+     * @param string $password The password of the user to restore.
+     * @return true|false True if success else false.
+     */
+    public function restoreSoftDeletedFromAuth(string $email, string $password)
+    {
+        $statement = sprintf("UPDATE %s SET deleted = 0 WHERE %s = %s AND %s = %s",
+            static::TABLE, static::FIELDS[2], static::PLACEHOLDERS[2], static::FIELDS[3],
+            static::PLACEHOLDERS[3]);
+        $req = $this->db->prepare($statement);
+
+        $req->bindValue(static::PLACEHOLDERS[3], $email, PDO::PARAM_STR);
+        $req->bindValue(static::PLACEHOLDERS[2], $password, PDO::PARAM_STR);
 
         return $req->execute();
     }

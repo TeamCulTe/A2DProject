@@ -164,7 +164,7 @@ public abstract class DBManager {
      * @param filterValue The value to filter on.
      * @return The value of the field.
      */
-    public String getSQLiteField(String field, String table, String filter, String filterValue) {
+    public String getFieldSQLite(String field, String table, String filter, String filterValue) {
         try {
             String[] selectArgs = {filterValue};
             String query = String.format(SIMPLE_QUERY_FIELD, field, table, filter);
@@ -192,8 +192,8 @@ public abstract class DBManager {
      * @param id The id of the db entity to access.
      * @return The value of the field.
      */
-    public String getSQLiteField(String field, String table, String idColumn, int id) {
-        return this.getSQLiteField(field, table, idColumn, String.valueOf(id));
+    public String getFieldSQLite(String field, String table, String idColumn, int id) {
+        return this.getFieldSQLite(field, table, idColumn, String.valueOf(id));
     }
 
     /**

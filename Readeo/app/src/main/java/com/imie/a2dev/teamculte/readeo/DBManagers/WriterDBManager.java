@@ -106,7 +106,7 @@ public final class WriterDBManager extends DBManager {
      * @param idAuthor The id of the author.
      * @return The list of entities if exists else an empty ArrayList.
      */
-    public List<Book> loadSQLiteBooks(int idAuthor) {
+    public List<Book> loadBookSQLites(int idAuthor) {
         try {
             ArrayList<Book> books = new ArrayList<>();
             String[] selectArgs = {String.valueOf(idAuthor)};
@@ -187,7 +187,7 @@ public final class WriterDBManager extends DBManager {
      * @param id The id of the book.
      * @return True if success else false.
      */
-    public boolean deleteSQLiteBook(int id) {
+    public boolean deleteBookSQLite(int id) {
         try {
             String whereClause = String.format("%s = ?", BOOK);
             String[] whereArgs = new String[]{String.valueOf(id)};

@@ -72,8 +72,8 @@ public final class CityDBManager extends DBManager {
      * @param id The id of the db entity to access.
      * @return The value of the field.
      */
-    public String getSQLiteField(String field, int id) {
-        return this.getSQLiteField(field, TABLE, ID, id);
+    public String getFieldSQLite(String field, int id) {
+        return this.getFieldSQLite(field, TABLE, ID, id);
     }
 
     /**
@@ -135,7 +135,7 @@ public final class CityDBManager extends DBManager {
     }
 
     /**
-     * Query all the city from the database.
+     * Queries all the city from the database.
      * @return The list of city.
      */
     public List<City> queryAllSQLite() {

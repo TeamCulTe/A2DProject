@@ -230,7 +230,7 @@ public final class PrivateUser extends PublicUser {
             this.email = object.getString(UserDBManager.EMAIL);
             this.city = new CityDBManager(context).loadSQLite(object.getInt(UserDBManager.CITY));
             this.country = new CountryDBManager(context).loadSQLite(object.getInt(UserDBManager.COUNTRY));
-            this.reviews = new ReviewDBManager(context).loadSQLiteUser(this.id);
+            this.reviews = new ReviewDBManager(context).loadUserSQLite(this.id);
             // TODO : See how to get book lists.
         } catch (JSONException e) {
             Log.e(DBManager.JSON_TAG, e.getMessage());
