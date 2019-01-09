@@ -75,7 +75,7 @@ public final class ReviewDBManager extends DBManager {
 
             data.put(USER, this.userDBManager.SQLiteGetId(entity.getAuthor()));
             data.put(BOOK, entity.getId());
-            this.database.insertOrThrow(TABLE, null, data);
+            DBManager.database.insertOrThrow(TABLE, null, data);
 
             return true;
         } catch (SQLiteException e) {
@@ -96,7 +96,7 @@ public final class ReviewDBManager extends DBManager {
         try {
             String[] selectArgs = {String.valueOf(idUser), String.valueOf(idBook)};
             String query = String.format(DOUBLE_QUERY_FIELD, field, TABLE, USER, BOOK);
-            Cursor result = this.database.rawQuery(query, selectArgs);
+            Cursor result = DBManager.database.rawQuery(query, selectArgs);
 
             result.moveToNext();
 
@@ -126,7 +126,7 @@ public final class ReviewDBManager extends DBManager {
 
             data.put(REVIEW, entity.getReview());
 
-            return this.database.update(TABLE, data, whereClause, whereArgs) != 0;
+            return DBManager.database.update(TABLE, data, whereClause, whereArgs) != 0;
         } catch (SQLiteException e) {
             Log.e(SQLITE_TAG, e.getMessage());
 
@@ -144,7 +144,7 @@ public final class ReviewDBManager extends DBManager {
         try {
             String[] selectArgs = {String.valueOf(idUser), String.valueOf(idBook)};
             String query = String.format(DOUBLE_QUERY_ALL, TABLE, USER, BOOK);
-            Cursor result = this.database.rawQuery(query, selectArgs);
+            Cursor result = DBManager.database.rawQuery(query, selectArgs);
 
             return new Review(result);
         } catch (SQLiteException e) {
@@ -183,7 +183,7 @@ public final class ReviewDBManager extends DBManager {
             String whereClause = String.format("%s = ? AND %s = ?", USER, BOOK);
             String[] whereArgs = new String[]{String.valueOf(idUser), String.valueOf(idBook)};
 
-            return this.database.delete(TABLE, whereClause, whereArgs) != 0;
+            return DBManager.database.delete(TABLE, whereClause, whereArgs) != 0;
         } catch (SQLiteException e) {
             Log.e(SQLITE_TAG, e.getMessage());
 
@@ -201,7 +201,7 @@ public final class ReviewDBManager extends DBManager {
             String whereClause = String.format("%s = ?", USER);
             String[] whereArgs = new String[]{String.valueOf(id)};
 
-            return this.database.delete(TABLE, whereClause, whereArgs) != 0;
+            return DBManager.database.delete(TABLE, whereClause, whereArgs) != 0;
         } catch (SQLiteException e) {
             Log.e(SQLITE_TAG, e.getMessage());
 
@@ -219,7 +219,7 @@ public final class ReviewDBManager extends DBManager {
             String whereClause = String.format("%s = ?", BOOK);
             String[] whereArgs = new String[]{String.valueOf(id)};
 
-            return this.database.delete(TABLE, whereClause, whereArgs) != 0;
+            return DBManager.database.delete(TABLE, whereClause, whereArgs) != 0;
         } catch (SQLiteException e) {
             Log.e(SQLITE_TAG, e.getMessage());
 
@@ -237,7 +237,7 @@ public final class ReviewDBManager extends DBManager {
             String whereClause = String.format("%s = ?", filter);
             String[] whereArgs = new String[]{String.valueOf(id)};
 
-            return this.database.delete(TABLE, whereClause, whereArgs) != 0;
+            return DBManager.database.delete(TABLE, whereClause, whereArgs) != 0;
         } catch (SQLiteException e) {
             Log.e(SQLITE_TAG, e.getMessage());
 
@@ -256,7 +256,7 @@ public final class ReviewDBManager extends DBManager {
             ArrayList<Review> reviews = new ArrayList<>();
             String[] selectArgs = {String.valueOf(id)};
             String query = String.format(SIMPLE_QUERY_ALL, TABLE, column);
-            Cursor result = this.database.rawQuery(query, selectArgs);
+            Cursor result = DBManager.database.rawQuery(query, selectArgs);
 
             while (result.moveToNext()) {
                 reviews.add(new Review(result, false));
@@ -280,12 +280,15 @@ public final class ReviewDBManager extends DBManager {
         List<Review> reviews = new ArrayList<>();
 
         try {
-            Cursor result = this.database.rawQuery(String.format(QUERY_ALL, TABLE), null);
+            Cursor result = DBManager.database.rawQuery(String.format(QUERY_ALL, TABLE), null);
 
-            while (result.moveToNext()) {
-                reviews.add(new Review(result));
+            if (result.getCount() > 0) {
+                do {
+                    reviews.add(new Review(result, false));
+                } while (result.moveToNext());
             }
 
+            result.close();
         } catch (SQLiteException e) {
             Log.e(SQLITE_TAG, e.getMessage());
         }
@@ -410,7 +413,7 @@ public final class ReviewDBManager extends DBManager {
             data.put(USER, entity.getInt(USER));
             data.put(BOOK, entity.getInt(BOOK));
             data.put(REVIEW, entity.getString(REVIEW));
-            this.database.insertOrThrow(TABLE, null, data);
+            DBManager.database.insertOrThrow(TABLE, null, data);
         } catch (SQLiteException e) {
             Log.e(SQLITE_TAG, e.getMessage());
         } catch (JSONException e) {

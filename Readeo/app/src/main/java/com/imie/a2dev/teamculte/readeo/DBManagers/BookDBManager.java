@@ -82,7 +82,7 @@ public final class BookDBManager extends DBManager {
             data.put(SUMMARY, entity.getSummary());
             data.put(DATE, entity.getDatePublished());
 
-            this.database.insertOrThrow(TABLE, null, data);
+            DBManager.database.insertOrThrow(TABLE, null, data);
 
             return true;
         } catch (SQLiteException e) {
@@ -119,7 +119,7 @@ public final class BookDBManager extends DBManager {
             data.put(SUMMARY, entity.getSummary());
             data.put(DATE, entity.getDatePublished());
 
-            return this.database.update(TABLE, data, whereClause, whereArgs) != 0;
+            return DBManager.database.update(TABLE, data, whereClause, whereArgs) != 0;
         } catch (SQLiteException e) {
             Log.e(SQLITE_TAG, e.getMessage());
 
@@ -136,7 +136,7 @@ public final class BookDBManager extends DBManager {
         try {
             String[] selectArgs = {String.valueOf(id)};
             String query = String.format(SIMPLE_QUERY_ALL, TABLE, ID);
-            Cursor result = this.database.rawQuery(query, selectArgs);
+            Cursor result = DBManager.database.rawQuery(query, selectArgs);
 
             return new Book(result);
         } catch (SQLiteException e) {
@@ -156,7 +156,7 @@ public final class BookDBManager extends DBManager {
             String whereClause = String.format("%s = ?", ID);
             String[] whereArgs = new String[]{String.valueOf(id)};
 
-            return this.database.delete(TABLE, whereClause, whereArgs) != 0;
+            return DBManager.database.delete(TABLE, whereClause, whereArgs) != 0;
         } catch (SQLiteException e) {
             Log.e(SQLITE_TAG, e.getMessage());
 
@@ -169,15 +169,19 @@ public final class BookDBManager extends DBManager {
      * @return The list of books.
      */
     public List<Book> queryAllSQLite() {
+        //TODO : Make the query better to improve loading time...
         List<Book> books = new ArrayList<>();
 
         try {
-            Cursor result = this.database.rawQuery(String.format(QUERY_ALL, TABLE), null);
+            Cursor result = DBManager.database.rawQuery(String.format(QUERY_ALL, TABLE), null);
 
-            while (result.moveToNext()) {
-                books.add(new Book(result));
+            if (result.getCount() > 0) {
+                do {
+                    books.add(new Book(result, false));
+                } while (result.moveToNext());
             }
 
+            result.close();
         } catch (SQLiteException e) {
             Log.e(SQLITE_TAG, e.getMessage());
         }
@@ -204,7 +208,7 @@ public final class BookDBManager extends DBManager {
             data.put(COVER, entity.getString(COVER));
             data.put(SUMMARY, entity.getString(SUMMARY));
             data.put(DATE, entity.getInt(DATE));
-            this.database.insertOrThrow(TABLE, null, data);
+            DBManager.database.insertOrThrow(TABLE, null, data);
         } catch (SQLiteException e) {
             Log.e(SQLITE_TAG, e.getMessage());
         } catch (JSONException e) {

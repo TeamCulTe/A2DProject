@@ -16,7 +16,7 @@ class BookListTypeDbManager extends DbManager
     /**
      * Stores the associated database fields.
      */
-    const FIELDS = ["id_book_list_type", "name", "deleted"];
+    const FIELDS = ["id_book_list_type", "name_book_list_type", "deleted"];
 
     /**
      * Stores the placeholders for prepared queries.

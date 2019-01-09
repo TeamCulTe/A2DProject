@@ -70,7 +70,7 @@ public final class BookListType extends DBEntity {
     @Override
     protected void init(Cursor result, boolean close) {
         try {
-            if (result.isFirst()) {
+            if (result.getPosition() == -1) {
                 result.moveToNext();
             }
 

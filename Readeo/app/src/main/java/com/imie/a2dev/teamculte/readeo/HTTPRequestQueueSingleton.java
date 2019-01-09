@@ -26,12 +26,91 @@ public final class HTTPRequestQueueSingleton {
     private RequestQueue requestQueue;
 
     /**
+     * Stores the number of requests.
+     */
+    private int requestNumber;
+
+    /**
+     * Stores the number of finished requests.
+     */
+    private int requestFinished;
+
+    /**
+     * Stores the listener in order to notify it when the request from the queue have been passed.
+     */
+    private HTTPRequestQueueListener listener;
+
+    /**
      * Private constructor to apply the pattern.
      * @param context The associated context to set.
      */
     private HTTPRequestQueueSingleton(Context context) {
         HTTPRequestQueueSingleton.context = context;
         this.requestQueue = this.getRequestQueue();
+    }
+
+    /**
+     * Gets the requestNumber attribute.
+     *
+     * @return The int value of requestNumber attribute.
+     */
+    public int getRequestNumber() {
+        return this.requestNumber;
+    }
+
+    /**
+     * Gets the requestFinished attribute.
+     * @return The int value of requestFinished attribute.
+     */
+    public int getRequestFinished() {
+        return this.requestFinished;
+    }
+
+    /**
+     * Gets the listener attribute.
+     * @return The HTTPRequestQueueListener value of listener attribute.
+     */
+    public HTTPRequestQueueListener getListener() {
+        return this.listener;
+    }
+
+    /**
+     * Sets the requestNumber attribute.
+     * @param newRequestNumber The new int value to set.
+     */
+    public void setRequestNumber(int newRequestNumber) {
+        this.requestNumber = newRequestNumber;
+    }
+
+    /**
+     * Sets the requestFinished attribute.
+     * @param newRequestFinished The new int value to set.
+     */
+    public void setRequestFinished(int newRequestFinished) {
+        this.requestFinished = newRequestFinished;
+    }
+
+    /**
+     * Sets the listener attribute.
+     * @param newListener The new HTTPRequestQueueListener value to set.
+     */
+    public void setListener(HTTPRequestQueueListener newListener) {
+        this.listener = newListener;
+    }
+
+    /**
+     * Called when a request is finished, simply increment the finished request attribute and check if all the
+     * requests have been passed (notify the listener and reinitializes the counters).
+     */
+    public void finishRequest() {
+        this.requestFinished++;
+
+        if (this.requestFinished == this.requestNumber) {
+            this.listener.onRequestsFinished();
+
+            this.requestNumber = 0;
+            this.requestFinished = 0;
+        }
     }
 
     /**
@@ -61,5 +140,17 @@ public final class HTTPRequestQueueSingleton {
      */
     public <T> void addToRequestQueue(Request<T> request) {
         this.getRequestQueue().add(request);
+        this.requestNumber++;
+    }
+
+    /**
+     * Interface used to implement pattern observer on the HTTPRequestQueueSingleton (notify when all the requests
+     * have been passed).
+     */
+    public interface HTTPRequestQueueListener {
+        /**
+         * Called when the requests from the queue are finished.
+         */
+        void onRequestsFinished();
     }
 }

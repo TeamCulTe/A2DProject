@@ -64,7 +64,7 @@ public final class WriterDBManager extends DBManager {
 
                 data.put(BOOK, idBook);
                 data.put(AUTHOR, author.getId());
-                this.database.insertOrThrow(TABLE, null, data);
+                DBManager.database.insertOrThrow(TABLE, null, data);
             }
 
             return true;
@@ -83,12 +83,13 @@ public final class WriterDBManager extends DBManager {
     public List<Author> loadSQLiteAuthors(int idBook) {
         try {
             ArrayList<Author> authors = new ArrayList<>();
+            AuthorDBManager authorDBManager = new AuthorDBManager(this.getContext());
             String[] selectArgs = {String.valueOf(idBook)};
             String query = String.format(SIMPLE_QUERY_ALL, TABLE, BOOK);
-            Cursor result = this.database.rawQuery(query, selectArgs);
+            Cursor result = DBManager.database.rawQuery(query, selectArgs);
 
             while (result.moveToNext()) {
-                authors.add(new Author(result, false));
+                authors.add(authorDBManager.loadSQLite(result.getInt(result.getColumnIndexOrThrow(AUTHOR))));
             }
 
             result.close();
@@ -111,7 +112,7 @@ public final class WriterDBManager extends DBManager {
             ArrayList<Book> books = new ArrayList<>();
             String[] selectArgs = {String.valueOf(idAuthor)};
             String query = String.format(SIMPLE_QUERY_ALL, TABLE, AUTHOR);
-            Cursor result = this.database.rawQuery(query, selectArgs);
+            Cursor result = DBManager.database.rawQuery(query, selectArgs);
 
             while (result.moveToNext()) {
                 books.add(new Book(result, false));
@@ -138,7 +139,7 @@ public final class WriterDBManager extends DBManager {
             String whereClause = String.format("%s = ? AND %s = ?", AUTHOR, BOOK);
             String[] whereArgs = new String[]{String.valueOf(idAuthor), String.valueOf(idBook)};
 
-            return this.database.delete(TABLE, whereClause, whereArgs) != 0;
+            return DBManager.database.delete(TABLE, whereClause, whereArgs) != 0;
         } catch (SQLiteException e) {
             Log.e(SQLITE_TAG, e.getMessage());
 
@@ -156,7 +157,7 @@ public final class WriterDBManager extends DBManager {
             String whereClause = String.format("%s = ?", filter);
             String[] whereArgs = new String[]{String.valueOf(id)};
 
-            return this.database.delete(TABLE, whereClause, whereArgs) != 0;
+            return DBManager.database.delete(TABLE, whereClause, whereArgs) != 0;
         } catch (SQLiteException e) {
             Log.e(SQLITE_TAG, e.getMessage());
 
@@ -174,7 +175,7 @@ public final class WriterDBManager extends DBManager {
             String whereClause = String.format("%s = ?", AUTHOR);
             String[] whereArgs = new String[]{String.valueOf(id)};
 
-            return this.database.delete(TABLE, whereClause, whereArgs) != 0;
+            return DBManager.database.delete(TABLE, whereClause, whereArgs) != 0;
         } catch (SQLiteException e) {
             Log.e(SQLITE_TAG, e.getMessage());
 
@@ -192,7 +193,7 @@ public final class WriterDBManager extends DBManager {
             String whereClause = String.format("%s = ?", BOOK);
             String[] whereArgs = new String[]{String.valueOf(id)};
 
-            return this.database.delete(TABLE, whereClause, whereArgs) != 0;
+            return DBManager.database.delete(TABLE, whereClause, whereArgs) != 0;
         } catch (SQLiteException e) {
             Log.e(SQLITE_TAG, e.getMessage());
 
@@ -215,7 +216,7 @@ public final class WriterDBManager extends DBManager {
 
             data.put(AUTHOR, entity.getInt(AUTHOR));
             data.put(BOOK, entity.getInt(BOOK));
-            this.database.insertOrThrow(TABLE, null, data);
+            DBManager.database.insertOrThrow(TABLE, null, data);
         } catch (SQLiteException e) {
             Log.e(SQLITE_TAG, e.getMessage());
         } catch (JSONException e) {

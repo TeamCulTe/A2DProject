@@ -57,7 +57,7 @@ public final class CategoryDBManager extends DBManager {
 
             data.put(ID, entity.getId());
             data.put(NAME, entity.getName());
-            this.database.insertOrThrow(TABLE, null, data);
+            DBManager.database.insertOrThrow(TABLE, null, data);
 
             return true;
         } catch (SQLiteException e) {
@@ -90,7 +90,7 @@ public final class CategoryDBManager extends DBManager {
 
             data.put(NAME, entity.getName());
 
-            return this.database.update(TABLE, data, whereClause, whereArgs) != 0;
+            return DBManager.database.update(TABLE, data, whereClause, whereArgs) != 0;
         } catch (SQLiteException e) {
             Log.e(SQLITE_TAG, e.getMessage());
 
@@ -107,7 +107,7 @@ public final class CategoryDBManager extends DBManager {
         try {
             String[] selectArgs = {String.valueOf(id)};
             String query = String.format(SIMPLE_QUERY_ALL, TABLE, ID);
-            Cursor result = this.database.rawQuery(query, selectArgs);
+            Cursor result = DBManager.database.rawQuery(query, selectArgs);
 
             return new Category(result);
         } catch (SQLiteException e) {
@@ -127,7 +127,7 @@ public final class CategoryDBManager extends DBManager {
             String whereClause = String.format("%s = ?", ID);
             String[] whereArgs = new String[]{String.valueOf(id)};
 
-            return this.database.delete(TABLE, whereClause, whereArgs) != 0;
+            return DBManager.database.delete(TABLE, whereClause, whereArgs) != 0;
         } catch (SQLiteException e) {
             Log.e(SQLITE_TAG, e.getMessage());
 
@@ -143,12 +143,15 @@ public final class CategoryDBManager extends DBManager {
         List<Category> categories = new ArrayList<>();
 
         try {
-            Cursor result = this.database.rawQuery(String.format(QUERY_ALL, TABLE), null);
+            Cursor result = DBManager.database.rawQuery(String.format(QUERY_ALL, TABLE), null);
 
-            while (result.moveToNext()) {
-                categories.add(new Category(result));
+            if (result.getCount() > 0) {
+                do {
+                    categories.add(new Category(result, false));
+                } while (result.moveToNext());
             }
 
+            result.close();
         } catch (SQLiteException e) {
             Log.e(SQLITE_TAG, e.getMessage());
         }
@@ -171,7 +174,7 @@ public final class CategoryDBManager extends DBManager {
 
             data.put(ID, entity.getInt(ID));
             data.put(NAME, entity.getString(NAME));
-            this.database.insertOrThrow(TABLE, null, data);
+            DBManager.database.insertOrThrow(TABLE, null, data);
         } catch (SQLiteException e) {
             Log.e(SQLITE_TAG, e.getMessage());
         } catch (JSONException e) {

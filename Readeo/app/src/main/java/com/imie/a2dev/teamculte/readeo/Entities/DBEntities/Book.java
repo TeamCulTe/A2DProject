@@ -6,6 +6,8 @@ import android.database.sqlite.SQLiteException;
 import android.util.Log;
 import com.imie.a2dev.teamculte.readeo.App;
 import com.imie.a2dev.teamculte.readeo.DBManagers.BookDBManager;
+import com.imie.a2dev.teamculte.readeo.DBManagers.BookListTypeDBManager;
+import com.imie.a2dev.teamculte.readeo.DBManagers.CategoryDBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.DBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.QuoteDBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.ReviewDBManager;
@@ -282,7 +284,7 @@ public final class Book extends DBEntity {
     @Override
     protected void init(Cursor result, boolean close) {
         try {
-            if (result.isFirst()) {
+            if (result.getPosition() == -1) {
                 result.moveToNext();
             }
 
@@ -293,7 +295,8 @@ public final class Book extends DBEntity {
             this.cover = result.getString(result.getColumnIndexOrThrow(BookDBManager.COVER));
             this.summary = result.getString(result.getColumnIndexOrThrow(BookDBManager.SUMMARY));
             this.datePublished = result.getInt(result.getColumnIndexOrThrow(BookDBManager.DATE));
-            this.category = new Category(result, false);
+            this.category = new CategoryDBManager(context).loadSQLite(result.getInt(result.getColumnIndexOrThrow
+                    (BookDBManager.CATEGORY)));
             this.reviews = new ReviewDBManager(context).loadBookSQLite(this.id);
             this.quotes = new QuoteDBManager(context).loadBookSQLite(this.id);
             this.authors = new WriterDBManager(context).loadSQLiteAuthors(this.id);

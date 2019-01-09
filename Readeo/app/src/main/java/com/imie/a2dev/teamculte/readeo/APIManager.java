@@ -7,7 +7,7 @@ public abstract class APIManager {
     /**
      * Stores the url used to access to the API.
      */
-    public static final String API_URL = "localhost:8888/";
+    public static final String API_URL = "http://10.0.2.2:8888/";
 
 
     // Entities mapping.

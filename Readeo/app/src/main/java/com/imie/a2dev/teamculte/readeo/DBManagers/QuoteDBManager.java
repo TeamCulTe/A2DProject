@@ -69,7 +69,7 @@ public final class QuoteDBManager extends DBManager {
             data.put(ID, entity.getId());
             data.put(USER, new UserDBManager(this.getContext()).SQLiteGetId(entity.getAuthor()));
             data.put(BOOK, entity.getBookId());
-            this.database.insertOrThrow(TABLE, null, data);
+            DBManager.database.insertOrThrow(TABLE, null, data);
 
             return true;
         } catch (SQLiteException e) {
@@ -102,7 +102,7 @@ public final class QuoteDBManager extends DBManager {
 
             data.put(QUOTE, entity.getQuote());
 
-            return this.database.update(TABLE, data, whereClause, whereArgs) != 0;
+            return DBManager.database.update(TABLE, data, whereClause, whereArgs) != 0;
         } catch (SQLiteException e) {
             Log.e(SQLITE_TAG, e.getMessage());
 
@@ -119,7 +119,7 @@ public final class QuoteDBManager extends DBManager {
         try {
             String[] selectArgs = {String.valueOf(id)};
             String query = String.format(SIMPLE_QUERY_ALL, TABLE, ID);
-            Cursor result = this.database.rawQuery(query, selectArgs);
+            Cursor result = DBManager.database.rawQuery(query, selectArgs);
 
             return new Quote(result);
         } catch (SQLiteException e) {
@@ -157,7 +157,7 @@ public final class QuoteDBManager extends DBManager {
             String whereClause = String.format("%s = ?", ID);
             String[] whereArgs = new String[]{String.valueOf(id)};
 
-            return this.database.delete(TABLE, whereClause, whereArgs) != 0;
+            return DBManager.database.delete(TABLE, whereClause, whereArgs) != 0;
         } catch (SQLiteException e) {
             Log.e(SQLITE_TAG, e.getMessage());
 
@@ -175,7 +175,7 @@ public final class QuoteDBManager extends DBManager {
             String whereClause = String.format("%s = ?", USER);
             String[] whereArgs = new String[]{String.valueOf(id)};
 
-            return this.database.delete(TABLE, whereClause, whereArgs) != 0;
+            return DBManager.database.delete(TABLE, whereClause, whereArgs) != 0;
         } catch (SQLiteException e) {
             Log.e(SQLITE_TAG, e.getMessage());
 
@@ -193,7 +193,7 @@ public final class QuoteDBManager extends DBManager {
             String whereClause = String.format("%s = ?", BOOK);
             String[] whereArgs = new String[]{String.valueOf(id)};
 
-            return this.database.delete(TABLE, whereClause, whereArgs) != 0;
+            return DBManager.database.delete(TABLE, whereClause, whereArgs) != 0;
         } catch (SQLiteException e) {
             Log.e(SQLITE_TAG, e.getMessage());
 
@@ -211,7 +211,7 @@ public final class QuoteDBManager extends DBManager {
             String whereClause = String.format("%s = ?", filter);
             String[] whereArgs = new String[]{String.valueOf(id)};
 
-            return this.database.delete(TABLE, whereClause, whereArgs) != 0;
+            return DBManager.database.delete(TABLE, whereClause, whereArgs) != 0;
         } catch (SQLiteException e) {
             Log.e(SQLITE_TAG, e.getMessage());
 
@@ -230,7 +230,7 @@ public final class QuoteDBManager extends DBManager {
             ArrayList<Quote> quotes = new ArrayList<>();
             String[] selectArgs = {String.valueOf(id)};
             String query = String.format(SIMPLE_QUERY_ALL, TABLE, column);
-            Cursor result = this.database.rawQuery(query, selectArgs);
+            Cursor result = DBManager.database.rawQuery(query, selectArgs);
 
             while (result.moveToNext()) {
                 quotes.add(new Quote(result, false));
@@ -254,12 +254,15 @@ public final class QuoteDBManager extends DBManager {
         List<Quote> quotes = new ArrayList<>();
 
         try {
-            Cursor result = this.database.rawQuery(String.format(QUERY_ALL, TABLE), null);
+            Cursor result = DBManager.database.rawQuery(String.format(QUERY_ALL, TABLE), null);
 
-            while (result.moveToNext()) {
-                quotes.add(new Quote(result));
+            if (result.getCount() > 0) {
+                do {
+                    quotes.add(new Quote(result, false));
+                } while (result.moveToNext());
             }
 
+            result.close();
         } catch (SQLiteException e) {
             Log.e(SQLITE_TAG, e.getMessage());
         }
@@ -377,7 +380,7 @@ public final class QuoteDBManager extends DBManager {
             data.put(USER, entity.getInt(USER));
             data.put(BOOK, entity.getInt(BOOK));
             data.put(QUOTE, entity.getString(QUOTE));
-            this.database.insertOrThrow(TABLE, null, data);
+            DBManager.database.insertOrThrow(TABLE, null, data);
         } catch (SQLiteException e) {
             Log.e(SQLITE_TAG, e.getMessage());
         } catch (JSONException e) {

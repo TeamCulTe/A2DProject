@@ -12,6 +12,7 @@ import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
+import com.imie.a2dev.teamculte.readeo.App;
 import com.imie.a2dev.teamculte.readeo.HTTPRequestQueueSingleton;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -76,9 +77,9 @@ public abstract class DBManager {
     protected final static String DOUBLE_QUERY_ALL = "SELECT * FROM %s WHERE %s = ? AND %s = ?";
 
     /**
-     * Stores the manager database in order to manage.
+     * Stores the managers database in order to manage.
      */
-    protected SQLiteDatabase database;
+    protected static SQLiteDatabase database;
 
     /**
      * Stores the associated context in order to use other managers from managers classes.
@@ -112,8 +113,8 @@ public abstract class DBManager {
      * Gets the database attribute.
      * @return The SQLiteDatabase value of database attribute.
      */
-    public SQLiteDatabase getDatabase() {
-        return this.database;
+    public static SQLiteDatabase getDatabase() {
+        return DBManager.database;
     }
 
     /**
@@ -130,14 +131,6 @@ public abstract class DBManager {
      */
     public Context getContext() {
         return this.context;
-    }
-
-    /**
-     * Sets the database attribute.
-     * @param newDatabase The new SQLiteDatabase value to set.
-     */
-    public void setDatabase(SQLiteDatabase newDatabase) {
-        this.database = newDatabase;
     }
 
     /**
@@ -168,7 +161,7 @@ public abstract class DBManager {
         try {
             String[] selectArgs = {filterValue};
             String query = String.format(SIMPLE_QUERY_FIELD, field, table, filter);
-            Cursor result = this.database.rawQuery(query, selectArgs);
+            Cursor result = DBManager.database.rawQuery(query, selectArgs);
 
             result.moveToNext();
 
@@ -212,8 +205,29 @@ public abstract class DBManager {
                         Log.e(JSON_TAG, e.getMessage());
                     }
                 }
+
+                HTTPRequestQueueSingleton.getInstance(DBManager.this.context).finishRequest();
             }
         });
+    }
+
+    /**
+     * Imports all the MySQL database into the SQLite one.
+     */
+    public static void importMySQLDatabase() {
+        Context context = App.getAppContext();
+
+        new AuthorDBManager(context).importAllFromMySQL();
+        new CategoryDBManager(context).importAllFromMySQL();
+        new CityDBManager(context).importAllFromMySQL();
+        new CountryDBManager(context).importAllFromMySQL();
+        new BookListTypeDBManager(context).importAllFromMySQL();
+        new ProfileDBManager(context).importAllFromMySQL();
+        new BookDBManager(context).importAllFromMySQL();
+        new UserDBManager(context).importAllFromMySQL();
+        new QuoteDBManager(context).importAllFromMySQL();
+        new ReviewDBManager(context).importAllFromMySQL();
+        new WriterDBManager(context).importAllFromMySQL();
     }
 
     /**
@@ -261,6 +275,16 @@ public abstract class DBManager {
     }
 
     /**
+     * Inner class used to manage HTTP request errors while contacting the API.
+     */
+    protected class OnRequestError implements Response.ErrorListener {
+        @Override
+        public void onErrorResponse(VolleyError error) {
+            Log.e(SERVER_TAG, error.getMessage());
+        }
+    }
+
+    /**
      * From a JSON object creates the associated entity into the database.
      * @param entity The JSON object to store into the database.
      */
@@ -270,7 +294,9 @@ public abstract class DBManager {
      * Opens and set the SQLiteDatabase.
      */
     private void open() {
-        this.database = this.handler.getWritableDatabase();
+        if (DBManager.database == null) {
+            DBManager.database = this.handler.getWritableDatabase();
+        }
     }
 
     /**
@@ -278,15 +304,5 @@ public abstract class DBManager {
      */
     private void close() {
         this.handler.close();
-    }
-
-    /**
-     * Inner class used to manage HTTP request errors while contacting the API.
-     */
-    protected class OnRequestError implements Response.ErrorListener {
-        @Override
-        public void onErrorResponse(VolleyError error) {
-            Log.e(SERVER_TAG, error.getMessage());
-        }
     }
 }
