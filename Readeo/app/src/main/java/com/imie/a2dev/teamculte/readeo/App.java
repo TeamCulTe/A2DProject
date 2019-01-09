@@ -18,7 +18,7 @@ public class App extends Application {
     /**
      * Stores the log tag.
      */
-    private final String TAG = "App";
+    private final String SQLITE_TAG = "App";
 
     @Override
     public void onCreate() {

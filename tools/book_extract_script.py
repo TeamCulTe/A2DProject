@@ -3,6 +3,7 @@ from ReadeoDBManager import ReadeoDBManager
 from string import ascii_uppercase
 from string import ascii_lowercase
 import configparser
+import requests
 
 book_getter = BookGetter("volumes", {"q": ""}, use_default=True)
 db_manager = ReadeoDBManager()
@@ -12,7 +13,12 @@ config_file = "extract.conf"
 
 config.read(config_file)
 
-
+"""
+Updates the config starts indexes.
+:param section The section to update.
+:param new_first_start The first loop start to define.
+:param new_second_start The second start loop to define.
+"""
 def update_indexes(section, new_first_start, new_second_start):
     config[section]["firstLoopStart"] = str(new_first_start)
     config[section]["secondLoopStart"] = str(new_second_start)
@@ -20,54 +26,72 @@ def update_indexes(section, new_first_start, new_second_start):
     with open(config_file, "w") as conf:
         config.write(conf)
 
+"""
+Called when an error occurs, displays the message, save the starts indexes and exit.
+:param exception The exception raised.
+:param section The section to update.
+:param new_first_start The first loop start to define.
+:param new_second_start The second start loop to define.
+"""
+def handle_error(exception, section, new_first_start, new_second_start):
+    update_indexes(section, new_first_start, new_second_start)
+    print(exception.message)
+
+    exit(1)
+
 
 for elt in ["CONTENT", "AUTHOR", "TITLE", "CATEGORY"]:
     first_start = int(config[elt]["firstLoopStart"])
     second_start = int(config[elt]["secondLoopStart"])
 
-    if first_start > end_loop and second_start > end_loop:
+    if first_start >= end_loop and second_start >= end_loop:
         continue
 
-    if elt == "CONTENT":
+    try:
+        if elt == "CONTENT":
+            for upper in ascii_uppercase[first_start:]:
+                for lower in ascii_lowercase[second_start:]:
+                    try:
+                        book_list = book_getter.query_content_filtered_books("{}{}".format(upper, lower))
+
+                        db_manager.insert_all(book_list)
+                    except ServerError as e:
+                        handle_error(e, elt, first_start, second_start)
+
+                    second_start += 1
+
+                second_start = 0
+                first_start += 1
+            # TODO: SEE IF FIXES SEC UPDATE
+            update_indexes(elt, first_start, second_start)
+            continue
+
+        elif elt == "AUTHOR":
+            queryFilter = BookGetter.AUTHOR_FILTER
+        elif elt == "TITLE":
+            queryFilter = BookGetter.TITLE_FILTER
+        elif elt == "CATEGORY":
+            queryFilter = BookGetter.CATEGORY_FILTER
+
         for upper in ascii_uppercase[first_start:]:
             for lower in ascii_lowercase[second_start:]:
                 try:
-                    book_list = book_getter.query_content_filtered_books("{}{}".format(upper, lower))
+                    book_list = book_getter.query_filtered_books(queryFilter, "{}{}".format(upper, lower))
 
                     db_manager.insert_all(book_list)
                 except ServerError as e:
-                    update_indexes(elt, first_start, second_start)
-                    print(e.message)
-                    exit(1)
+                    handle_error(e, elt, first_start, second_start)
 
                 second_start += 1
 
             second_start = 0
             first_start += 1
+    except requests.exceptions.SSLError as e:
+        handle_error(e, elt, first_start, second_start)
 
-        continue
+    except KeyboardInterrupt as e:
+        handle_error(e, elt, first_start, second_start)
 
-    elif elt == "AUTHOR":
-        queryFilter = BookGetter.AUTHOR_FILTER
-    elif elt == "TITLE":
-        queryFilter = BookGetter.TITLE_FILTER
-    elif elt == "CATEGORY":
-        queryFilter = BookGetter.CATEGORY_FILTER
-
-    for upper in ascii_uppercase[first_start:]:
-        for lower in ascii_lowercase[second_start:]:
-            try:
-                book_list = book_getter.query_filtered_books(queryFilter, "{}{}".format(upper, lower))
-
-                db_manager.insert_all(book_list)
-            except ServerError as e:
-                print(e.message)
-                update_indexes(elt, first_start, second_start)
-                exit(1)
-
-            second_start += 1
-
-        second_start = 0
-        first_start += 1
+    update_indexes(elt, first_start, second_start)
 
 exit(0)

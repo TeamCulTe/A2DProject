@@ -20,5 +20,5 @@ header("Content-Type: application/json; charset=UTF-8");
 
 $dbManager = new WriterDbManager();
 
-$idUser = WriterDbManager::FIELDS[0];
-$idBookListType = WriterDbManager::FIELDS[1];
+$idAuthor = WriterDbManager::FIELDS[0];
+$idBook = WriterDbManager::FIELDS[1];

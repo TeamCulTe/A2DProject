@@ -8,9 +8,9 @@
 
 require_once "common_header.php";
 
-if (isset($_POST["label"]))
+if (isset($_POST[$name]))
 {
-    $response_code = ($dbManager->create($_POST[$label])) ? 201 : 404;
+    $response_code = ($dbManager->create($_POST[$name])) ? 201 : 404;
 }
 else
 {

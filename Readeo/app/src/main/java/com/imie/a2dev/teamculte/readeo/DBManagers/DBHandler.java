@@ -39,12 +39,23 @@ public final class DBHandler extends SQLiteOpenHelper {
             BookDBManager.CATEGORY,
             BookDBManager.TITLE,
             LABEL_SIZE,
-            TEXT_SIZE,
             BookDBManager.COVER,
+            TEXT_SIZE,
             BookDBManager.SUMMARY,
             BookDBManager.DATE,
             BookDBManager.CATEGORY,
             CategoryDBManager.ID);
+
+    /**
+     * Defines the book list type create table statement.
+     */
+    private static final String BOOK_LIST_TYPE_TABLE_STATEMENT = String.format("CREATE TABLE IF NOT EXISTS %s (%s " +
+                    "INTEGER " +
+                    "PRIMARY KEY, %s TEXT(%s) UNIQUE NOT NULL);",
+            BookListTypeDBManager.TABLE,
+            BookListTypeDBManager.ID,
+            BookListTypeDBManager.NAME,
+            LABEL_SIZE);
 
     /**
      * Defines the category create table statement.
@@ -54,6 +65,26 @@ public final class DBHandler extends SQLiteOpenHelper {
             CategoryDBManager.TABLE,
             CategoryDBManager.ID,
             CategoryDBManager.NAME,
+            LABEL_SIZE);
+
+    /**
+     * Defines the city create table statement.
+     */
+    private static final String CITY_TABLE_STATEMENT = String.format("CREATE TABLE IF NOT EXISTS %s (%s INTEGER " +
+                    "PRIMARY KEY, %s TEXT(%s) UNIQUE NOT NULL);",
+            CityDBManager.TABLE,
+            CityDBManager.ID,
+            CityDBManager.NAME,
+            LABEL_SIZE);
+
+    /**
+     * Defines the country create table statement.
+     */
+    private static final String COUNTRY_TABLE_STATEMENT = String.format("CREATE TABLE IF NOT EXISTS %s (%s INTEGER " +
+                    "PRIMARY KEY, %s TEXT(%s) UNIQUE NOT NULL);",
+            CountryDBManager.TABLE,
+            CountryDBManager.ID,
+            CountryDBManager.NAME,
             LABEL_SIZE);
 
     /**
@@ -148,9 +179,10 @@ public final class DBHandler extends SQLiteOpenHelper {
     /**
      * Stores the trigger statement on user table when deleting in order to delete the other user occurrences.
      */
+    // TODO: See what's wrong here.
     private static final String USER_TRIGGER_STATEMENT = "CREATE TRIGGER IF NOT EXISTS user_trigger BEFORE DELETE ON " +
-            "User BEGIN DELETE FROM Quote WHERE Quote.id_user = User.id_user; DELETE FROM Review WHERE Review.id_user" +
-            " = User.id_user; DELETE FROM Profile WHERE Profile.id; END;";
+            "User FOR EACH ROW BEGIN DELETE FROM Quote WHERE Quote.id_user = User.id_user; DELETE FROM Review WHERE " +
+            "Review.id_user = User.id_user; DELETE FROM Profile WHERE Profile.id; END;";
 
     /**
      * DBHandler's constructor.
@@ -174,12 +206,33 @@ public final class DBHandler extends SQLiteOpenHelper {
         db.execSQL(BOOK_TABLE_STATEMENT);
         db.execSQL(String.format(INDEX_STATEMENT, BookDBManager.TITLE, BookDBManager.TABLE, BookDBManager.TITLE));
 
+        //BookListType table
+        db.execSQL(BOOK_LIST_TYPE_TABLE_STATEMENT);
+        db.execSQL(String.format(INDEX_STATEMENT,
+                BookListTypeDBManager.NAME,
+                BookListTypeDBManager.TABLE,
+                BookListTypeDBManager.NAME));
+
         //Category table
         db.execSQL(CATEGORY_TABLE_STATEMENT);
         db.execSQL(String.format(INDEX_STATEMENT,
                 CategoryDBManager.NAME,
                 CategoryDBManager.TABLE,
                 CategoryDBManager.NAME));
+
+        //City table
+        db.execSQL(CITY_TABLE_STATEMENT);
+        db.execSQL(String.format(INDEX_STATEMENT,
+                CityDBManager.NAME,
+                CityDBManager.TABLE,
+                CityDBManager.NAME));
+
+        //Country table
+        db.execSQL(COUNTRY_TABLE_STATEMENT);
+        db.execSQL(String.format(INDEX_STATEMENT,
+                CountryDBManager.NAME,
+                CountryDBManager.TABLE,
+                CountryDBManager.NAME));
 
         //Profile table
         db.execSQL(PROFILE_TABLE_STATEMENT);
@@ -200,10 +253,12 @@ public final class DBHandler extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int i, int i1) {
-
         db.execSQL(String.format(DROP_STATEMENT, AuthorDBManager.TABLE));
         db.execSQL(String.format(DROP_STATEMENT, BookDBManager.TABLE));
+        db.execSQL(String.format(DROP_STATEMENT, BookListTypeDBManager.TABLE));
         db.execSQL(String.format(DROP_STATEMENT, CategoryDBManager.TABLE));
+        db.execSQL(String.format(DROP_STATEMENT, CityDBManager.TABLE));
+        db.execSQL(String.format(DROP_STATEMENT, CountryDBManager.TABLE));
         db.execSQL(String.format(DROP_STATEMENT, ProfileDBManager.TABLE));
         db.execSQL(String.format(DROP_STATEMENT, QuoteDBManager.TABLE));
         db.execSQL(String.format(DROP_STATEMENT, ReviewDBManager.TABLE));

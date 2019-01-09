@@ -12,6 +12,9 @@ if (isset($_POST[$idUser]))
 {
     $response_code = ($dbManager->restoreSoftDeleted($_POST[$idUser])) ? 200 : 404;
 }
+elseif (isset($_POST[$email]) && isset($_POST[$password])) {
+    $response_code = ($dbManager->restoreSoftDeletedFromAuth($_POST[$email], $_POST[$password])) ? 200 : 404;
+}
 else
 {
     $response_code = 400;

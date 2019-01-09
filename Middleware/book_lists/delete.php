@@ -14,7 +14,7 @@ if (isset($_POST[$idUser]) && isset($_POST[$idBookListType]) && isset($_POST[$id
 }
 elseif (isset($_POST[$idUser]) && isset($_POST[$idBook]))
 {
-    $response_code = ($dbManager->restoreSoftDeleteUserBookListBook($_POST[$idUser], $_POST[$idBook])) ? 200 : 404;
+    $response_code = ($dbManager->softDeleteUserBookListBook($_POST[$idUser], $_POST[$idBook])) ? 200 : 404;
 }
 elseif (isset($_POST[$idUser]))
 {

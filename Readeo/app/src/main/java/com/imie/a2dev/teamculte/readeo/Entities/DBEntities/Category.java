@@ -4,7 +4,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.util.Log;
 import com.imie.a2dev.teamculte.readeo.DBManagers.CategoryDBManager;
-import static android.content.ContentValues.TAG;
+import com.imie.a2dev.teamculte.readeo.DBManagers.DBManager;
 
 /**
  * Final class representing a category from the application.
@@ -70,7 +70,7 @@ public final class Category extends DBEntity {
     @Override
     protected void init(Cursor result, boolean close) {
         try {
-            if (result.isFirst()) {
+            if (result.getPosition() == -1) {
                 result.moveToNext();
             }
 
@@ -81,7 +81,7 @@ public final class Category extends DBEntity {
                 result.close();
             }
         } catch (SQLiteException e) {
-            Log.e(TAG, e.getMessage());
+            Log.e(DBManager.SQLITE_TAG, e.getMessage());
         }
     }
 }

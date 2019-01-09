@@ -36,7 +36,7 @@ class ReviewDbManager extends DbManager
      * @param bool $shared The review's shared status to set.
      * @return true|false True if success else false.
      */
-    public function create(int $idUser, int $idBook, string $review, bool $shared)
+    public function create(int $idUser, int $idBook, string $review, bool $shared = false)
     {
         $statement = sprintf("INSERT INTO %s(%s, %s, %s, %s) VALUES(%s, %s, %s, %s)",
             static::TABLE, static::FIELDS[0], static::FIELDS[1], static::FIELDS[2], static::FIELDS[3],

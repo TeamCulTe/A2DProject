@@ -4,9 +4,11 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.util.Log;
 import com.imie.a2dev.teamculte.readeo.App;
+import com.imie.a2dev.teamculte.readeo.DBManagers.DBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.QuoteDBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.UserDBManager;
-import static android.content.ContentValues.TAG;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Final class representing a quote from a user to a specific book.
@@ -128,16 +130,31 @@ public final class Quote extends DBEntity {
         this.quote = newQuote;
     }
 
+    /**
+     * Initializes the quote from a JSON response object.
+     * @param object The JSON response from the API.
+     */
+    public void init(JSONObject object) {
+        try {
+            this.setId(object.getInt(QuoteDBManager.ID));
+            this.setBookId(object.getInt(QuoteDBManager.BOOK));
+            this.setQuote(object.getString(QuoteDBManager.QUOTE));
+            // TODO : See how to get the name of the user -> Getting it from sqlite db ?
+        } catch (JSONException e) {
+            Log.e(DBManager.JSON_TAG, e.getMessage());
+        }
+    }
+
     @Override
     protected void init(Cursor result, boolean close) {
         try {
-            if (result.isFirst()) {
+            if (result.getPosition() == -1) {
                 result.moveToNext();
             }
 
             this.id = result.getInt(result.getColumnIndexOrThrow(QuoteDBManager.ID));
             this.bookId = result.getInt(result.getColumnIndexOrThrow(QuoteDBManager.BOOK));
-            this.author = new UserDBManager(App.getAppContext()).SQLiteGetField(UserDBManager.PSEUDO,
+            this.author = new UserDBManager(App.getAppContext()).getFieldSQLite(UserDBManager.PSEUDO,
                     result.getInt(result.getColumnIndexOrThrow(QuoteDBManager.USER)));
             this.quote = result.getString(result.getColumnIndexOrThrow(QuoteDBManager.QUOTE));
 
@@ -145,7 +162,7 @@ public final class Quote extends DBEntity {
                 result.close();
             }
         } catch (SQLiteException e) {
-            Log.e(TAG, e.getMessage());
+            Log.e(DBManager.SQLITE_TAG, e.getMessage());
         }
     }
 }

@@ -12,9 +12,9 @@ if (isset($_POST[$id]))
 {
     $response = $dbManager->getBookListType($_POST[$id]);
 }
-elseif (isset($_POST[$label]))
+elseif (isset($_POST[$name]))
 {
-    $response = $dbManager->getBookListTypeId($_POST[$label]);
+    $response = $dbManager->getBookListTypeId($_POST[$name]);
 }
 elseif (isset($_POST["start"]) && isset($_POST["end"]))
 {

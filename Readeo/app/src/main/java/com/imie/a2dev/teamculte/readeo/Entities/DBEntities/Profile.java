@@ -3,8 +3,10 @@ package com.imie.a2dev.teamculte.readeo.Entities.DBEntities;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.util.Log;
+import com.imie.a2dev.teamculte.readeo.DBManagers.DBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.ProfileDBManager;
-import static android.content.ContentValues.TAG;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Final class representing the profile of an user with its related information.
@@ -102,10 +104,24 @@ public final class Profile extends DBEntity {
         this.description = newDescription;
     }
 
+    /**
+     * Initializes the profile from a JSON response object.
+     * @param object The JSON response from the API.
+     */
+    public void init(JSONObject object) {
+        try {
+            this.setId(object.getInt(ProfileDBManager.ID));
+            this.setAvatar(object.getString(ProfileDBManager.AVATAR));
+            this.setDescription(object.getString(ProfileDBManager.DESCRIPTION));
+        } catch (JSONException e) {
+            Log.e(DBManager.JSON_TAG, e.getMessage());
+        }
+    }
+
     @Override
     protected void init(Cursor result, boolean close) {
         try {
-            if (result.isFirst()) {
+            if (result.getPosition() == -1) {
                 result.moveToNext();
             }
 
@@ -117,7 +133,7 @@ public final class Profile extends DBEntity {
                 result.close();
             }
         } catch (SQLiteException e) {
-            Log.e(TAG, e.getMessage());
+            Log.e(DBManager.SQLITE_TAG, e.getMessage());
         }
     }
 }

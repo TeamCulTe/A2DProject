@@ -4,9 +4,11 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.util.Log;
 import com.imie.a2dev.teamculte.readeo.App;
+import com.imie.a2dev.teamculte.readeo.DBManagers.DBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.ReviewDBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.UserDBManager;
-import static android.content.ContentValues.TAG;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Final class representing a review written by an user for a specific book.
@@ -128,15 +130,30 @@ public final class Review extends DBEntity {
         this.shared = newShared;
     }
 
+    /**
+     * Initializes the review from a JSON response object.
+     * @param object The JSON response from the API.
+     */
+    public void init(JSONObject object) {
+        try {
+            this.setId(object.getInt(ReviewDBManager.BOOK));
+            this.setReview(object.getString(ReviewDBManager.BOOK));
+            this.setReview(object.getString(ReviewDBManager.REVIEW));
+            // TODO : See how to get the name of the user -> Getting it from sqlite db ?
+        } catch (JSONException e) {
+            Log.e(DBManager.JSON_TAG, e.getMessage());
+        }
+    }
+
     @Override
     protected void init(Cursor result, boolean close) {
         try {
-            if (result.isFirst()) {
+            if (result.getPosition() == -1) {
                 result.moveToNext();
             }
 
             this.id = result.getInt(result.getColumnIndexOrThrow(ReviewDBManager.BOOK));
-            this.author = new UserDBManager(App.getAppContext()).SQLiteGetField(UserDBManager.PSEUDO,
+            this.author = new UserDBManager(App.getAppContext()).getFieldSQLite(UserDBManager.PSEUDO,
                     result.getInt(result.getColumnIndexOrThrow(ReviewDBManager.USER)));
             this.review = result.getString(result.getColumnIndexOrThrow(ReviewDBManager.REVIEW));
             this.shared = true;
@@ -145,7 +162,7 @@ public final class Review extends DBEntity {
                 result.close();
             }
         } catch (SQLiteException e) {
-            Log.e(TAG, e.getMessage());
+            Log.e(DBManager.SQLITE_TAG, e.getMessage());
         }
     }
 }

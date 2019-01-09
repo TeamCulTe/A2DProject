@@ -6,7 +6,12 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import com.android.volley.Response;
+import com.imie.a2dev.teamculte.readeo.APIManager;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Review;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -30,9 +35,19 @@ public final class ReviewDBManager extends DBManager {
     public static final String BOOK = BookDBManager.ID;
 
     /**
-     * Defines the review's user id field.
+     * Defines the review's text field.
      */
     public static final String REVIEW = "review";
+
+    /**
+     * Defines the review's shared field.
+     */
+    public static final String SHARED = "shared";
+
+    /**
+     * Stores the base of the reviews API url.
+     */
+    private final String baseUrl = APIManager.API_URL + APIManager.REVIEWS;
 
     /**
      * Stores the user db manager used to correspond between the user pseudo and the associated id.
@@ -54,17 +69,17 @@ public final class ReviewDBManager extends DBManager {
      * @param entity The model to store into the database.
      * @return true if success else false.
      */
-    public boolean SQLiteCreate(@NonNull Review entity) {
+    public boolean createSQLite(@NonNull Review entity) {
         try {
             ContentValues data = new ContentValues();
 
             data.put(USER, this.userDBManager.SQLiteGetId(entity.getAuthor()));
             data.put(BOOK, entity.getId());
-            this.database.insertOrThrow(TABLE, null, data);
+            DBManager.database.insertOrThrow(TABLE, null, data);
 
             return true;
         } catch (SQLiteException e) {
-            Log.e(TAG, e.getMessage());
+            Log.e(SQLITE_TAG, e.getMessage());
 
             return false;
         }
@@ -77,11 +92,11 @@ public final class ReviewDBManager extends DBManager {
      * @param idBook The id of the book.
      * @return The value of the field.
      */
-    public String SQLiteGetField(String field, int idUser, int idBook) {
+    public String getFieldSQLite(String field, int idUser, int idBook) {
         try {
             String[] selectArgs = {String.valueOf(idUser), String.valueOf(idBook)};
             String query = String.format(DOUBLE_QUERY_FIELD, field, TABLE, USER, BOOK);
-            Cursor result = this.database.rawQuery(query, selectArgs);
+            Cursor result = DBManager.database.rawQuery(query, selectArgs);
 
             result.moveToNext();
 
@@ -91,7 +106,7 @@ public final class ReviewDBManager extends DBManager {
 
             return queriedField;
         } catch (SQLiteException e) {
-            Log.e(TAG, e.getMessage());
+            Log.e(SQLITE_TAG, e.getMessage());
 
             return null;
         }
@@ -102,7 +117,7 @@ public final class ReviewDBManager extends DBManager {
      * @param entity The model to update into the database.
      * @return true if success else false.
      */
-    public boolean SQLiteUpdate(@NonNull Review entity) {
+    public boolean updateSQLite(@NonNull Review entity) {
         try {
             ContentValues data = new ContentValues();
             String whereClause = String.format("%s = ? AND %s = ?", BOOK, USER);
@@ -111,9 +126,9 @@ public final class ReviewDBManager extends DBManager {
 
             data.put(REVIEW, entity.getReview());
 
-            return this.database.update(TABLE, data, whereClause, whereArgs) != 0;
+            return DBManager.database.update(TABLE, data, whereClause, whereArgs) != 0;
         } catch (SQLiteException e) {
-            Log.e(TAG, e.getMessage());
+            Log.e(SQLITE_TAG, e.getMessage());
 
             return false;
         }
@@ -125,15 +140,15 @@ public final class ReviewDBManager extends DBManager {
      * @param idBook The id of the book.
      * @return The loaded entity if exists else null.
      */
-    public Review SQLiteLoad(int idUser, int idBook) {
+    public Review loadSQLite(int idUser, int idBook) {
         try {
             String[] selectArgs = {String.valueOf(idUser), String.valueOf(idBook)};
             String query = String.format(DOUBLE_QUERY_ALL, TABLE, USER, BOOK);
-            Cursor result = this.database.rawQuery(query, selectArgs);
+            Cursor result = DBManager.database.rawQuery(query, selectArgs);
 
             return new Review(result);
         } catch (SQLiteException e) {
-            Log.e(TAG, e.getMessage());
+            Log.e(SQLITE_TAG, e.getMessage());
 
             return null;
         }
@@ -144,8 +159,8 @@ public final class ReviewDBManager extends DBManager {
      * @param idBook The id of the book.
      * @return The list of entities if exists else else an empty ArrayList.
      */
-    public List<Review> SQLiteLoadBook(int idBook) {
-        return this.SQLiteLoad(idBook, BOOK);
+    public List<Review> loadBookSQLite(int idBook) {
+        return this.loadSQLite(idBook, BOOK);
     }
 
     /**
@@ -153,8 +168,8 @@ public final class ReviewDBManager extends DBManager {
      * @param idUser The id of the user.
      * @return The list of entities if exists else an empty ArrayList.
      */
-    public List<Review> SQLiteLoadUser(int idUser) {
-        return this.SQLiteLoad(idUser, USER);
+    public List<Review> loadUserSQLite(int idUser) {
+        return this.loadSQLite(idUser, USER);
     }
 
     /**
@@ -163,14 +178,14 @@ public final class ReviewDBManager extends DBManager {
      * @param idBook The book affected to the review.
      * @return True if success else false.
      */
-    public boolean SQLiteDelete(int idUser, int idBook) {
+    public boolean deleteSQLite(int idUser, int idBook) {
         try {
             String whereClause = String.format("%s = ? AND %s = ?", USER, BOOK);
             String[] whereArgs = new String[]{String.valueOf(idUser), String.valueOf(idBook)};
 
-            return this.database.delete(TABLE, whereClause, whereArgs) != 0;
+            return DBManager.database.delete(TABLE, whereClause, whereArgs) != 0;
         } catch (SQLiteException e) {
-            Log.e(TAG, e.getMessage());
+            Log.e(SQLITE_TAG, e.getMessage());
 
             return false;
         }
@@ -181,14 +196,14 @@ public final class ReviewDBManager extends DBManager {
      * @param id The id of the user.
      * @return True if success else false.
      */
-    public boolean SQLiteDeleteAuthor(int id) {
+    public boolean deleteUserSQLite(int id) {
         try {
             String whereClause = String.format("%s = ?", USER);
             String[] whereArgs = new String[]{String.valueOf(id)};
 
-            return this.database.delete(TABLE, whereClause, whereArgs) != 0;
+            return DBManager.database.delete(TABLE, whereClause, whereArgs) != 0;
         } catch (SQLiteException e) {
-            Log.e(TAG, e.getMessage());
+            Log.e(SQLITE_TAG, e.getMessage());
 
             return false;
         }
@@ -199,14 +214,14 @@ public final class ReviewDBManager extends DBManager {
      * @param id The id of the book.
      * @return True if success else false.
      */
-    public boolean SQLiteDeleteBook(int id) {
+    public boolean deleteBookSQLite(int id) {
         try {
             String whereClause = String.format("%s = ?", BOOK);
             String[] whereArgs = new String[]{String.valueOf(id)};
 
-            return this.database.delete(TABLE, whereClause, whereArgs) != 0;
+            return DBManager.database.delete(TABLE, whereClause, whereArgs) != 0;
         } catch (SQLiteException e) {
-            Log.e(TAG, e.getMessage());
+            Log.e(SQLITE_TAG, e.getMessage());
 
             return false;
         }
@@ -217,14 +232,14 @@ public final class ReviewDBManager extends DBManager {
      * @param id The id from which delete the entries.
      * @return True if success else false.
      */
-    private boolean SQLiteDelete(int id, String filter) {
+    private boolean deleteSQLite(int id, String filter) {
         try {
             String whereClause = String.format("%s = ?", filter);
             String[] whereArgs = new String[]{String.valueOf(id)};
 
-            return this.database.delete(TABLE, whereClause, whereArgs) != 0;
+            return DBManager.database.delete(TABLE, whereClause, whereArgs) != 0;
         } catch (SQLiteException e) {
-            Log.e(TAG, e.getMessage());
+            Log.e(SQLITE_TAG, e.getMessage());
 
             return false;
         }
@@ -236,12 +251,12 @@ public final class ReviewDBManager extends DBManager {
      * @param column The id column to filter on.
      * @return The list of entities if exists else an empty ArrayList.
      */
-    private List<Review> SQLiteLoad(int id, String column) {
+    private List<Review> loadSQLite(int id, String column) {
         try {
             ArrayList<Review> reviews = new ArrayList<>();
             String[] selectArgs = {String.valueOf(id)};
             String query = String.format(SIMPLE_QUERY_ALL, TABLE, column);
-            Cursor result = this.database.rawQuery(query, selectArgs);
+            Cursor result = DBManager.database.rawQuery(query, selectArgs);
 
             while (result.moveToNext()) {
                 reviews.add(new Review(result, false));
@@ -251,7 +266,7 @@ public final class ReviewDBManager extends DBManager {
 
             return reviews;
         } catch (SQLiteException e) {
-            Log.e(TAG, e.getMessage());
+            Log.e(SQLITE_TAG, e.getMessage());
 
             return null;
         }
@@ -261,20 +276,148 @@ public final class ReviewDBManager extends DBManager {
      * Query all the reviews from the database.
      * @return The list of reviews.
      */
-    public List<Review> queryAll() {
+    public List<Review> queryAllSQLite() {
         List<Review> reviews = new ArrayList<>();
 
         try {
-            Cursor result = this.database.rawQuery(String.format(QUERY_ALL, TABLE), null);
+            Cursor result = DBManager.database.rawQuery(String.format(QUERY_ALL, TABLE), null);
 
-            while (result.moveToNext()) {
-                reviews.add(new Review(result));
+            if (result.getCount() > 0) {
+                do {
+                    reviews.add(new Review(result, false));
+                } while (result.moveToNext());
             }
 
+            result.close();
         } catch (SQLiteException e) {
-            Log.e(TAG, e.getMessage());
+            Log.e(SQLITE_TAG, e.getMessage());
         }
 
         return reviews;
+    }
+
+    /**
+     * From the API, query the list of all reviews from the MySQL database in order to stores it into the SQLite
+     * database.
+     */
+    public void importAllFromMySQL() {
+        super.importAllFromMySQL(baseUrl + APIManager.READ);
+    }
+
+    /**
+     * Creates a review entity in MySQL database.
+     * @param review The review to create.
+     */
+    public void createMySQL(Review review) {
+        String url = String.format(baseUrl + APIManager.CREATE + USER + "=%s&" + BOOK + "=%s&" + REVIEW +
+                "=%s&" + SHARED + "=%s",
+                this.userDBManager.SQLiteGetId(review.getAuthor()),
+                review.getId(),
+                review.getReview(),
+                review.isShared());
+
+        super.requestString(url, null);
+    }
+
+    /**
+     * Updates a review entity in MySQL database.
+     * @param review The review to update.
+     */
+    public void updateMySQL(Review review) {
+        String url = String.format(baseUrl + APIManager.UPDATE + USER + "=%s&" + BOOK + "=%s&" + REVIEW + "=%s&" +
+                        SHARED + "=%s",
+                this.userDBManager.SQLiteGetId(review.getAuthor()),
+                review.getId(),
+                review.getReview(),
+                review.isShared());
+
+        super.requestString(url, null);
+    }
+
+    /**
+     * Loads a review from MySQL database.
+     * @param idUser The id of the user.
+     * @param idBook The id of the book.
+     * @return The loaded review.
+     */
+    public Review loadMySQL(int idUser, int idBook) {
+        final Review review = new Review();
+
+        String url = String.format(baseUrl + APIManager.READ + USER + "=%s&" + BOOK + "=%s", idUser, idBook);
+
+        super.requestJsonObject(url, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                review.init(response);
+            }
+        });
+
+        return review;
+    }
+
+    /**
+     * Deletes a review entity in MySQL database.
+     * @param idUser The id of the user.
+     * @param idBook The id of the book.
+     */
+    public void deleteMySQL(int idUser, int idBook) {
+        String url = String.format(baseUrl + APIManager.DELETE + USER + "=%s&" + BOOK + "=%s", idUser, idBook);
+
+        super.requestString(url, null);
+    }
+
+    /**
+     * Deletes all reviews entities in MySQL database from a specific user.
+     * @param idUser The id of the user.
+     */
+    public void deleteUserMySQL(int idUser) {
+        String url = String.format(baseUrl + APIManager.DELETE + USER + "=%s", idUser);
+
+        super.requestString(url, null);
+    }
+
+    /**
+     * Restores a quote entity in MySQL database.
+     * @param idUser The id of the user.
+     * @param idBook The id of the book.
+     */
+    public void restoreMySQL(int idUser, int idBook) {
+        String url = String.format(baseUrl + APIManager.RESTORE + USER + "=%s&" + BOOK + "=%s", idUser, idBook);
+
+        super.requestString(url, null);
+    }
+
+    /**
+     * Restores all quote entities in MySQL database from a specific user.
+     * @param idUser The id of the user.
+     */
+    public void restoreUserMySQL(int idUser) {
+        String url = String.format(baseUrl + APIManager.RESTORE + USER + "=%s", idUser);
+
+        super.requestString(url, null);
+    }
+
+    /**
+     * Deletes a review entity in MySQL database.
+     * @param review The review to delete.
+     */
+    public void deleteMySQL(Review review) {
+        this.deleteMySQL(this.userDBManager.SQLiteGetId(review.getAuthor()), review.getId());
+    }
+
+    @Override
+    protected void createSQLite(@NonNull JSONObject entity) {
+        try {
+            ContentValues data = new ContentValues();
+
+            data.put(USER, entity.getInt(USER));
+            data.put(BOOK, entity.getInt(BOOK));
+            data.put(REVIEW, entity.getString(REVIEW));
+            DBManager.database.insertOrThrow(TABLE, null, data);
+        } catch (SQLiteException e) {
+            Log.e(SQLITE_TAG, e.getMessage());
+        } catch (JSONException e) {
+            Log.e(SQLITE_TAG, e.getMessage());
+        }
     }
 }
