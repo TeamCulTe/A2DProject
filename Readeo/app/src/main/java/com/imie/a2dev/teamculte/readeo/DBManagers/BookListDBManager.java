@@ -2,6 +2,7 @@ package com.imie.a2dev.teamculte.readeo.DBManagers;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import com.android.volley.Request;
 import com.android.volley.Response;
 import com.imie.a2dev.teamculte.readeo.APIManager;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Book;
@@ -62,7 +63,7 @@ public final class BookListDBManager extends DBManager {
                     book.getId(),
                     bookList.getType().getId());
 
-            super.requestString(url, null);
+            super.requestString(Request.Method.POST, url, null);
         }
     }
 
@@ -78,7 +79,7 @@ public final class BookListDBManager extends DBManager {
                 idBook,
                 idType);
 
-        super.requestString(url, null);
+        super.requestString(Request.Method.POST, url, null);
     }
 
     /**
@@ -92,7 +93,7 @@ public final class BookListDBManager extends DBManager {
 
         String url = String.format(baseUrl + APIManager.READ + USER + "=%s&" + TYPE + "=%s", idUser, idType);
 
-        super.requestJsonArray(url, new Response.Listener<JSONArray>() {
+        super.requestJsonArray(Request.Method.GET, url, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
                 bookList.init(response);
@@ -125,7 +126,7 @@ public final class BookListDBManager extends DBManager {
     public void deleteUserMySQL(int idUser) {
         String url = String.format(baseUrl + APIManager.DELETE + USER + "=%s", idUser);
 
-        super.requestString(url, null);
+        super.requestString(Request.Method.PUT, url, null);
     }
 
     /**
@@ -140,7 +141,7 @@ public final class BookListDBManager extends DBManager {
                 idBook,
                 idType);
 
-        super.requestString(url, null);
+        super.requestString(Request.Method.PUT, url, null);
     }
 
     /**
@@ -150,7 +151,7 @@ public final class BookListDBManager extends DBManager {
     public void restoreUserMySQL(int idUser) {
         String url = String.format(baseUrl + APIManager.RESTORE + USER + "=%s", idUser);
 
-        super.requestString(url, null);
+        super.requestString(Request.Method.PUT, url, null);
     }
 
     /**
@@ -165,7 +166,7 @@ public final class BookListDBManager extends DBManager {
                 idBook,
                 idType);
 
-        super.requestString(url, null);
+        super.requestString(Request.Method.PUT, url, null);
     }
 
     @Override

@@ -103,7 +103,7 @@ class BookDbManager extends DbManager
     public function getBookId(string $title, string $date)
     {
         $statement = sprintf("SELECT %s FROM %s WHERE %s = %s AND %s = %s AND deleted = 0",
-            static::FIELDS[0],static::TABLE, static::FIELDS[2], static::PLACEHOLDERS[2], static::FIELDS[5],
+            static::FIELDS[0], static::TABLE, static::FIELDS[2], static::PLACEHOLDERS[2], static::FIELDS[5],
             static::PLACEHOLDERS[5]);
         $req = $this->db->prepare($statement);
 
@@ -223,8 +223,9 @@ class BookDbManager extends DbManager
             static::FIELDS[5], static::TABLE, $limitPlaceholder, $offsetPlaceholder);
         $req = $this->db->prepare($statement);
 
-        $req->bindValue($offsetPlaceholder, ($start - 1), PDO::PARAM_INT);
-        $req->bindValue($limitPlaceholder, ($end - $start + 1), PDO::PARAM_INT);
+        $req->bindValue($offsetPlaceholder, $start, PDO::PARAM_INT);
+        $req->bindValue($limitPlaceholder, $end, PDO::PARAM_INT);
+        $req->execute();
 
         $response = $req->fetchAll(PDO::FETCH_ASSOC);
 

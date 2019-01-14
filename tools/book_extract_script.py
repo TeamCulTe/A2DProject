@@ -5,13 +5,6 @@ from string import ascii_lowercase
 import configparser
 import requests
 
-book_getter = BookGetter("volumes", {"q": ""}, use_default=True)
-db_manager = ReadeoDBManager()
-config = configparser.ConfigParser()
-end_loop = 25
-config_file = "extract.conf"
-
-config.read(config_file)
 
 """
 Updates the config starts indexes.
@@ -26,6 +19,7 @@ def update_indexes(section, new_first_start, new_second_start):
     with open(config_file, "w") as conf:
         config.write(conf)
 
+
 """
 Called when an error occurs, displays the message, save the starts indexes and exit.
 :param exception The exception raised.
@@ -38,6 +32,15 @@ def handle_error(exception, section, new_first_start, new_second_start):
     print(exception.message)
 
     exit(1)
+
+
+book_getter = BookGetter("volumes", {"q": ""}, use_default=True)
+db_manager = ReadeoDBManager()
+config = configparser.ConfigParser()
+end_loop = 25
+config_file = "extract.conf"
+
+config.read(config_file)
 
 
 for elt in ["CONTENT", "AUTHOR", "TITLE", "CATEGORY"]:
@@ -86,6 +89,7 @@ for elt in ["CONTENT", "AUTHOR", "TITLE", "CATEGORY"]:
 
             second_start = 0
             first_start += 1
+
     except requests.exceptions.SSLError as e:
         handle_error(e, elt, first_start, second_start)
 

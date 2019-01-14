@@ -73,6 +73,14 @@ public final class Profile extends DBEntity {
     }
 
     /**
+     * Profile's full filled constructor providing all its attributes values from a json object.
+     * @param result The json object.
+     */
+    public Profile(JSONObject result) {
+        this.init(result);
+    }
+
+    /**
      * Gets the avatar attribute.
      * @return The String value of avatar attribute.
      */
@@ -110,9 +118,9 @@ public final class Profile extends DBEntity {
      */
     public void init(JSONObject object) {
         try {
-            this.setId(object.getInt(ProfileDBManager.ID));
-            this.setAvatar(object.getString(ProfileDBManager.AVATAR));
-            this.setDescription(object.getString(ProfileDBManager.DESCRIPTION));
+            this.id = object.getInt(ProfileDBManager.ID);
+            this.avatar = object.getString(ProfileDBManager.AVATAR);
+            this.description = object.getString(ProfileDBManager.DESCRIPTION);
         } catch (JSONException e) {
             Log.e(DBManager.JSON_TAG, e.getMessage());
         }

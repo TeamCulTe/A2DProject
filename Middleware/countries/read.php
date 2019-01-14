@@ -8,20 +8,13 @@
 
 require_once "common_header.php";
 
-if (isset($_POST[$id]))
-{
-    $response = $dbManager->getCountry($_POST[$id]);
-}
-elseif (isset($_POST[$name]))
-{
-    $response = $dbManager->getCountryId($_POST[$name]);
-}
-elseif (isset($_POST["start"]) && isset($_POST["end"]))
-{
-    $response = $dbManager->queryAllPaginated($_POST["start"], $_POST["end"]);
-}
-else
-{
+if (isset($_GET[$id])) {
+    $response = $dbManager->getCountry($_GET[$id]);
+} elseif (isset($_GET[$name])) {
+    $response = $dbManager->getCountryId($_GET[$name]);
+} elseif (isset($_GET["start"]) && isset($_GET["end"])) {
+    $response = $dbManager->queryAllPaginated($_GET["start"], $_GET["end"]);
+} else {
     $response = $dbManager->queryAll();
 }
 

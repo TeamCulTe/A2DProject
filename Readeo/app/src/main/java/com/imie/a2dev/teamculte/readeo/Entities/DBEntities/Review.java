@@ -83,6 +83,14 @@ public final class Review extends DBEntity {
     }
 
     /**
+     * Review's full filled constructor providing all its attributes values from a json object.
+     * @param result The json object.
+     */
+    public Review(JSONObject result) {
+        this.init(result);
+    }
+
+    /**
      * Gets the author attribute.
      * @return The String value of author attribute.
      */
@@ -136,10 +144,10 @@ public final class Review extends DBEntity {
      */
     public void init(JSONObject object) {
         try {
-            this.setId(object.getInt(ReviewDBManager.BOOK));
-            this.setReview(object.getString(ReviewDBManager.BOOK));
-            this.setReview(object.getString(ReviewDBManager.REVIEW));
-            // TODO : See how to get the name of the user -> Getting it from sqlite db ?
+            this.id = object.getInt(ReviewDBManager.BOOK);
+            this.author = new UserDBManager(App.getAppContext()).getFieldSQLite(UserDBManager.PSEUDO,
+                    object.getInt(ReviewDBManager.USER));
+            this.review = object.getString(ReviewDBManager.REVIEW);
         } catch (JSONException e) {
             Log.e(DBManager.JSON_TAG, e.getMessage());
         }

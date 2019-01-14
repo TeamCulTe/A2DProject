@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import com.android.volley.Request;
 import com.android.volley.Response;
 import com.imie.a2dev.teamculte.readeo.APIManager;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Profile;
@@ -184,7 +185,7 @@ public final class ProfileDBManager extends DBManager {
                 profile.getAvatar(),
                 profile.getDescription());
 
-        super.requestString(url, null);
+        super.requestString(Request.Method.POST, url, null);
     }
 
     /**
@@ -197,7 +198,7 @@ public final class ProfileDBManager extends DBManager {
                 profile.getAvatar(),
                 profile.getDescription());
 
-        super.requestString(url, null);
+        super.requestString(Request.Method.PUT, url, null);
     }
 
     /**
@@ -211,7 +212,7 @@ public final class ProfileDBManager extends DBManager {
                 id,
                 value);
 
-        super.requestString(url, null);
+        super.requestString(Request.Method.PUT, url, null);
     }
 
     /**
@@ -224,7 +225,7 @@ public final class ProfileDBManager extends DBManager {
 
         String url = String.format(baseUrl + APIManager.READ + ID + "=%s", id);
 
-        super.requestJsonObject(url, new Response.Listener<JSONObject>() {
+        super.requestJsonObject(Request.Method.GET, url, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
                 profile.init(response);
@@ -241,7 +242,7 @@ public final class ProfileDBManager extends DBManager {
     public void deleteMySQL(int id) {
         String url = String.format(baseUrl + APIManager.DELETE + ID + "=%s", id);
 
-        super.requestString(url, null);
+        super.requestString(Request.Method.PUT, url, null);
     }
 
     /**
@@ -251,7 +252,7 @@ public final class ProfileDBManager extends DBManager {
     public void restoreMySQL(int id) {
         String url = String.format(baseUrl + APIManager.RESTORE + ID + "=%s", id);
 
-        super.requestString(url, null);
+        super.requestString(Request.Method.PUT, url, null);
     }
 
     /**

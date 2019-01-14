@@ -83,6 +83,14 @@ public final class Quote extends DBEntity {
     }
 
     /**
+     * Quote's full filled constructor providing all its attributes values from a json object.
+     * @param result The json object.
+     */
+    public Quote(JSONObject result) {
+        this.init(result);
+    }
+
+    /**
      * Gets the author attribute.
      * @return The String value of author attribute.
      */
@@ -136,10 +144,11 @@ public final class Quote extends DBEntity {
      */
     public void init(JSONObject object) {
         try {
-            this.setId(object.getInt(QuoteDBManager.ID));
-            this.setBookId(object.getInt(QuoteDBManager.BOOK));
-            this.setQuote(object.getString(QuoteDBManager.QUOTE));
-            // TODO : See how to get the name of the user -> Getting it from sqlite db ?
+            this.id = object.getInt(QuoteDBManager.ID);
+            this.bookId = object.getInt(QuoteDBManager.BOOK);
+            this.author = new UserDBManager(App.getAppContext()).getFieldSQLite(UserDBManager.PSEUDO,
+                    object.getInt(QuoteDBManager.USER));
+            this.quote = object.getString(QuoteDBManager.QUOTE);
         } catch (JSONException e) {
             Log.e(DBManager.JSON_TAG, e.getMessage());
         }

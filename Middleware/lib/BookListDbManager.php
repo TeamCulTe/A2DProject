@@ -380,8 +380,9 @@ class BookListDbManager extends DbManager
             $offsetPlaceholder);
         $req = $this->db->prepare($statement);
 
-        $req->bindValue($offsetPlaceholder, ($start - 1), PDO::PARAM_INT);
-        $req->bindValue($limitPlaceholder, ($end - $start + 1), PDO::PARAM_INT);
+        $req->bindValue($offsetPlaceholder, $start, PDO::PARAM_INT);
+        $req->bindValue($limitPlaceholder, $end, PDO::PARAM_INT);
+        $req->execute();
 
         $response = $req->fetchAll(PDO::FETCH_ASSOC);
 

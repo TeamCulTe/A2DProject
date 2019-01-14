@@ -8,20 +8,13 @@
 
 require_once "common_header.php";
 
-if (isset($_POST[$idUser]) && isset($_POST[$idBookListType]))
-{
-    $response = $dbManager->getBookList($_POST[$idUser], $_POST[$idBookListType]);
-}
-elseif (isset($_POST[$idUser]))
-{
-    $response = $dbManager->getBookListTypeId($_POST[$idUser]);
-}
-elseif (isset($_POST["start"]) && isset($_POST["end"]))
-{
-    $response = $dbManager->queryAllPaginated($_POST["start"], $_POST["end"]);
-}
-else
-{
+if (isset($_GET[$idUser]) && isset($_GET[$idBookListType])) {
+    $response = $dbManager->getBookList($_GET[$idUser], $_GET[$idBookListType]);
+} elseif (isset($_GET[$idUser])) {
+    $response = $dbManager->getBookListTypeId($_GET[$idUser]);
+} elseif (isset($_GET["start"]) && isset($_GET["end"])) {
+    $response = $dbManager->queryAllPaginated($_GET["start"], $_GET["end"]);
+} else {
     $response = $dbManager->queryAll();
 }
 

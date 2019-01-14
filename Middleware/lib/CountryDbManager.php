@@ -45,10 +45,10 @@ class CountryDbManager extends DbManager
     }
 
     /**
- * Gets the country associated to the id given in parameter.
- * @param int $id The id of the country to get.
- * @return null|string The json response if exists else null.
- */
+     * Gets the country associated to the id given in parameter.
+     * @param int $id The id of the country to get.
+     * @return null|string The json response if exists else null.
+     */
     public function getCountry(int $id)
     {
         $statement = sprintf("SELECT %s FROM %s WHERE %s = %s AND deleted = 0",
@@ -177,8 +177,9 @@ class CountryDbManager extends DbManager
             $offsetPlaceholder);
         $req = $this->db->prepare($statement);
 
-        $req->bindValue($offsetPlaceholder, ($start - 1), PDO::PARAM_INT);
-        $req->bindValue($limitPlaceholder, ($end - $start + 1), PDO::PARAM_INT);
+        $req->bindValue($offsetPlaceholder, $start, PDO::PARAM_INT);
+        $req->bindValue($limitPlaceholder, $end, PDO::PARAM_INT);
+        $req->execute();
 
         $response = $req->fetchAll(PDO::FETCH_ASSOC);
 

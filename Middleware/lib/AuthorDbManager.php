@@ -54,7 +54,7 @@ class AuthorDbManager extends DbManager
         $statement = sprintf("SELECT %s FROM %s WHERE %s = %s AND deleted = 0",
             static::FIELDS[1], static::TABLE, static::FIELDS[0], static::PLACEHOLDERS[0]);
         $req = $this->db->prepare($statement);
-        
+
         $req->bindValue(static::PLACEHOLDERS[0], $id, PDO::PARAM_INT);
         $req->execute();
 
@@ -176,8 +176,9 @@ class AuthorDbManager extends DbManager
             static::FIELDS[0], static::FIELDS[1], static::TABLE, $limitPlaceholder, $offsetPlaceholder);
         $req = $this->db->prepare($statement);
 
-        $req->bindValue($offsetPlaceholder, ($start - 1), PDO::PARAM_INT);
-        $req->bindValue($limitPlaceholder, ($end - $start + 1), PDO::PARAM_INT);
+        $req->bindValue($offsetPlaceholder, $start, PDO::PARAM_INT);
+        $req->bindValue($limitPlaceholder, $end, PDO::PARAM_INT);
+        $req->execute();
 
         $response = $req->fetchAll(PDO::FETCH_ASSOC);
 

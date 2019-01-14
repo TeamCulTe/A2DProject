@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import com.android.volley.Request;
 import com.imie.a2dev.teamculte.readeo.APIManager;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.City;
 import org.json.JSONException;
@@ -164,6 +165,16 @@ public final class CityDBManager extends DBManager {
      */
     public void importAllFromMySQL() {
         super.importAllFromMySQL(baseUrl + APIManager.READ);
+    }
+
+    /**
+     * Creates a city entity in MySQL database.
+     * @param name The name of the city to create.
+     */
+    public void createMySQL(String name) {
+        String url = String.format(baseUrl + APIManager.CREATE + NAME + "=%s", name);
+
+        super.requestString(Request.Method.POST, url, null);
     }
 
     @Override

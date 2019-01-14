@@ -62,6 +62,11 @@ public abstract class DBManager {
     protected final static String SIMPLE_QUERY_ALL = "SELECT * FROM %s WHERE %s = ?";
 
     /**
+     * Defines the default all fields database query with a simple where - like (from start) clause.
+     */
+    protected final static String SIMPLE_QUERY_ALL_LIKE_START = "SELECT * FROM %s WHERE %s LIKE '?%%'";
+
+    /**
      * Defines the default field database query with a simple where clause.
      */
     protected final static String SIMPLE_QUERY_FIELD = "SELECT %s FROM %s WHERE %s = ?";
@@ -100,13 +105,6 @@ public abstract class DBManager {
         this.context = context;
 
         this.open();
-    }
-
-    /**
-     * Overriding destructor in order to close the database object.
-     */
-    public void finalize() {
-        this.close();
     }
 
     /**
@@ -195,7 +193,7 @@ public abstract class DBManager {
      * @param url The url to request.
      */
     public void importAllFromMySQL(String url) {
-        this.requestJsonArray(url, new Response.Listener<JSONArray>() {
+        this.requestJsonArray(Request.Method.GET, url, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
                 for (int i = 0; i < response.length(); i++) {
@@ -232,12 +230,13 @@ public abstract class DBManager {
 
     /**
      * Adds a JsonArray HTTP request to the queue.
+     * @param method The method to use (POST, GET, PUT...).
      * @param url The url to request.
      * @param successListener The instance implementing response listener in order to call the associated callback
      * function.
      */
-    protected void requestJsonArray(String url, Response.Listener<JSONArray> successListener) {
-        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.POST,
+    protected void requestJsonArray(int method, String url, Response.Listener<JSONArray> successListener) {
+        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(method,
                 url,
                 null,
                 successListener,
@@ -248,12 +247,13 @@ public abstract class DBManager {
 
     /**
      * Adds a JsonObject HTTP request to the queue.
+     * @param method The method to use (POST, GET, PUT...).
      * @param url The url to request.
      * @param successListener The instance implementing response listener in order to call the associated callback
      * function.
      */
-    protected void requestJsonObject(String url, Response.Listener<JSONObject> successListener) {
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST,
+    protected void requestJsonObject(int method, String url, Response.Listener<JSONObject> successListener) {
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(method,
                 url,
                 null,
                 successListener,
@@ -264,12 +264,13 @@ public abstract class DBManager {
 
     /**
      * Adds a String HTTP request to the queue.
+     * @param method The method to use (POST, GET, PUT...).
      * @param url The url to request.
      * @param successListener The instance implementing response listener in order to call the associated callback
      * function.
      */
-    protected void requestString(String url, Response.Listener<String> successListener) {
-        StringRequest stringRequest = new StringRequest(Request.Method.POST, url, successListener, new OnRequestError());
+    protected void requestString(int method, String url, Response.Listener<String> successListener) {
+        StringRequest stringRequest = new StringRequest(method, url, successListener, new OnRequestError());
 
         HTTPRequestQueueSingleton.getInstance(this.context).addToRequestQueue(stringRequest);
     }
@@ -280,7 +281,7 @@ public abstract class DBManager {
     protected class OnRequestError implements Response.ErrorListener {
         @Override
         public void onErrorResponse(VolleyError error) {
-            Log.e(SERVER_TAG, error.getMessage());
+            Log.e(SERVER_TAG, error.getMessage();
         }
     }
 

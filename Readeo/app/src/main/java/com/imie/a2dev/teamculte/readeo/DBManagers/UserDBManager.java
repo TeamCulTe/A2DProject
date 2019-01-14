@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import com.android.volley.Request;
 import com.android.volley.Response;
 import com.imie.a2dev.teamculte.readeo.APIManager;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.PrivateUser;
@@ -167,6 +168,50 @@ public final class UserDBManager extends DBManager {
     }
 
     /**
+     * From a pseudo, returns the associated java entity.
+     * @param pseudo The pseudo of entity to load from the database.
+     * @return The loaded entity if exists else null.
+     */
+    public PublicUser loadSQLite(String pseudo) {
+        try {
+            String[] selectArgs = {pseudo};
+            String query = String.format(SIMPLE_QUERY_ALL, TABLE, PSEUDO);
+            Cursor result = DBManager.database.rawQuery(query, selectArgs);
+
+            return new PublicUser(result);
+        } catch (SQLiteException e) {
+            Log.e(SQLITE_TAG, e.getMessage());
+
+            return null;
+        }
+    }
+
+    /**
+     * From a string and a field, returns the associated java entities where the string matches in the field values.
+     * @param field The field to filter on.
+     * @param filter The string contained in the pseudo of the entity to load from the database.
+     * @return The loaded entities if exists else null.
+     */
+    public List<PublicUser> loadFilteredSQLite(String field, String filter) {
+        try {
+            List<PublicUser> users = new ArrayList<>();
+            String[] selectArgs = {filter};
+            String query = String.format(SIMPLE_QUERY_ALL_LIKE_START, TABLE, field);
+            Cursor result = DBManager.database.rawQuery(query, selectArgs);
+
+            while (result.moveToNext()) {
+                users.add(new PublicUser(result));
+            }
+
+            return users;
+        } catch (SQLiteException e) {
+            Log.e(SQLITE_TAG, e.getMessage());
+
+            return null;
+        }
+    }
+
+    /**
      * From an id given in parameter, deletes the associated entity in the database.
      * @param id The id of the entity to delete.
      * @return true if success else false.
@@ -230,7 +275,7 @@ public final class UserDBManager extends DBManager {
                 user.getCity().getId(),
                 user.getCountry().getId());
 
-        super.requestString(url, null);
+        super.requestString(Request.Method.POST, url, null);
     }
 
     /**
@@ -248,7 +293,7 @@ public final class UserDBManager extends DBManager {
                 user.getCity().getId(),
                 user.getCountry().getId());
 
-        super.requestString(url, null);
+        super.requestString(Request.Method.PUT, url, null);
     }
 
     /**
@@ -262,7 +307,7 @@ public final class UserDBManager extends DBManager {
                 id,
                 value);
 
-        super.requestString(url, null);
+        super.requestString(Request.Method.PUT, url, null);
     }
 
     /**
@@ -275,7 +320,7 @@ public final class UserDBManager extends DBManager {
 
         String url = String.format(baseUrl + APIManager.READ + ID + "=%s", idUser);
 
-        super.requestJsonObject(url, new Response.Listener<JSONObject>() {
+        super.requestJsonObject(Request.Method.GET, url, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
                 user.init(response);
@@ -296,7 +341,7 @@ public final class UserDBManager extends DBManager {
 
         String url = String.format(baseUrl + APIManager.READ + EMAIL + "=%s&" + PASSWORD + "=%s", email, password);
 
-        super.requestJsonObject(url, new Response.Listener<JSONObject>() {
+        super.requestJsonObject(Request.Method.GET, url, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
                 user.init(response);
@@ -314,7 +359,7 @@ public final class UserDBManager extends DBManager {
     public void deleteMySQL(String email, String password) {
         String url = String.format(baseUrl + APIManager.DELETE + EMAIL + "=%s&" + PASSWORD + "=%s", email, password);
 
-        super.requestString(url, null);
+        super.requestString(Request.Method.PUT, url, null);
     }
 
     /**
@@ -325,7 +370,7 @@ public final class UserDBManager extends DBManager {
     public void restoreMySQL(String email, String password) {
         String url = String.format(baseUrl + APIManager.RESTORE + EMAIL + "=%s&" + PASSWORD + "=%s", email, password);
 
-        super.requestString(url, null);
+        super.requestString(Request.Method.PUT, url, null);
     }
 
     /**
@@ -335,7 +380,7 @@ public final class UserDBManager extends DBManager {
     public void restoreMySQL(int idUser) {
         String url = String.format(baseUrl + APIManager.RESTORE + ID + "=%s", idUser);
 
-        super.requestString(url, null);
+        super.requestString(Request.Method.PUT, url, null);
     }
 
     /**

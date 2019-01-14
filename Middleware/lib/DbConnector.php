@@ -70,17 +70,14 @@ class DbConnector
 
         $connectStr = sprintf($baseStr, $this->dbName, $this->port);
 
-        try
-        {
+        try {
             $db = new PDO($connectStr, $this->userName, $this->password);
 
             $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
             $db->setAttribute(PDO::ATTR_EMULATE_PREPARES, false);
 
             return $db;
-        }
-        catch (PDOException $error)
-        {
+        } catch (PDOException $error) {
             echo "An error occurred during the db connection.\n" . $error->getMessage();
 
             return null;

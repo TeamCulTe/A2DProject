@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import com.android.volley.Request;
 import com.android.volley.Response;
 import com.imie.a2dev.teamculte.readeo.APIManager;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Quote;
@@ -288,7 +289,7 @@ public final class QuoteDBManager extends DBManager {
                 quote.getBookId(),
                 quote.getQuote());
 
-        super.requestString(url, null);
+        super.requestString(Request.Method.POST, url, null);
     }
 
     /**
@@ -300,7 +301,7 @@ public final class QuoteDBManager extends DBManager {
                 quote.getId(),
                 quote.getQuote());
 
-        super.requestString(url, null);
+        super.requestString(Request.Method.PUT, url, null);
     }
 
     /**
@@ -313,7 +314,7 @@ public final class QuoteDBManager extends DBManager {
 
         String url = String.format(baseUrl + APIManager.READ + ID + "=%s", id);
 
-        super.requestJsonObject(url, new Response.Listener<JSONObject>() {
+        super.requestJsonObject(Request.Method.GET, url, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
                 quote.init(response);
@@ -330,7 +331,7 @@ public final class QuoteDBManager extends DBManager {
     public void deleteMySQL(int id) {
         String url = String.format(baseUrl + APIManager.DELETE + ID + "=%s", id);
 
-        super.requestString(url, null);
+        super.requestString(Request.Method.PUT, url, null);
     }
 
     /**
@@ -340,7 +341,7 @@ public final class QuoteDBManager extends DBManager {
     public void deleteUserMySQL(int idUser) {
         String url = String.format(baseUrl + APIManager.DELETE + USER + "=%s", idUser);
 
-        super.requestString(url, null);
+        super.requestString(Request.Method.PUT, url, null);
     }
 
     /**
@@ -350,7 +351,7 @@ public final class QuoteDBManager extends DBManager {
     public void restoreMySQL(int id) {
         String url = String.format(baseUrl + APIManager.RESTORE + ID + "=%s", id);
 
-        super.requestString(url, null);
+        super.requestString(Request.Method.PUT, url, null);
     }
 
     /**
@@ -360,7 +361,7 @@ public final class QuoteDBManager extends DBManager {
     public void restoreUserMySQL(int idUser) {
         String url = String.format(baseUrl + APIManager.RESTORE + USER + "=%s", idUser);
 
-        super.requestString(url, null);
+        super.requestString(Request.Method.PUT, url, null);
     }
 
     /**

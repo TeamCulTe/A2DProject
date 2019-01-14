@@ -64,6 +64,14 @@ public final class BookList extends DBEntity {
     }
 
     /**
+     * BookList's full filled constructor providing all its attributes values from a json object.
+     * @param result The json array.
+     */
+    public BookList(JSONArray result) {
+        this.init(result);
+    }
+
+    /**
      * Gets the type attribute.
      * @return The BookListType value of type attribute.
      */

@@ -121,6 +121,14 @@ public final class PrivateUser extends PublicUser {
     }
 
     /**
+     * Private user's full filled constructor providing all its attributes values from a json object.
+     * @param result The json object.
+     */
+    public PrivateUser(JSONObject result) {
+        this.init(result);
+    }
+
+    /**
      * Gets the password attribute.
      * @return The String value of password attribute.
      */

@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import com.android.volley.Request;
 import com.android.volley.Response;
 import com.imie.a2dev.teamculte.readeo.APIManager;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Review;
@@ -297,11 +298,13 @@ public final class ReviewDBManager extends DBManager {
     }
 
     /**
-     * From the API, query the list of all reviews from the MySQL database in order to stores it into the SQLite
-     * database.
+     * From the API, query the list of all the shared reviews from the MySQL database in order to stores it into the
+     * SQLite database.
      */
     public void importAllFromMySQL() {
-        super.importAllFromMySQL(baseUrl + APIManager.READ);
+        String url = String.format(baseUrl + APIManager.READ + "?%s=true", SHARED);
+
+        super.importAllFromMySQL(url);
     }
 
     /**
@@ -316,7 +319,7 @@ public final class ReviewDBManager extends DBManager {
                 review.getReview(),
                 review.isShared());
 
-        super.requestString(url, null);
+        super.requestString(Request.Method.POST, url, null);
     }
 
     /**
@@ -331,7 +334,7 @@ public final class ReviewDBManager extends DBManager {
                 review.getReview(),
                 review.isShared());
 
-        super.requestString(url, null);
+        super.requestString(Request.Method.PUT, url, null);
     }
 
     /**
@@ -345,7 +348,7 @@ public final class ReviewDBManager extends DBManager {
 
         String url = String.format(baseUrl + APIManager.READ + USER + "=%s&" + BOOK + "=%s", idUser, idBook);
 
-        super.requestJsonObject(url, new Response.Listener<JSONObject>() {
+        super.requestJsonObject(Request.Method.GET, url, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
                 review.init(response);
@@ -356,6 +359,45 @@ public final class ReviewDBManager extends DBManager {
     }
 
     /**
+     * Loads all reviews written by a specific user from MySQL database.
+     * @param idUser The id of the user.
+     * @return The loaded review.
+     */
+    public List<Review> loadUserMySQL(int idUser) {
+        final List<Review> reviews = new ArrayList<>();
+
+        String url = String.format(baseUrl + APIManager.READ + USER + "=%s", idUser);
+
+        super.requestJsonObject(Request.Method.GET, url, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                reviews.add(new Review(response));
+            }
+        });
+
+        return reviews;
+    }
+
+    /**
+     * Loads all reviews written by a specific user from MySQL database.
+     * @param idBook The id of the book.
+     * @return The loaded review.
+     */
+    public List<Review> loadBookMySQL(int idBook) {
+        final List<Review> reviews = new ArrayList<>();
+        String url = String.format(baseUrl + APIManager.READ + BOOK + "=%s", idBook);
+
+        super.requestJsonObject(Request.Method.GET, url, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject response) {
+                reviews.add(new Review(response));
+            }
+        });
+
+        return reviews;
+    }
+
+    /**
      * Deletes a review entity in MySQL database.
      * @param idUser The id of the user.
      * @param idBook The id of the book.
@@ -363,7 +405,7 @@ public final class ReviewDBManager extends DBManager {
     public void deleteMySQL(int idUser, int idBook) {
         String url = String.format(baseUrl + APIManager.DELETE + USER + "=%s&" + BOOK + "=%s", idUser, idBook);
 
-        super.requestString(url, null);
+        super.requestString(Request.Method.PUT, url, null);
     }
 
     /**
@@ -373,7 +415,7 @@ public final class ReviewDBManager extends DBManager {
     public void deleteUserMySQL(int idUser) {
         String url = String.format(baseUrl + APIManager.DELETE + USER + "=%s", idUser);
 
-        super.requestString(url, null);
+        super.requestString(Request.Method.PUT, url, null);
     }
 
     /**
@@ -384,7 +426,7 @@ public final class ReviewDBManager extends DBManager {
     public void restoreMySQL(int idUser, int idBook) {
         String url = String.format(baseUrl + APIManager.RESTORE + USER + "=%s&" + BOOK + "=%s", idUser, idBook);
 
-        super.requestString(url, null);
+        super.requestString(Request.Method.PUT, url, null);
     }
 
     /**
@@ -394,7 +436,7 @@ public final class ReviewDBManager extends DBManager {
     public void restoreUserMySQL(int idUser) {
         String url = String.format(baseUrl + APIManager.RESTORE + USER + "=%s", idUser);
 
-        super.requestString(url, null);
+        super.requestString(Request.Method.PUT, url, null);
     }
 
     /**

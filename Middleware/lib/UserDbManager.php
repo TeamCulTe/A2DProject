@@ -186,7 +186,7 @@ class UserDbManager extends DbManager
     public function getUserId(string $pseudo)
     {
         $statement = sprintf("SELECT %s FROM %s WHERE %s = %s AND deleted = 0",
-            static::FIELDS[0],static::TABLE, static::FIELDS[1], static::PLACEHOLDERS[1]);
+            static::FIELDS[0], static::TABLE, static::FIELDS[1], static::PLACEHOLDERS[1]);
         $req = $this->db->prepare($statement);
 
         $req->bindValue(static::PLACEHOLDERS[1], $pseudo, PDO::PARAM_STR);
@@ -466,8 +466,9 @@ class UserDbManager extends DbManager
             static::FIELDS[5], static::FIELDS[6], static::TABLE, $limitPlaceholder, $offsetPlaceholder);
         $req = $this->db->prepare($statement);
 
-        $req->bindValue($offsetPlaceholder, ($start - 1), PDO::PARAM_INT);
-        $req->bindValue($limitPlaceholder, ($end - $start + 1), PDO::PARAM_INT);
+        $req->bindValue($offsetPlaceholder, $start, PDO::PARAM_INT);
+        $req->bindValue($limitPlaceholder, $end, PDO::PARAM_INT);
+        $req->execute();
 
         $response = $req->fetchAll(PDO::FETCH_ASSOC);
 
@@ -489,8 +490,9 @@ class UserDbManager extends DbManager
             $offsetPlaceholder);
         $req = $this->db->prepare($statement);
 
-        $req->bindValue($offsetPlaceholder, ($start - 1), PDO::PARAM_INT);
-        $req->bindValue($limitPlaceholder, ($end - $start + 1), PDO::PARAM_INT);
+        $req->bindValue($offsetPlaceholder, $start, PDO::PARAM_INT);
+        $req->bindValue($limitPlaceholder, $end, PDO::PARAM_INT);
+        $req->execute();
 
         $response = $req->fetchAll(PDO::FETCH_ASSOC);
 

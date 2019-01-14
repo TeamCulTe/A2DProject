@@ -1,5 +1,7 @@
 package com.imie.a2dev.teamculte.readeo.Entities;
 
+import com.imie.a2dev.teamculte.readeo.App;
+import com.imie.a2dev.teamculte.readeo.DBManagers.BookDBManager;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Book;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +24,14 @@ public final class Library {
     /**
      * Stores the list of book matching to the filter.
      */
-    private List<Book> books = new ArrayList<>();
+    private List<Book> books;
+
+    /**
+     * Library's default constructor.
+     */
+    public Library() {
+        this.books = new ArrayList<>();
+    }
 
     /**
      * Library's constructor initialized by the filter.
@@ -32,6 +41,8 @@ public final class Library {
     public Library(String filterKey, String filterValue) {
         this.filterKey = filterKey;
         this.filterValue = filterValue;
+
+        this.books = new BookDBManager(App.getAppContext()).loadFilteredSQLite(this.filterKey, this.filterValue);
     }
 
     /**

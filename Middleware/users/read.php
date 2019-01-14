@@ -8,54 +8,31 @@
 
 require_once "common_header.php";
 
-if (isset($_POST[$email]) && isset($_POST[$publicMode]))
-{
-    if ($_POST[$publicMode] == true)
-    {
-        $response = $dbManager->getPublicUserFromEmail($_POST[$email]);
+if (isset($_GET[$email]) && isset($_GET[$publicMode])) {
+    if ($_GET[$publicMode] == true) {
+        $response = $dbManager->getPublicUserFromEmail($_GET[$email]);
+    } elseif ($_GET[$publicMode] == false) {
+        $response = $dbManager->getUserFromEmail($_GET[$email]);
     }
-    elseif ($_POST[$publicMode] == false)
-    {
-        $response = $dbManager->getUserFromEmail($_POST[$email]);
+} elseif (isset($_GET[$idUser])) {
+    $response = $dbManager->getUser($_GET[$idUser]);
+} elseif (isset($_GET[$pseudo]) && isset($_GET[$publicMode])) {
+    if ($_GET[$publicMode] == true) {
+        $response = $dbManager->getPublicUserFromPseudo($_GET[$pseudo]);
+    } elseif ($_GET[$publicMode] == false) {
+        $response = $dbManager->getUserFromPseudo($_GET[$pseudo]);
     }
-}
-elseif (isset($_POST[$idUser]))
-{
-    $response = $dbManager->getUser($_POST[$idUser]);
-}
-elseif (isset($_POST[$pseudo]) && isset($_POST[$publicMode]))
-{
-    if ($_POST[$publicMode] == true)
-    {
-        $response = $dbManager->getPublicUserFromPseudo($_POST[$pseudo]);
-    }
-    elseif ($_POST[$publicMode] == false)
-    {
-        $response = $dbManager->getUserFromPseudo($_POST[$pseudo]);
-    }
-}
-elseif (isset($_POST[$email]) && isset($_POST[$password]))
-{
-    $response = $dbManager->getUserFromAuth($_POST[$email], $_POST[$password]);
-}
-elseif (isset($_POST[$pseudo]))
-{
-    $response = $dbManager->getUserId($_POST[$pseudo]);
-}
-elseif (isset($_POST["start"]) && isset($_POST["end"]) && isset($_POST[$publicMode]))
-{
-    $response = $dbManager->queryAllPublicPaginated($_POST["start"], $_POST["end"]);
-}
-elseif (isset($_POST[$publicMode]) && $_POST[$publicMode] == true)
-{
+} elseif (isset($_GET[$email]) && isset($_GET[$password])) {
+    $response = $dbManager->getUserFromAuth($_GET[$email], $_GET[$password]);
+} elseif (isset($_GET[$pseudo])) {
+    $response = $dbManager->getUserId($_GET[$pseudo]);
+} elseif (isset($_GET["start"]) && isset($_GET["end"]) && isset($_GET[$publicMode])) {
+    $response = $dbManager->queryAllPublicPaginated($_GET["start"], $_GET["end"]);
+} elseif (isset($_GET[$publicMode]) && $_GET[$publicMode] == true) {
     $response = $dbManager->queryAllPublic();
-}
-elseif (isset($_POST["start"]) && isset($_POST["end"]))
-{
-    $response = $dbManager->queryAllPaginated($_POST["start"], $_POST["end"]);
-}
-else
-{
+} elseif (isset($_GET["start"]) && isset($_GET["end"])) {
+    $response = $dbManager->queryAllPaginated($_GET["start"], $_GET["end"]);
+} else {
     $response = $dbManager->queryAll();
 }
 
