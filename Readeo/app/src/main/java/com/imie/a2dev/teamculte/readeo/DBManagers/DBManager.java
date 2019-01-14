@@ -281,7 +281,7 @@ public abstract class DBManager {
     protected class OnRequestError implements Response.ErrorListener {
         @Override
         public void onErrorResponse(VolleyError error) {
-            Log.e(SERVER_TAG, error.getMessage();
+            Log.e(SERVER_TAG, error.getMessage());
         }
     }
 
