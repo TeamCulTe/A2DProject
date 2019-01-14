@@ -1,5 +1,7 @@
 package com.imie.a2dev.teamculte.readeo.Entities.DBEntities;
 
+import android.database.Cursor;
+
 /**
  * Abstract class defining the base attributes of the database entities classes.
  */
@@ -7,34 +9,25 @@ public abstract class DBEntity {
     /**
      * Stores the database identifier.
      */
-    private int id;
-
-    /**
-     * Defines if the entity is deleted or not (soft deletion).
-     */
-    private boolean deleted = false;
+    protected int id;
 
     /**
      * DBEntity's default constructor.
      */
     protected DBEntity() {
-
+        this.id = 0;
     }
 
     /**
      * DBEntity's full filled constructor initializing all the database related attributes.
-     *
      * @param id The id to set.
-     * @param deleted The boolean value defining if the element is deleted or not.
      */
-    protected DBEntity(int id, boolean deleted) {
+    protected DBEntity(int id) {
         this.id = id;
-        this.deleted = deleted;
     }
 
     /**
      * Gets the id attribute.
-     *
      * @return The int value of id attribute.
      */
     public final int getId() {
@@ -43,7 +36,6 @@ public abstract class DBEntity {
 
     /**
      * Sets the id attribute.
-     *
      * @param newId The new int value to set.
      */
     public final void setId(int newId) {
@@ -51,20 +43,10 @@ public abstract class DBEntity {
     }
 
     /**
-     * Gets the deleted attribute.
-     *
-     * @return The boolean value of deleted attribute.
+     * Initializes all the entity attributes values from the result of a database query
+     * closes the cursor if close is true.
+     * @param result The result of the query.
+     * @param close Defines if the cursor should be closed or not.
      */
-    public final boolean isDeleted() {
-        return this.deleted;
-    }
-
-    /**
-     * Sets the deleted attribute.
-     *
-     * @param newDeleted The new boolean value to set.
-     */
-    public final void setDeleted(boolean newDeleted) {
-        this.deleted = newDeleted;
-    }
+    protected abstract void init(Cursor result, boolean close);
 }

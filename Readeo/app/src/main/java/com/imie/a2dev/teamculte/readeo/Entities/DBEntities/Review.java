@@ -1,18 +1,28 @@
 package com.imie.a2dev.teamculte.readeo.Entities.DBEntities;
 
+import android.database.Cursor;
+import android.database.sqlite.SQLiteException;
+import android.util.Log;
+import com.imie.a2dev.teamculte.readeo.App;
+import com.imie.a2dev.teamculte.readeo.DBManagers.DBManager;
+import com.imie.a2dev.teamculte.readeo.DBManagers.ReviewDBManager;
+import com.imie.a2dev.teamculte.readeo.DBManagers.UserDBManager;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 /**
  * Final class representing a review written by an user for a specific book.
  */
 public final class Review extends DBEntity {
     /**
-     * Stores the review's text.
-     */
-    private String review;
-
-    /**
      * Stores the author's pseudo.
      */
     private String author;
+
+    /**
+     * Stores the review's text.
+     */
+    private String review;
 
     /**
      * Not yet implemented.
@@ -24,58 +34,56 @@ public final class Review extends DBEntity {
      * Review's default constructor.
      */
     public Review() {
-
+        super();
     }
 
     /**
      * Review's nearly full filled constructor, providing all attributes values, except for database related ones.
-     *
-     * @param review The review to set.
      * @param author The name of the author to set.
+     * @param review The review to set.
      * @param shared The value defining if the review is shared or not.
      */
-    public Review(String review, String author, boolean shared) {
-        this.review = review;
+    public Review(String author, String review, boolean shared) {
+        super();
+
         this.author = author;
+        this.review = review;
         this.shared = shared;
     }
 
     /**
      * Review's full filled constructor, providing all attributes values.
-     *
+     * @param author The name of the author to set.
      * @param review The review to set.
-     * @param author The user to set.
      * @param shared The value defining if the review is shared or not.
      */
-    public Review(int id, String review, String author, boolean shared, boolean deleted) {
-        super(id, deleted);
+    public Review(int id, String review, String author, boolean shared) {
+        super(id);
 
-        this.review = review;
         this.author = author;
+        this.review = review;
         this.shared = shared;
     }
 
     /**
-     * Gets the review attribute.
-     *
-     * @return The String value of review attribute.
+     * Review's full filled constructor providing all its attributes values from the result of a database query.
+     * @param result The result of the query.
      */
-    public String getReview() {
-        return this.review;
+    public Review(Cursor result) {
+        this.init(result, true);
     }
 
     /**
-     * Sets the review attribute.
-     *
-     * @param newReview The new String value to set.
+     * Review's full filled constructor providing all its attributes values from the result of a database query.
+     * @param result The result of the query.
+     * @param close Defines if the cursor should be closed or not.
      */
-    public void setReview(String newReview) {
-        this.review = newReview;
+    public Review(Cursor result, boolean close) {
+        this.init(result, close);
     }
 
     /**
      * Gets the author attribute.
-     *
      * @return The String value of author attribute.
      */
     public String getAuthor() {
@@ -83,8 +91,23 @@ public final class Review extends DBEntity {
     }
 
     /**
+     * Gets the review attribute.
+     * @return The String value of review attribute.
+     */
+    public String getReview() {
+        return this.review;
+    }
+
+    /**
+     * Gets the shared attribute.
+     * @return The boolean value of the sgit hared attribute.
+     */
+    public boolean isShared() {
+        return this.shared;
+    }
+
+    /**
      * Sets the author attribute.
-     *
      * @param newAuthor The new User value to set.
      */
     public void setAuthor(String newAuthor) {
@@ -92,20 +115,54 @@ public final class Review extends DBEntity {
     }
 
     /**
-     * Gets the shared attribute.
-     *
-     * @return The boolean value of the shared attribute.
+     * Sets the review attribute.
+     * @param newReview The new String value to set.
      */
-    public boolean isShared() {
-        return this.shared;
+    public void setReview(String newReview) {
+        this.review = newReview;
     }
 
     /**
      * Sets the shared attribute.
-     *
      * @param newShared The new boolean value to set.
      */
-    public void setPublic(boolean newShared) {
+    public void setShared(boolean newShared) {
         this.shared = newShared;
+    }
+
+    /**
+     * Initializes the review from a JSON response object.
+     * @param object The JSON response from the API.
+     */
+    public void init(JSONObject object) {
+        try {
+            this.setId(object.getInt(ReviewDBManager.BOOK));
+            this.setReview(object.getString(ReviewDBManager.BOOK));
+            this.setReview(object.getString(ReviewDBManager.REVIEW));
+            // TODO : See how to get the name of the user -> Getting it from sqlite db ?
+        } catch (JSONException e) {
+            Log.e(DBManager.JSON_TAG, e.getMessage());
+        }
+    }
+
+    @Override
+    protected void init(Cursor result, boolean close) {
+        try {
+            if (result.getPosition() == -1) {
+                result.moveToNext();
+            }
+
+            this.id = result.getInt(result.getColumnIndexOrThrow(ReviewDBManager.BOOK));
+            this.author = new UserDBManager(App.getAppContext()).getFieldSQLite(UserDBManager.PSEUDO,
+                    result.getInt(result.getColumnIndexOrThrow(ReviewDBManager.USER)));
+            this.review = result.getString(result.getColumnIndexOrThrow(ReviewDBManager.REVIEW));
+            this.shared = true;
+
+            if (close) {
+                result.close();
+            }
+        } catch (SQLiteException e) {
+            Log.e(DBManager.SQLITE_TAG, e.getMessage());
+        }
     }
 }

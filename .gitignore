@@ -1,4 +1,8 @@
 .idea/*
 Readeo/.idea/*
 Middleware/.idea/*
-test/.idea/*
+tools/.idea/*
+.DS_Store
+Readeo/.DS_Store
+Middleware/.DS_Store
+tools/.DS_Store
