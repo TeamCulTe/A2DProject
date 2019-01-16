@@ -16,17 +16,17 @@ class AuthorDbManager extends DbManager
     /**
      * Stores the associated database fields.
      */
-    const FIELDS = ["id_author", "name_author", "deleted"];
+    public const FIELDS = ["id_author", "name_author", "deleted"];
 
     /**
      * Stores the placeholders for prepared queries.
      */
-    const PLACEHOLDERS = [":idA", ":nameA"];
+    public const PLACEHOLDERS = [":idA", ":nameA"];
 
     /**
      * Stores the associated table name.
      */
-    const TABLE = "Author";
+    public const TABLE = "Author";
 
     /**
      * Creates an author in the database from a name given in parameter.
@@ -54,7 +54,7 @@ class AuthorDbManager extends DbManager
         $statement = sprintf("SELECT %s FROM %s WHERE %s = %s AND deleted = 0",
             static::FIELDS[1], static::TABLE, static::FIELDS[0], static::PLACEHOLDERS[0]);
         $req = $this->db->prepare($statement);
-        
+
         $req->bindValue(static::PLACEHOLDERS[0], $id, PDO::PARAM_INT);
         $req->execute();
 
@@ -176,9 +176,21 @@ class AuthorDbManager extends DbManager
             static::FIELDS[0], static::FIELDS[1], static::TABLE, $limitPlaceholder, $offsetPlaceholder);
         $req = $this->db->prepare($statement);
 
-        $req->bindValue($offsetPlaceholder, ($start - 1), PDO::PARAM_INT);
-        $req->bindValue($limitPlaceholder, ($end - $start + 1), PDO::PARAM_INT);
+        $req->bindValue($offsetPlaceholder, $start, PDO::PARAM_INT);
+        $req->bindValue($limitPlaceholder, $end, PDO::PARAM_INT);
+        $req->execute();
 
+        $response = $req->fetchAll(PDO::FETCH_ASSOC);
+
+        return (!empty($response)) ? json_encode($response) : null;
+    }
+
+    /**
+     * Counts the number of entities in the database.
+     */
+    public function count() {
+        $statement = sprintf("SELECT COUNT(*) as %s FROM %s WHERE deleted = 0", static::COUNT, static::TABLE);
+        $req = $this->db->query($statement);
         $response = $req->fetchAll(PDO::FETCH_ASSOC);
 
         return (!empty($response)) ? json_encode($response) : null;

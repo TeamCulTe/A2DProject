@@ -8,28 +8,19 @@
 
 require_once "common_header.php";
 
-if (isset($_POST[$idUser]) && isset($_POST[$idBook]))
-{
-    $response = $dbManager->getUserBookQuotes($_POST[$idUser], $_POST[$idBook]);
-}
-elseif (isset($_POST[$idQuote]))
-{
-    $response = $dbManager->getQuote($_POST[$idQuote]);
-}
-elseif (isset($_POST[$idUser]))
-{
-    $response = $dbManager->getUserQuotes($_POST[$idUser]);
-}
-elseif (isset($_POST[$idBook]))
-{
-    $response = $dbManager->getBookQuotes($_POST[$idBook]);
-}
-elseif (isset($_POST["start"]) && isset($_POST["end"]))
-{
-    $response = $dbManager->queryAllPaginated($_POST["start"], $_POST["end"]);
-}
-else
-{
+if (isset($_GET[$idUser]) && isset($_GET[$idBook])) {
+    $response = $dbManager->getUserBookQuotes($_GET[$idUser], $_GET[$idBook]);
+} elseif (isset($_GET[$idQuote])) {
+    $response = $dbManager->getQuote($_GET[$idQuote]);
+} elseif (isset($_GET[$idUser])) {
+    $response = $dbManager->getUserQuotes($_GET[$idUser]);
+} elseif (isset($_GET[$idBook])) {
+    $response = $dbManager->getBookQuotes($_GET[$idBook]);
+} elseif (isset($_GET[$count])) {
+    $response = $dbManager->count();
+} elseif (isset($_GET[$start]) && isset($_GET[$end])) {
+    $response = $dbManager->queryAllPaginated($_GET[$start], $_GET[$end]);
+} else {
     $response = $dbManager->queryAll();
 }
 

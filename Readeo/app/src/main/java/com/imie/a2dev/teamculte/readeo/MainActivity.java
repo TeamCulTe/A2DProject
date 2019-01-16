@@ -68,7 +68,7 @@ public class MainActivity extends AppCompatActivity implements HTTPRequestQueueS
         Quote quote = new Quote();
         Review review = new Review();
 
-        //DBManager.importMySQLDatabase();
+//        DBManager.importMySQLDatabase();
 
         List<Author> authors = authorDBManager.queryAllSQLite();
         List<Category> categories = categoryDBManager.queryAllSQLite();

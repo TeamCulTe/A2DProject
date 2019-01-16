@@ -3,8 +3,8 @@ package com.imie.a2dev.teamculte.readeo.Entities.DBEntities;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.util.Log;
-import com.imie.a2dev.teamculte.readeo.DBManagers.CategoryDBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.DBManager;
+import com.imie.a2dev.teamculte.readeo.DBSchemas.CategoryDBSchema;
 
 /**
  * Final class representing a category from the application.
@@ -74,8 +74,8 @@ public final class Category extends DBEntity {
                 result.moveToNext();
             }
 
-            this.id = result.getInt(result.getColumnIndexOrThrow(CategoryDBManager.ID));
-            this.name = result.getString(result.getColumnIndexOrThrow(CategoryDBManager.NAME));
+            this.id = result.getInt(result.getColumnIndexOrThrow(CategoryDBSchema.ID));
+            this.name = result.getString(result.getColumnIndexOrThrow(CategoryDBSchema.NAME));
 
             if (close) {
                 result.close();

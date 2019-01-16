@@ -2,170 +2,23 @@ package com.imie.a2dev.teamculte.readeo.DBManagers;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
-import android.database.sqlite.SQLiteOpenHelper;
+import com.imie.a2dev.teamculte.readeo.DBSchemas.AuthorDBSchema;
+import com.imie.a2dev.teamculte.readeo.DBSchemas.BookDBSchema;
+import com.imie.a2dev.teamculte.readeo.DBSchemas.BookListTypeDBSchema;
+import com.imie.a2dev.teamculte.readeo.DBSchemas.CategoryDBSchema;
+import com.imie.a2dev.teamculte.readeo.DBSchemas.CityDBSchema;
+import com.imie.a2dev.teamculte.readeo.DBSchemas.CountryDBSchema;
+import com.imie.a2dev.teamculte.readeo.DBSchemas.ProfileDBSchema;
+import com.imie.a2dev.teamculte.readeo.DBSchemas.QuoteDBSchema;
+import com.imie.a2dev.teamculte.readeo.DBSchemas.ReviewDBSchema;
+import com.imie.a2dev.teamculte.readeo.DBSchemas.UserDBSchema;
+import com.imie.a2dev.teamculte.readeo.DBSchemas.WriterDBSchema;
+import com.readystatesoftware.sqliteasset.SQLiteAssetHelper;
 
 /**
  * Class used to manage database structure (tables, upgrades...).
  */
-public final class DBHandler extends SQLiteOpenHelper {
-    /**
-     * Defines the default database labels size (such as pseudo, names, avatar...).
-     */
-    private static final String LABEL_SIZE = "50";
-
-    /**
-     * Defines the default database texts size (such as reviews and quotes).
-     */
-    private static final String TEXT_SIZE = "255";
-
-    /**
-     * Defines the author create table statement.
-     */
-    private static final String AUTHOR_TABLE_STATEMENT = String.format("CREATE TABLE IF NOT EXISTS %s (%s INTEGER " +
-                    "PRIMARY KEY, %s TEXT(%s) UNIQUE NOT NULL);",
-            AuthorDBManager.TABLE,
-            AuthorDBManager.ID,
-            AuthorDBManager.NAME,
-            LABEL_SIZE);
-
-    /**
-     * Defines the book create table statement.
-     */
-    private static final String BOOK_TABLE_STATEMENT = String.format("CREATE TABLE IF NOT EXISTS %s (%s INTEGER " +
-                    "PRIMARY KEY, %s INTEGER NOT NULL, %s TEXT(%s) UNIQUE NOT NULL, %s TEXT(%s), %s TEXT, %s " +
-                    "INTEGER(4) NOT NULL, CONSTRAINT Book_Category_FK FOREIGN KEY (%s) REFERENCES Category(%s));",
-            BookDBManager.TABLE,
-            BookDBManager.ID,
-            BookDBManager.CATEGORY,
-            BookDBManager.TITLE,
-            LABEL_SIZE,
-            BookDBManager.COVER,
-            TEXT_SIZE,
-            BookDBManager.SUMMARY,
-            BookDBManager.DATE,
-            BookDBManager.CATEGORY,
-            CategoryDBManager.ID);
-
-    /**
-     * Defines the book list type create table statement.
-     */
-    private static final String BOOK_LIST_TYPE_TABLE_STATEMENT = String.format("CREATE TABLE IF NOT EXISTS %s (%s " +
-                    "INTEGER " +
-                    "PRIMARY KEY, %s TEXT(%s) UNIQUE NOT NULL);",
-            BookListTypeDBManager.TABLE,
-            BookListTypeDBManager.ID,
-            BookListTypeDBManager.NAME,
-            LABEL_SIZE);
-
-    /**
-     * Defines the category create table statement.
-     */
-    private static final String CATEGORY_TABLE_STATEMENT = String.format("CREATE TABLE IF NOT EXISTS %s (%s INTEGER " +
-                    "PRIMARY KEY, %s TEXT(%s) UNIQUE NOT NULL);",
-            CategoryDBManager.TABLE,
-            CategoryDBManager.ID,
-            CategoryDBManager.NAME,
-            LABEL_SIZE);
-
-    /**
-     * Defines the city create table statement.
-     */
-    private static final String CITY_TABLE_STATEMENT = String.format("CREATE TABLE IF NOT EXISTS %s (%s INTEGER " +
-                    "PRIMARY KEY, %s TEXT(%s) UNIQUE NOT NULL);",
-            CityDBManager.TABLE,
-            CityDBManager.ID,
-            CityDBManager.NAME,
-            LABEL_SIZE);
-
-    /**
-     * Defines the country create table statement.
-     */
-    private static final String COUNTRY_TABLE_STATEMENT = String.format("CREATE TABLE IF NOT EXISTS %s (%s INTEGER " +
-                    "PRIMARY KEY, %s TEXT(%s) UNIQUE NOT NULL);",
-            CountryDBManager.TABLE,
-            CountryDBManager.ID,
-            CountryDBManager.NAME,
-            LABEL_SIZE);
-
-    /**
-     * Defines the profile create table statement.
-     */
-    private static final String PROFILE_TABLE_STATEMENT = String.format("CREATE TABLE IF NOT EXISTS %s (%s INTEGER " +
-                    "PRIMARY KEY, %s TEXT(%s) NOT NULL, %s TEXT(%s) NOT NULL);",
-            ProfileDBManager.TABLE,
-            ProfileDBManager.ID,
-            ProfileDBManager.AVATAR,
-            LABEL_SIZE,
-            ProfileDBManager.DESCRIPTION,
-            TEXT_SIZE);
-
-    /**
-     * Defines the quote create table statement.
-     */
-    private static final String QUOTE_TABLE_STATEMENT = String.format("CREATE TABLE IF NOT EXISTS %s (%s INTEGER " +
-                    "PRIMARY KEY, %s INTEGER NOT NULL, %s INTEGER NOT NULL, %s TEXT NOT NULL, CONSTRAINT " +
-                    "Quote_User_FK FOREIGN KEY (%s) REFERENCES User(%s), CONSTRAINT Quote_Book_FK FOREIGN KEY (%s) " +
-                    "REFERENCES Book(%s));",
-            QuoteDBManager.TABLE,
-            QuoteDBManager.ID,
-            QuoteDBManager.USER,
-            QuoteDBManager.BOOK,
-            QuoteDBManager.QUOTE,
-            QuoteDBManager.USER,
-            UserDBManager.ID,
-            QuoteDBManager.BOOK,
-            BookDBManager.ID);
-
-    /**
-     * Defines the review create table statement.
-     */
-    private static final String REVIEW_TABLE_STATEMENT = String.format("CREATE TABLE IF NOT EXISTS %s (%s INTEGER NOT " +
-                    "NULL, %s INTEGER NOT NULL, %s TEXT(%s) NOT NULL, CONSTRAINT Review_PK PRIMARY KEY (%s, %s), " +
-                    "CONSTRAINT Review_User_FK FOREIGN KEY (%s) REFERENCES User(%s), CONSTRAINT Review_Book_FK " +
-                    "FOREIGN KEY (%s) REFERENCES Book(%s));",
-            ReviewDBManager.TABLE,
-            ReviewDBManager.USER,
-            ReviewDBManager.BOOK,
-            ReviewDBManager.REVIEW,
-            TEXT_SIZE,
-            ReviewDBManager.USER,
-            ReviewDBManager.BOOK,
-            ReviewDBManager.USER,
-            UserDBManager.ID,
-            ReviewDBManager.BOOK,
-            BookDBManager.ID);
-
-    /**
-     * Defines the user create table statement.
-     */
-    private static final String USER_TABLE_STATEMENT = String.format("CREATE TABLE IF NOT EXISTS %s (%s INTEGER " +
-                    "PRIMARY KEY, %s TEXT(%s) UNIQUE NOT NULL, %s INTEGER NOT NULL, deleted INT(1) NOT NULL DEFAULT " +
-                    "0, CONSTRAINT User_Profile_FK FOREIGN KEY (%s) REFERENCES Profile(%s));",
-            UserDBManager.TABLE,
-            UserDBManager.ID,
-            UserDBManager.PSEUDO,
-            LABEL_SIZE,
-            UserDBManager.PROFILE,
-            UserDBManager.PROFILE,
-            ProfileDBManager.ID);
-
-    /**
-     * Defines the writer create table statement.
-     */
-    private static final String WRITER_TABLE_STATEMENT = String.format("CREATE TABLE IF NOT EXISTS %s (%s INTEGER " +
-                    "NOT NULL, %s INTEGER NOT NULL, CONSTRAINT Writer_PK PRIMARY KEY (%s, %s), CONSTRAINT " +
-                    "Writer_Author_FK FOREIGN KEY (%s) REFERENCES Author(%s), CONSTRAINT Writer_Book_FK FOREIGN " +
-                    "KEY (%s) REFERENCES Book(%s));",
-            WriterDBManager.TABLE,
-            WriterDBManager.AUTHOR,
-            WriterDBManager.BOOK,
-            WriterDBManager.AUTHOR,
-            WriterDBManager.BOOK,
-            WriterDBManager.AUTHOR,
-            AuthorDBManager.ID,
-            WriterDBManager.BOOK,
-            BookDBManager.ID);
-
+public final class DBHandler extends SQLiteAssetHelper {
     /**
      * Defines the index statement.
      */
@@ -175,14 +28,6 @@ public final class DBHandler extends SQLiteOpenHelper {
      * Defines the drop statement.
      */
     private static final String DROP_STATEMENT = "DROP TABLE IF EXISTS %s;";
-
-    /**
-     * Stores the trigger statement on user table when deleting in order to delete the other user occurrences.
-     */
-    // TODO: See what's wrong here.
-    private static final String USER_TRIGGER_STATEMENT = "CREATE TRIGGER IF NOT EXISTS user_trigger BEFORE DELETE ON " +
-            "User FOR EACH ROW BEGIN DELETE FROM Quote WHERE Quote.id_user = User.id_user; DELETE FROM Review WHERE " +
-            "Review.id_user = User.id_user; DELETE FROM Profile WHERE Profile.id; END;";
 
     /**
      * DBHandler's constructor.
@@ -196,75 +41,78 @@ public final class DBHandler extends SQLiteOpenHelper {
     }
 
 
-    @Override
-    public void onCreate(SQLiteDatabase db) {
+    /**
+     * Creates the database.
+     * @param db The database object.
+     */
+    public void create(SQLiteDatabase db) {
         //Author table
-        db.execSQL(AUTHOR_TABLE_STATEMENT);
-        db.execSQL(String.format(INDEX_STATEMENT, AuthorDBManager.NAME, AuthorDBManager.TABLE, AuthorDBManager.NAME));
+        db.execSQL(AuthorDBSchema.AUTHOR_TABLE_STATEMENT);
+        db.execSQL(String.format(INDEX_STATEMENT, AuthorDBSchema.NAME, AuthorDBSchema.TABLE, AuthorDBSchema.NAME));
 
         //Book table
-        db.execSQL(BOOK_TABLE_STATEMENT);
-        db.execSQL(String.format(INDEX_STATEMENT, BookDBManager.TITLE, BookDBManager.TABLE, BookDBManager.TITLE));
+        db.execSQL(BookDBSchema.BOOK_TABLE_STATEMENT);
+        db.execSQL(String.format(INDEX_STATEMENT, BookDBSchema.TITLE, BookDBSchema.TABLE, BookDBSchema.TITLE));
 
         //BookListType table
-        db.execSQL(BOOK_LIST_TYPE_TABLE_STATEMENT);
+        db.execSQL(BookListTypeDBSchema.BOOK_LIST_TYPE_TABLE_STATEMENT);
         db.execSQL(String.format(INDEX_STATEMENT,
-                BookListTypeDBManager.NAME,
-                BookListTypeDBManager.TABLE,
-                BookListTypeDBManager.NAME));
+                BookListTypeDBSchema.NAME,
+                BookListTypeDBSchema.TABLE,
+                BookListTypeDBSchema.NAME));
 
         //Category table
-        db.execSQL(CATEGORY_TABLE_STATEMENT);
+        db.execSQL(CategoryDBSchema.CATEGORY_TABLE_STATEMENT);
         db.execSQL(String.format(INDEX_STATEMENT,
-                CategoryDBManager.NAME,
-                CategoryDBManager.TABLE,
-                CategoryDBManager.NAME));
+                CategoryDBSchema.NAME,
+                CategoryDBSchema.TABLE,
+                CategoryDBSchema.NAME));
 
         //City table
-        db.execSQL(CITY_TABLE_STATEMENT);
+        db.execSQL(CityDBSchema.CITY_TABLE_STATEMENT);
         db.execSQL(String.format(INDEX_STATEMENT,
-                CityDBManager.NAME,
-                CityDBManager.TABLE,
-                CityDBManager.NAME));
+                CityDBSchema.NAME,
+                CityDBSchema.TABLE,
+                CityDBSchema.NAME));
 
         //Country table
-        db.execSQL(COUNTRY_TABLE_STATEMENT);
+        db.execSQL(CountryDBSchema.COUNTRY_TABLE_STATEMENT);
         db.execSQL(String.format(INDEX_STATEMENT,
-                CountryDBManager.NAME,
-                CountryDBManager.TABLE,
-                CountryDBManager.NAME));
+                CountryDBSchema.NAME,
+                CountryDBSchema.TABLE,
+                CountryDBSchema.NAME));
 
         //Profile table
-        db.execSQL(PROFILE_TABLE_STATEMENT);
+        db.execSQL(ProfileDBSchema.PROFILE_TABLE_STATEMENT);
 
         //Quote table
-        db.execSQL(QUOTE_TABLE_STATEMENT);
+        db.execSQL(QuoteDBSchema.QUOTE_TABLE_STATEMENT);
 
         //Review table
-        db.execSQL(REVIEW_TABLE_STATEMENT);
+        db.execSQL(ReviewDBSchema.REVIEW_TABLE_STATEMENT);
 
         //User table
-        db.execSQL(USER_TABLE_STATEMENT);
-        db.execSQL(String.format(INDEX_STATEMENT, UserDBManager.PSEUDO, UserDBManager.TABLE, UserDBManager.PSEUDO));
+        db.execSQL(UserDBSchema.USER_TABLE_STATEMENT);
+        db.execSQL(String.format(INDEX_STATEMENT, UserDBSchema.PSEUDO, UserDBSchema.TABLE, UserDBSchema.PSEUDO));
+        db.execSQL(UserDBSchema.USER_TRIGGER_STATEMENT);
 
         //Writer table
-        db.execSQL(WRITER_TABLE_STATEMENT);
+        db.execSQL(WriterDBSchema.WRITER_TABLE_STATEMENT);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int i, int i1) {
-        db.execSQL(String.format(DROP_STATEMENT, AuthorDBManager.TABLE));
-        db.execSQL(String.format(DROP_STATEMENT, BookDBManager.TABLE));
-        db.execSQL(String.format(DROP_STATEMENT, BookListTypeDBManager.TABLE));
-        db.execSQL(String.format(DROP_STATEMENT, CategoryDBManager.TABLE));
-        db.execSQL(String.format(DROP_STATEMENT, CityDBManager.TABLE));
-        db.execSQL(String.format(DROP_STATEMENT, CountryDBManager.TABLE));
-        db.execSQL(String.format(DROP_STATEMENT, ProfileDBManager.TABLE));
-        db.execSQL(String.format(DROP_STATEMENT, QuoteDBManager.TABLE));
-        db.execSQL(String.format(DROP_STATEMENT, ReviewDBManager.TABLE));
-        db.execSQL(String.format(DROP_STATEMENT, UserDBManager.TABLE));
-        db.execSQL(String.format(DROP_STATEMENT, WriterDBManager.TABLE));
-        db.execSQL(USER_TRIGGER_STATEMENT);
+        db.execSQL(String.format(DROP_STATEMENT, AuthorDBSchema.TABLE));
+        db.execSQL(String.format(DROP_STATEMENT, BookDBSchema.TABLE));
+        db.execSQL(String.format(DROP_STATEMENT, BookListTypeDBSchema.TABLE));
+        db.execSQL(String.format(DROP_STATEMENT, CategoryDBSchema.TABLE));
+        db.execSQL(String.format(DROP_STATEMENT, CityDBSchema.TABLE));
+        db.execSQL(String.format(DROP_STATEMENT, CountryDBSchema.TABLE));
+        db.execSQL(String.format(DROP_STATEMENT, ProfileDBSchema.TABLE));
+        db.execSQL(String.format(DROP_STATEMENT, QuoteDBSchema.TABLE));
+        db.execSQL(String.format(DROP_STATEMENT, ReviewDBSchema.TABLE));
+        db.execSQL(String.format(DROP_STATEMENT, UserDBSchema.TABLE));
+        db.execSQL(String.format(DROP_STATEMENT, WriterDBSchema.TABLE));
         this.onCreate(db);
     }
 }

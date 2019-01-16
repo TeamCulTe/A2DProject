@@ -8,16 +8,13 @@
 
 require_once "common_header.php";
 
-if (isset($_POST[$id]))
-{
-    $response = $dbManager->getProfile($_POST[$id]);
-}
-elseif (isset($_POST["start"]) && isset($_POST["end"]))
-{
-    $response = $dbManager->queryAllPaginated($_POST["start"], $_POST["end"]);
-}
-else
-{
+if (isset($_GET[$id])) {
+    $response = $dbManager->getProfile($_GET[$id]);
+} elseif (isset($_GET[$count])) {
+    $response = $dbManager->count();
+} elseif (isset($_GET[$start]) && isset($_GET[$end])) {
+    $response = $dbManager->queryAllPaginated($_GET[$start], $_GET[$end]);
+} else {
     $response = $dbManager->queryAll();
 }
 

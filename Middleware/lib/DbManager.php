@@ -19,6 +19,11 @@ abstract class DbManager
     protected $db;
 
     /**
+     * Defines the count alias.
+     */
+    protected const COUNT = "count";
+
+    /**
      * DbManager default constructor.
      */
     public function __construct()

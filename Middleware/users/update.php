@@ -8,34 +8,21 @@
 
 require_once "common_header.php";
 
-if (isset($_POST[$idUser]) && isset($_POST[$pseudo]) && isset($_POST[$password]) && isset($_POST[$email]) &&
-    isset($_POST[$idProfile]) && isset($_POST[$idCity]) && isset($_POST[$idCountry]))
-{
-    $response_code = ($dbManager->update($_POST[$idUser], $_POST[$pseudo], $_POST[$password], $_POST[$email],
-        $_POST[$idProfile], $_POST[$idCity], $_POST[$idCountry])) ? 201 : 404;
-}
-elseif (isset($_POST[$idUser]) && isset($_POST[$pseudo]))
-{
-    $response_code = ($dbManager->updatePseudo($_POST[$idUser], $_POST[$pseudo]));
-}
-elseif (isset($_POST[$idUser]) && isset($_POST[$password]))
-{
-    $response_code = ($dbManager->updatePassword($_POST[$idUser], $_POST[$password]));
-}
-elseif (isset($_POST[$idUser]) && isset($_POST[$email]))
-{
-    $response_code = ($dbManager->updateEmail($_POST[$idUser], $_POST[$email]));
-}
-elseif (isset($_POST[$idUser]) && isset($_POST[$idCity]))
-{
-    $response_code = ($dbManager->updateCity($_POST[$idUser], $_POST[$idCity]));
-}
-elseif (isset($_POST[$idUser]) && isset($_POST[$idCountry]))
-{
-    $response_code = ($dbManager->updateCountry($_POST[$idUser], $_POST[$idCountry]));
-}
-else
-{
+if (isset($_PUT[$idUser]) && isset($_PUT[$pseudo]) && isset($_PUT[$password]) && isset($_PUT[$email]) &&
+    isset($_PUT[$idProfile]) && isset($_PUT[$idCity]) && isset($_PUT[$idCountry])) {
+    $response_code = ($dbManager->update($_PUT[$idUser], $_PUT[$pseudo], $_PUT[$password], $_PUT[$email],
+        $_PUT[$idProfile], $_PUT[$idCity], $_PUT[$idCountry])) ? 201 : 404;
+} elseif (isset($_PUT[$idUser]) && isset($_PUT[$pseudo])) {
+    $response_code = ($dbManager->updatePseudo($_PUT[$idUser], $_PUT[$pseudo]));
+} elseif (isset($_PUT[$idUser]) && isset($_PUT[$password])) {
+    $response_code = ($dbManager->updatePassword($_PUT[$idUser], $_PUT[$password]));
+} elseif (isset($_PUT[$idUser]) && isset($_PUT[$email])) {
+    $response_code = ($dbManager->updateEmail($_PUT[$idUser], $_PUT[$email]));
+} elseif (isset($_PUT[$idUser]) && isset($_PUT[$idCity])) {
+    $response_code = ($dbManager->updateCity($_PUT[$idUser], $_PUT[$idCity]));
+} elseif (isset($_PUT[$idUser]) && isset($_PUT[$idCountry])) {
+    $response_code = ($dbManager->updateCountry($_PUT[$idUser], $_PUT[$idCountry]));
+} else {
     $response_code = 400;
 }
 

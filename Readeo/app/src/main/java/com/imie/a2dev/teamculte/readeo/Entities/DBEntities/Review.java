@@ -7,6 +7,8 @@ import com.imie.a2dev.teamculte.readeo.App;
 import com.imie.a2dev.teamculte.readeo.DBManagers.DBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.ReviewDBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.UserDBManager;
+import com.imie.a2dev.teamculte.readeo.DBSchemas.ReviewDBSchema;
+import com.imie.a2dev.teamculte.readeo.DBSchemas.UserDBSchema;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -83,6 +85,14 @@ public final class Review extends DBEntity {
     }
 
     /**
+     * Review's full filled constructor providing all its attributes values from a json object.
+     * @param result The json object.
+     */
+    public Review(JSONObject result) {
+        this.init(result);
+    }
+
+    /**
      * Gets the author attribute.
      * @return The String value of author attribute.
      */
@@ -136,10 +146,10 @@ public final class Review extends DBEntity {
      */
     public void init(JSONObject object) {
         try {
-            this.setId(object.getInt(ReviewDBManager.BOOK));
-            this.setReview(object.getString(ReviewDBManager.BOOK));
-            this.setReview(object.getString(ReviewDBManager.REVIEW));
-            // TODO : See how to get the name of the user -> Getting it from sqlite db ?
+            this.id = object.getInt(ReviewDBSchema.BOOK);
+            this.author = new UserDBManager(App.getAppContext()).getFieldSQLite(UserDBSchema.PSEUDO,
+                    object.getInt(ReviewDBSchema.USER));
+            this.review = object.getString(ReviewDBSchema.REVIEW);
         } catch (JSONException e) {
             Log.e(DBManager.JSON_TAG, e.getMessage());
         }
@@ -152,10 +162,10 @@ public final class Review extends DBEntity {
                 result.moveToNext();
             }
 
-            this.id = result.getInt(result.getColumnIndexOrThrow(ReviewDBManager.BOOK));
-            this.author = new UserDBManager(App.getAppContext()).getFieldSQLite(UserDBManager.PSEUDO,
-                    result.getInt(result.getColumnIndexOrThrow(ReviewDBManager.USER)));
-            this.review = result.getString(result.getColumnIndexOrThrow(ReviewDBManager.REVIEW));
+            this.id = result.getInt(result.getColumnIndexOrThrow(ReviewDBSchema.BOOK));
+            this.author = new UserDBManager(App.getAppContext()).getFieldSQLite(UserDBSchema.PSEUDO,
+                    result.getInt(result.getColumnIndexOrThrow(ReviewDBSchema.USER)));
+            this.review = result.getString(result.getColumnIndexOrThrow(ReviewDBSchema.REVIEW));
             this.shared = true;
 
             if (close) {

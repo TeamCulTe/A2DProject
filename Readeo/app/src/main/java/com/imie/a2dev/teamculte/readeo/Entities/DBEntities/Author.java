@@ -5,6 +5,7 @@ import android.database.sqlite.SQLiteException;
 import android.util.Log;
 import com.imie.a2dev.teamculte.readeo.DBManagers.AuthorDBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.DBManager;
+import com.imie.a2dev.teamculte.readeo.DBSchemas.AuthorDBSchema;
 
 /**
  * Final class representing an author from the application.
@@ -74,8 +75,8 @@ public final class Author extends DBEntity {
                 result.moveToNext();
             }
 
-            this.id = result.getInt(result.getColumnIndexOrThrow(AuthorDBManager.ID));
-            this.name = result.getString(result.getColumnIndexOrThrow(AuthorDBManager.NAME));
+            this.id = result.getInt(result.getColumnIndexOrThrow(AuthorDBSchema.ID));
+            this.name = result.getString(result.getColumnIndexOrThrow(AuthorDBSchema.NAME));
 
             if (close) {
                 result.close();

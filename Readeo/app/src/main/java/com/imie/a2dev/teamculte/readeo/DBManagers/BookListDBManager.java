@@ -2,6 +2,7 @@ package com.imie.a2dev.teamculte.readeo.DBManagers;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import com.android.volley.Request;
 import com.android.volley.Response;
 import com.imie.a2dev.teamculte.readeo.APIManager;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Book;
@@ -10,33 +11,18 @@ import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.BookListType;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
+
+import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookListDBSchema.BOOK;
+import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookListDBSchema.TABLE;
+import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookListDBSchema.TYPE;
+import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookListDBSchema.USER;
 
 /**
  * Manager class used to manage the book list entities from databases.
  */
 public final class BookListDBManager extends DBManager {
-    /**
-     * Defines the book list's table name.
-     */
-    public static final String TABLE = "BookList";
-
-    /**
-     * Defines the book list's id field.
-     */
-    public static final String USER = UserDBManager.ID;
-
-    /**
-     * Defines the book list's avatar field.
-     */
-    public static final String BOOK = BookDBManager.ID;
-
-    /**
-     * Defines the book list's description field.
-     */
-    public static final String TYPE = "id_book_list_type";
-
     /**
      * Stores the base of the book lists API url.
      */
@@ -48,6 +34,8 @@ public final class BookListDBManager extends DBManager {
      */
     public BookListDBManager(Context context) {
         super(context);
+
+        this.table = TABLE;
     }
 
     /**
@@ -62,7 +50,7 @@ public final class BookListDBManager extends DBManager {
                     book.getId(),
                     bookList.getType().getId());
 
-            super.requestString(url, null);
+            super.requestString(Request.Method.POST, url, null);
         }
     }
 
@@ -78,7 +66,7 @@ public final class BookListDBManager extends DBManager {
                 idBook,
                 idType);
 
-        super.requestString(url, null);
+        super.requestString(Request.Method.POST, url, null);
     }
 
     /**
@@ -92,7 +80,7 @@ public final class BookListDBManager extends DBManager {
 
         String url = String.format(baseUrl + APIManager.READ + USER + "=%s&" + TYPE + "=%s", idUser, idType);
 
-        super.requestJsonArray(url, new Response.Listener<JSONArray>() {
+        super.requestJsonArray(Request.Method.GET, url, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
                 bookList.init(response);
@@ -107,12 +95,15 @@ public final class BookListDBManager extends DBManager {
      * @param idUser The id of the user who owns the book lists to load.
      * @return The loaded book lists.
      */
-    public List<BookList> loadUserMySQL(int idUser) {
-        final ArrayList<BookList> bookLists = new ArrayList<>();
+    public Map<String, BookList> loadUserMySQL(int idUser) {
+        BookList bookList;
+        final Map<String, BookList> bookLists = new HashMap<>();
         BookListTypeDBManager bookListTypeDBManager = new BookListTypeDBManager(this.getContext());
 
         for (BookListType type : bookListTypeDBManager.queryAllSQLite()) {
-            bookLists.add(this.loadMySQL(idUser, type.getId()));
+            bookList = this.loadMySQL(idUser, type.getId());
+
+            bookLists.put(bookList.getType().getName(), bookList);
         }
 
         return bookLists;
@@ -125,7 +116,7 @@ public final class BookListDBManager extends DBManager {
     public void deleteUserMySQL(int idUser) {
         String url = String.format(baseUrl + APIManager.DELETE + USER + "=%s", idUser);
 
-        super.requestString(url, null);
+        super.requestString(Request.Method.PUT, url, null);
     }
 
     /**
@@ -140,7 +131,7 @@ public final class BookListDBManager extends DBManager {
                 idBook,
                 idType);
 
-        super.requestString(url, null);
+        super.requestString(Request.Method.PUT, url, null);
     }
 
     /**
@@ -150,7 +141,7 @@ public final class BookListDBManager extends DBManager {
     public void restoreUserMySQL(int idUser) {
         String url = String.format(baseUrl + APIManager.RESTORE + USER + "=%s", idUser);
 
-        super.requestString(url, null);
+        super.requestString(Request.Method.PUT, url, null);
     }
 
     /**
@@ -165,7 +156,12 @@ public final class BookListDBManager extends DBManager {
                 idBook,
                 idType);
 
-        super.requestString(url, null);
+        super.requestString(Request.Method.PUT, url, null);
+    }
+
+    @Override
+    public boolean deleteSQLite(int id) {
+        return false;
     }
 
     @Override

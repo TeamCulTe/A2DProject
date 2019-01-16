@@ -5,8 +5,9 @@ import android.database.sqlite.SQLiteException;
 import android.util.Log;
 import com.imie.a2dev.teamculte.readeo.App;
 import com.imie.a2dev.teamculte.readeo.DBManagers.DBManager;
-import com.imie.a2dev.teamculte.readeo.DBManagers.QuoteDBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.UserDBManager;
+import com.imie.a2dev.teamculte.readeo.DBSchemas.QuoteDBSchema;
+import com.imie.a2dev.teamculte.readeo.DBSchemas.UserDBSchema;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -83,6 +84,14 @@ public final class Quote extends DBEntity {
     }
 
     /**
+     * Quote's full filled constructor providing all its attributes values from a json object.
+     * @param result The json object.
+     */
+    public Quote(JSONObject result) {
+        this.init(result);
+    }
+
+    /**
      * Gets the author attribute.
      * @return The String value of author attribute.
      */
@@ -136,10 +145,11 @@ public final class Quote extends DBEntity {
      */
     public void init(JSONObject object) {
         try {
-            this.setId(object.getInt(QuoteDBManager.ID));
-            this.setBookId(object.getInt(QuoteDBManager.BOOK));
-            this.setQuote(object.getString(QuoteDBManager.QUOTE));
-            // TODO : See how to get the name of the user -> Getting it from sqlite db ?
+            this.id = object.getInt(QuoteDBSchema.ID);
+            this.bookId = object.getInt(QuoteDBSchema.BOOK);
+            this.author = new UserDBManager(App.getAppContext()).getFieldSQLite(UserDBSchema.PSEUDO,
+                    object.getInt(QuoteDBSchema.USER));
+            this.quote = object.getString(QuoteDBSchema.QUOTE);
         } catch (JSONException e) {
             Log.e(DBManager.JSON_TAG, e.getMessage());
         }
@@ -152,11 +162,11 @@ public final class Quote extends DBEntity {
                 result.moveToNext();
             }
 
-            this.id = result.getInt(result.getColumnIndexOrThrow(QuoteDBManager.ID));
-            this.bookId = result.getInt(result.getColumnIndexOrThrow(QuoteDBManager.BOOK));
-            this.author = new UserDBManager(App.getAppContext()).getFieldSQLite(UserDBManager.PSEUDO,
-                    result.getInt(result.getColumnIndexOrThrow(QuoteDBManager.USER)));
-            this.quote = result.getString(result.getColumnIndexOrThrow(QuoteDBManager.QUOTE));
+            this.id = result.getInt(result.getColumnIndexOrThrow(QuoteDBSchema.ID));
+            this.bookId = result.getInt(result.getColumnIndexOrThrow(QuoteDBSchema.BOOK));
+            this.author = new UserDBManager(App.getAppContext()).getFieldSQLite(UserDBSchema.PSEUDO,
+                    result.getInt(result.getColumnIndexOrThrow(QuoteDBSchema.USER)));
+            this.quote = result.getString(result.getColumnIndexOrThrow(QuoteDBSchema.QUOTE));
 
             if (close) {
                 result.close();

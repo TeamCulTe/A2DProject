@@ -3,8 +3,8 @@ package com.imie.a2dev.teamculte.readeo.Entities.DBEntities;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.util.Log;
-import com.imie.a2dev.teamculte.readeo.DBManagers.CityDBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.DBManager;
+import com.imie.a2dev.teamculte.readeo.DBSchemas.CityDBSchema;
 
 /**
  * Final class representing a city from the application.
@@ -74,8 +74,8 @@ public final class City extends DBEntity {
                 result.moveToNext();
             }
 
-            this.id = result.getInt(result.getColumnIndexOrThrow(CityDBManager.ID));
-            this.name = result.getString(result.getColumnIndexOrThrow(CityDBManager.NAME));
+            this.id = result.getInt(result.getColumnIndexOrThrow(CityDBSchema.ID));
+            this.name = result.getString(result.getColumnIndexOrThrow(CityDBSchema.NAME));
 
             if (close) {
                 result.close();

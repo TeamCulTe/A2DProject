@@ -8,28 +8,17 @@
 
 require_once "common_header.php";
 
-if (isset($_POST[$idUser]) && isset($_POST[$idBookListType]) && isset($_POST[$idBook]))
-{
-    $response_code = ($dbManager->softDelete($_POST[$idUser], $_POST[$idBookListType], $_POST[$idBook])) ? 200 : 404;
-}
-elseif (isset($_POST[$idUser]) && isset($_POST[$idBook]))
-{
-    $response_code = ($dbManager->softDeleteUserBookListBook($_POST[$idUser], $_POST[$idBook])) ? 200 : 404;
-}
-elseif (isset($_POST[$idUser]))
-{
-    $response_code = ($dbManager->softDeleteUserBookLists($_POST[$idUser])) ? 200 : 404;
-}
-elseif (isset($_POST[$idBookListType]))
-{
-    $response_code = ($dbManager->softDeleteTypedBookLists($_POST[$idBookListType])) ? 200 : 404;
-}
-elseif (isset($_POST[$idBook]))
-{
-    $response_code = ($dbManager->softDeleteBookBookLists($_POST[$idBook])) ? 200 : 404;
-}
-else
-{
+if (isset($_PUT[$idUser]) && isset($_PUT[$idBookListType]) && isset($_PUT[$idBook])) {
+    $response_code = ($dbManager->softDelete($_PUT[$idUser], $_PUT[$idBookListType], $_PUT[$idBook])) ? 200 : 404;
+} elseif (isset($_PUT[$idUser]) && isset($_PUT[$idBook])) {
+    $response_code = ($dbManager->softDeleteUserBookListBook($_PUT[$idUser], $_PUT[$idBook])) ? 200 : 404;
+} elseif (isset($_PUT[$idUser])) {
+    $response_code = ($dbManager->softDeleteUserBookLists($_PUT[$idUser])) ? 200 : 404;
+} elseif (isset($_PUT[$idBookListType])) {
+    $response_code = ($dbManager->softDeleteTypedBookLists($_PUT[$idBookListType])) ? 200 : 404;
+} elseif (isset($_PUT[$idBook])) {
+    $response_code = ($dbManager->softDeleteBookBookLists($_PUT[$idBook])) ? 200 : 404;
+} else {
     $response_code = 400;
 }
 

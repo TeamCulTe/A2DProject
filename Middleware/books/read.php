@@ -8,24 +8,17 @@
 
 require_once "common_header.php";
 
-if (isset($_POST[$idBook]))
-{
-    $response = $dbManager->getBook($_POST[$idBook]);
-}
-elseif (isset($_POST[$idCategory]))
-{
-    $response = $dbManager->getCategoryBooks($_POST[$idCategory]);
-}
-elseif (isset($_POST[$title]) && isset($_POST[$datePublished]))
-{
-    $response = $dbManager->getBookId($_POST[$title], $_POST[$datePublished]);
-}
-elseif (isset($_POST["start"]) && isset($_POST["end"]))
-{
-    $response = $dbManager->queryAllPaginated($_POST["start"], $_POST["end"]);
-}
-else
-{
+if (isset($_GET[$idBook])) {
+    $response = $dbManager->getBook($_GET[$idBook]);
+} elseif (isset($_GET[$idCategory])) {
+    $response = $dbManager->getCategoryBooks($_GET[$idCategory]);
+} elseif (isset($_GET[$title]) && isset($_GET[$datePublished])) {
+    $response = $dbManager->getBookId($_GET[$title], $_GET[$datePublished]);
+} elseif (isset($_GET[$count])) {
+    $response = $dbManager->count();
+} elseif (isset($_GET[$start]) && isset($_GET[$end])) {
+    $response = $dbManager->queryAllPaginated($_GET[$start], $_GET[$end]);
+} else {
     $response = $dbManager->queryAll();
 }
 

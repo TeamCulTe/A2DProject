@@ -8,28 +8,17 @@
 
 require_once "common_header.php";
 
-if (isset($_POST[$idUser]) && isset($_POST[$idBookListType]) && isset($_POST[$idBook]))
-{
-    $response_code = ($dbManager->restoreSoftDeletedBookList($_POST[$idUser], $_POST[$idBookListType], $_POST[$idBook])) ? 200 : 404;
-}
-elseif (isset($_POST[$idUser]) && isset($_POST[$idBook]))
-{
-    $response_code = ($dbManager->restoreSoftDeletedUserBookListBook($_POST[$idUser], $_POST[$idBook])) ? 200 : 404;
-}
-elseif (isset($_POST[$idUser]))
-{
-    $response_code = ($dbManager->restoreSoftDeletedUserBookLists($_POST[$idUser])) ? 200 : 404;
-}
-elseif (isset($_POST[$idBookListType]))
-{
-    $response_code = ($dbManager->restoreSoftDeletedTypedBookLists($_POST[$idBookListType])) ? 200 : 404;
-}
-elseif (isset($_POST[$idBook]))
-{
-    $response_code = ($dbManager->restoreSoftDeletedBookBookLists($_POST[$idBook])) ? 200 : 404;
-}
-else
-{
+if (isset($_PUT[$idUser]) && isset($_PUT[$idBookListType]) && isset($_PUT[$idBook])) {
+    $response_code = ($dbManager->restoreSoftDeletedBookList($_PUT[$idUser], $_PUT[$idBookListType], $_PUT[$idBook])) ? 200 : 404;
+} elseif (isset($_PUT[$idUser]) && isset($_PUT[$idBook])) {
+    $response_code = ($dbManager->restoreSoftDeletedUserBookListBook($_PUT[$idUser], $_PUT[$idBook])) ? 200 : 404;
+} elseif (isset($_PUT[$idUser])) {
+    $response_code = ($dbManager->restoreSoftDeletedUserBookLists($_PUT[$idUser])) ? 200 : 404;
+} elseif (isset($_PUT[$idBookListType])) {
+    $response_code = ($dbManager->restoreSoftDeletedTypedBookLists($_PUT[$idBookListType])) ? 200 : 404;
+} elseif (isset($_PUT[$idBook])) {
+    $response_code = ($dbManager->restoreSoftDeletedBookBookLists($_PUT[$idBook])) ? 200 : 404;
+} else {
     $response_code = 400;
 }
 

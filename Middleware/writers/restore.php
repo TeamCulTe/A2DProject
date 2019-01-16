@@ -9,20 +9,13 @@
 require_once "common_header.php";
 
 
-if (isset($_POST[$idAuthor]) && isset($_POST[$idBook]))
-{
-    $response_code = ($dbManager->restoreSoftDeleted($_POST[$idUser], $_POST[$idBook])) ? 200 : 404;
-}
-elseif (isset($_POST[$idAuthor]))
-{
-    $response_code = ($dbManager->restoreSoftDeletedAuthor($_POST[$idAuthor])) ? 200 : 404;
-}
-elseif (isset($_POST[$idBook]))
-{
-    $response_code = ($dbManager->restoreSoftDeletedBook($_POST[$idBook])) ? 200 : 404;
-}
-else
-{
+if (isset($_PUT[$idAuthor]) && isset($_PUT[$idBook])) {
+    $response_code = ($dbManager->restoreSoftDeleted($_PUT[$idUser], $_PUT[$idBook])) ? 200 : 404;
+} elseif (isset($_PUT[$idAuthor])) {
+    $response_code = ($dbManager->restoreSoftDeletedAuthor($_PUT[$idAuthor])) ? 200 : 404;
+} elseif (isset($_PUT[$idBook])) {
+    $response_code = ($dbManager->restoreSoftDeletedBook($_PUT[$idBook])) ? 200 : 404;
+} else {
     $response_code = 400;
 }
 

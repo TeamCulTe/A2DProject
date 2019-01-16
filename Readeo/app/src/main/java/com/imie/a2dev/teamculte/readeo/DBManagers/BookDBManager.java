@@ -7,6 +7,9 @@ import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import com.imie.a2dev.teamculte.readeo.APIManager;
+import com.imie.a2dev.teamculte.readeo.DBSchemas.AuthorDBSchema;
+import com.imie.a2dev.teamculte.readeo.DBSchemas.CategoryDBSchema;
+import com.imie.a2dev.teamculte.readeo.DBSchemas.WriterDBSchema;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Book;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -14,45 +17,18 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookDBSchema.ID;
+import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookDBSchema.TABLE;
+import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookDBSchema.TITLE;
+import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookDBSchema.CATEGORY;
+import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookDBSchema.COVER;
+import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookDBSchema.SUMMARY;
+import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookDBSchema.DATE;
+
 /**
  * Manager class used to manage the book entities from databases.
  */
 public final class BookDBManager extends DBManager {
-    /**
-     * Defines the book's table name.
-     */
-    public static final String TABLE = "Book";
-
-    /**
-     * Defines the book's id field.
-     */
-    public static final String ID = "id_book";
-
-    /**
-     * Defines the book's category id field.
-     */
-    public static final String CATEGORY = CategoryDBManager.ID;
-
-    /**
-     * Defines the book's title field.
-     */
-    public static final String TITLE = "title";
-
-    /**
-     * Defines the book's cover field.
-     */
-    public static final String COVER = "cover";
-
-    /**
-     * Defines the book's summary field.
-     */
-    public static final String SUMMARY = "summary";
-
-    /**
-     * Defines the book's date published field.
-     */
-    public static final String DATE = "date_published";
-
     /**
      * Stores the base of the books API url.
      */
@@ -64,6 +40,9 @@ public final class BookDBManager extends DBManager {
      */
     public BookDBManager(Context context) {
         super(context);
+
+        this.table = TABLE;
+        this.ids = new String[]{ID};
     }
 
     /**
@@ -82,7 +61,7 @@ public final class BookDBManager extends DBManager {
             data.put(SUMMARY, entity.getSummary());
             data.put(DATE, entity.getDatePublished());
 
-            DBManager.database.insertOrThrow(TABLE, null, data);
+            DBManager.database.insertOrThrow(this.table, null, data);
 
             return true;
         } catch (SQLiteException e) {
@@ -90,16 +69,6 @@ public final class BookDBManager extends DBManager {
 
             return false;
         }
-    }
-
-    /**
-     * Queries the value of a specific field from a specific id.
-     * @param field The field to access.
-     * @param id The id of the db entity to access.
-     * @return The value of the field.
-     */
-    public String getFieldSQLite(String field, int id) {
-        return this.getFieldSQLite(field, TABLE, ID, id);
     }
 
     /**
@@ -119,7 +88,7 @@ public final class BookDBManager extends DBManager {
             data.put(SUMMARY, entity.getSummary());
             data.put(DATE, entity.getDatePublished());
 
-            return DBManager.database.update(TABLE, data, whereClause, whereArgs) != 0;
+            return DBManager.database.update(this.table, data, whereClause, whereArgs) != 0;
         } catch (SQLiteException e) {
             Log.e(SQLITE_TAG, e.getMessage());
 
@@ -135,7 +104,7 @@ public final class BookDBManager extends DBManager {
     public Book loadSQLite(int id) {
         try {
             String[] selectArgs = {String.valueOf(id)};
-            String query = String.format(SIMPLE_QUERY_ALL, TABLE, ID);
+            String query = String.format(SIMPLE_QUERY_ALL, this.table, ID);
             Cursor result = DBManager.database.rawQuery(query, selectArgs);
 
             return new Book(result);
@@ -147,20 +116,142 @@ public final class BookDBManager extends DBManager {
     }
 
     /**
-     * From an id given in parameter, deletes the associated entity in the database.
-     * @param id The id of the entity to delete.
-     * @return true if success else false.
+     * From a string and a field, returns the associated java books where the string matches in the field values.
+     * @param field The field to filter on.
+     * @param filter The string that should match.
+     * @return The loaded entities if exists else null.
      */
-    public boolean deleteSQLite(int id) {
+    public List<Book> loadFieldFilteredSQLite(String field, String filter) {
         try {
-            String whereClause = String.format("%s = ?", ID);
-            String[] whereArgs = new String[]{String.valueOf(id)};
+            List<Book> books = new ArrayList<>();
+            String[] selectArgs = {filter};
+            String query = String.format(SIMPLE_QUERY_ALL_LIKE_START, this.table, field);
+            Cursor result = DBManager.database.rawQuery(query, selectArgs);
 
-            return DBManager.database.delete(TABLE, whereClause, whereArgs) != 0;
+            while (result.moveToNext()) {
+                books.add(new Book(result));
+            }
+
+            return books;
         } catch (SQLiteException e) {
             Log.e(SQLITE_TAG, e.getMessage());
 
-            return false;
+            return null;
+        }
+    }
+
+    /**
+     * From a string, returns the associated java books where the string matches in the category values.
+     * @param filter The string that should match.
+     * @return The loaded entities if exists else null.
+     */
+    public List<Book> loadCategoryNameFilteredSQLite(String filter) {
+        try {
+            List<Book> books = new ArrayList<>();
+            String[] selectArgs = {filter};
+            String query = String.format("SELECT %s.* FROM %s INNER JOIN %s ON %s.%s = %s.%s WHERE %s LIKE '?%%')",
+                    this.table,
+                    this.table,
+                    CategoryDBSchema.TABLE,
+                    this.table,
+                    CATEGORY,
+                    CategoryDBSchema.TABLE,
+                    ID,
+                    CategoryDBSchema.NAME);
+            Cursor result = DBManager.database.rawQuery(query, selectArgs);
+
+            while (result.moveToNext()) {
+                books.add(new Book(result));
+            }
+
+            return books;
+        } catch (SQLiteException e) {
+            Log.e(SQLITE_TAG, e.getMessage());
+
+            return null;
+        }
+    }
+
+    /**
+     * From a string, returns the associated java books where the string matches in the book writers.
+     * @param filter The string that should match.
+     * @return The loaded entities if exists else null.
+     */
+    public List<Book> loadAuthorNameFilteredSQLite(String filter) {
+        try {
+            List<Book> books = new ArrayList<>();
+            String[] selectArgs = {filter};
+            String query = String.format("SELECT %s.* FROM %s INNER JOIN %s ON %s.%s = %s.%s " +
+                            "INNER JOIN %s ON %s.%s = %s.%s WHERE %s.%s LIKE '?%%'",
+                    this.table,
+                    this.table,
+                    WriterDBSchema.TABLE,
+                    this.table,
+                    ID,
+                    WriterDBSchema.TABLE,
+                    WriterDBSchema.BOOK,
+                    AuthorDBSchema.TABLE,
+                    AuthorDBSchema.TABLE,
+                    AuthorDBSchema.ID,
+                    WriterDBSchema.TABLE,
+                    WriterDBSchema.AUTHOR,
+                    AuthorDBSchema.TABLE,
+                    AuthorDBSchema.NAME);
+            Cursor result = DBManager.database.rawQuery(query, selectArgs);
+
+            while (result.moveToNext()) {
+                books.add(new Book(result));
+            }
+
+            return books;
+        } catch (SQLiteException e) {
+            Log.e(SQLITE_TAG, e.getMessage());
+
+            return null;
+        }
+    }
+
+    /**
+     * From a string filter and a value, returns the associated java books where the value matches in the filter values.
+     * Uses the common filter fields (Author, Category, or inner Book fields).
+     * @param filter The filter to filter on (matching to database inner or joined fields).
+     * @param value The string value that should match.
+     * @return The loaded entities if exists else null.
+     */
+    public List<Book> loadFilteredSQLite(String filter, String value) {
+        switch (filter) {
+            case CategoryDBSchema.NAME:
+                return this.loadCategoryNameFilteredSQLite(value);
+            case AuthorDBSchema.NAME:
+                return this.loadAuthorNameFilteredSQLite(value);
+            default:
+                return this.loadFieldFilteredSQLite(filter, value);
+        }
+    }
+
+    /**
+     * From a category id, returns the associated list of books.
+     * @param idCategory The id of the category to load books from the database.
+     * @return The list of books.
+     */
+    public List<Book> loadCategorySQLite(int idCategory) {
+        try {
+            List<Book> books = new ArrayList<>();
+            String[] selectArgs = {String.valueOf(idCategory)};
+            String query = String.format(SIMPLE_QUERY_ALL, this.table, CATEGORY);
+            Cursor result = DBManager.database.rawQuery(query, selectArgs);
+
+            while (result.moveToNext()) {
+                books.add(new Book(result));
+            }
+
+            result.close();
+
+            return books;
+        } catch (SQLiteException e) {
+            Log.e(SQLITE_TAG, e.getMessage());
+
+            return null;
         }
     }
 
@@ -173,7 +264,7 @@ public final class BookDBManager extends DBManager {
         List<Book> books = new ArrayList<>();
 
         try {
-            Cursor result = DBManager.database.rawQuery(String.format(QUERY_ALL, TABLE), null);
+            Cursor result = DBManager.database.rawQuery(String.format(QUERY_ALL, this.table), null);
 
             if (result.getCount() > 0) {
                 do {
@@ -193,8 +284,8 @@ public final class BookDBManager extends DBManager {
      * From the API, query the list of all books from the MySQL database in order to stores it into the SQLite
      * database.
      */
-    public void importAllFromMySQL() {
-        super.importAllFromMySQL(baseUrl + APIManager.READ);
+    public void importFromMySQL() {
+        super.importFromMySQL(baseUrl + APIManager.READ);
     }
 
     @Override
@@ -208,7 +299,7 @@ public final class BookDBManager extends DBManager {
             data.put(COVER, entity.getString(COVER));
             data.put(SUMMARY, entity.getString(SUMMARY));
             data.put(DATE, entity.getInt(DATE));
-            DBManager.database.insertOrThrow(TABLE, null, data);
+            DBManager.database.insertOrThrow(this.table, null, data);
         } catch (SQLiteException e) {
             Log.e(SQLITE_TAG, e.getMessage());
         } catch (JSONException e) {

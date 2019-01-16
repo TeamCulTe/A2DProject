@@ -14,25 +14,14 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.imie.a2dev.teamculte.readeo.DBSchemas.AuthorDBSchema.TABLE;
+import static com.imie.a2dev.teamculte.readeo.DBSchemas.AuthorDBSchema.ID;
+import static com.imie.a2dev.teamculte.readeo.DBSchemas.AuthorDBSchema.NAME;
+
 /**
  * Manager class used to manage the author entities from databases.
  */
 public final class AuthorDBManager extends DBManager {
-    /**
-     * Defines the author's table name.
-     */
-    public static final String TABLE = "Author";
-
-    /**
-     * Defines the author's id field.
-     */
-    public static final String ID = "id_author";
-
-    /**
-     * Defines the author's name field.
-     */
-    public static final String NAME = "name_author";
-
     /**
      * Stores the base of the authors API url.
      */
@@ -44,6 +33,9 @@ public final class AuthorDBManager extends DBManager {
      */
     public AuthorDBManager(Context context) {
         super(context);
+
+        this.table = TABLE;
+        this.ids = new String[]{ID};
     }
 
     /**
@@ -57,7 +49,7 @@ public final class AuthorDBManager extends DBManager {
 
             data.put(ID, entity.getId());
             data.put(NAME, entity.getName());
-            DBManager.database.insertOrThrow(TABLE, null, data);
+            DBManager.database.insertOrThrow(this.table, null, data);
 
             return true;
         } catch (SQLiteException e) {
@@ -65,16 +57,6 @@ public final class AuthorDBManager extends DBManager {
 
             return false;
         }
-    }
-
-    /**
-     * Queries the value of a specific field from a specific id.
-     * @param field The field to access.
-     * @param id The id of the db entity to access.
-     * @return The value of the field.
-     */
-    public String getFieldSQLite(String field, int id) {
-        return this.getFieldSQLite(field, TABLE, ID, id);
     }
 
     /**
@@ -90,7 +72,7 @@ public final class AuthorDBManager extends DBManager {
 
             data.put(NAME, entity.getName());
 
-            return DBManager.database.update(TABLE, data, whereClause, whereArgs) != 0;
+            return DBManager.database.update(this.table, data, whereClause, whereArgs) != 0;
         } catch (SQLiteException e) {
             Log.e(SQLITE_TAG, e.getMessage());
 
@@ -106,7 +88,7 @@ public final class AuthorDBManager extends DBManager {
     public Author loadSQLite(int id) {
         try {
             String[] selectArgs = {String.valueOf(id)};
-            String query = String.format(SIMPLE_QUERY_ALL, TABLE, ID);
+            String query = String.format(SIMPLE_QUERY_ALL, this.table, ID);
             Cursor result = DBManager.database.rawQuery(query, selectArgs);
 
             return new Author(result);
@@ -118,24 +100,6 @@ public final class AuthorDBManager extends DBManager {
     }
 
     /**
-     * From an id given in parameter, deletes the associated entity in the database.
-     * @param id The id of the entity to delete.
-     * @return true if success else false.
-     */
-    public boolean deleteSQLite(int id) {
-        try {
-            String whereClause = String.format("%s = ?", ID);
-            String[] whereArgs = new String[]{String.valueOf(id)};
-
-            return DBManager.database.delete(TABLE, whereClause, whereArgs) != 0;
-        } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
-
-            return false;
-        }
-    }
-
-    /**
      * Queries all the authors from the database.
      * @return The list of authors.
      */
@@ -143,7 +107,33 @@ public final class AuthorDBManager extends DBManager {
         List<Author> authors = new ArrayList<>();
 
         try {
-            Cursor result = DBManager.database.rawQuery(String.format(QUERY_ALL, TABLE), null);
+            Cursor result = DBManager.database.rawQuery(String.format(QUERY_ALL, this.table), null);
+
+            if (result.getCount() > 0) {
+                do {
+                    authors.add(new Author(result, false));
+                } while (result.moveToNext());
+            }
+
+            result.close();
+        } catch (SQLiteException e) {
+            Log.e(SQLITE_TAG, e.getMessage());
+        }
+
+        return authors;
+    }
+
+    /**
+     * Queries all the authors paginated from the database.
+     * @param start The start index (LIMIT).
+     * @param end The end index (OFFSET).
+     * @return The list of authors.
+     */
+    public List<Author> queryAllPaginatedSQLite(int start, int end) {
+        List<Author> authors = new ArrayList<>();
+
+        try {
+            Cursor result = DBManager.database.rawQuery(String.format(QUERY_ALL_PAGINATED, this.table, start, end), null);
 
             if (result.getCount() > 0) {
                 do {
@@ -163,8 +153,8 @@ public final class AuthorDBManager extends DBManager {
      * From the API, query the list of all authors from the MySQL database in order to stores it into the SQLite
      * database.
      */
-    public void importAllFromMySQL() {
-        super.importAllFromMySQL(baseUrl + APIManager.READ);
+    public void importFromMySQL() {
+        super.importFromMySQL(baseUrl + APIManager.READ);
     }
 
     @Override
@@ -174,7 +164,7 @@ public final class AuthorDBManager extends DBManager {
 
             data.put(ID, entity.getInt(ID));
             data.put(NAME, entity.getString(NAME));
-            DBManager.database.insertOrThrow(TABLE, null, data);
+            DBManager.database.insertOrThrow(this.table, null, data);
         } catch (SQLiteException e) {
             Log.e(SQLITE_TAG, e.getMessage());
         } catch (JSONException e) {

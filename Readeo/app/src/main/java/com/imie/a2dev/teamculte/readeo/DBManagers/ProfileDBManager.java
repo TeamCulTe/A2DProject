@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import com.android.volley.Request;
 import com.android.volley.Response;
 import com.imie.a2dev.teamculte.readeo.APIManager;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Profile;
@@ -15,30 +16,15 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.imie.a2dev.teamculte.readeo.DBSchemas.ProfileDBSchema.AVATAR;
+import static com.imie.a2dev.teamculte.readeo.DBSchemas.ProfileDBSchema.DESCRIPTION;
+import static com.imie.a2dev.teamculte.readeo.DBSchemas.ProfileDBSchema.ID;
+import static com.imie.a2dev.teamculte.readeo.DBSchemas.ProfileDBSchema.TABLE;
+
 /**
  * Manager class used to manage the profile entities from databases.
  */
 public final class ProfileDBManager extends DBManager {
-    /**
-     * Defines the profile's table name.
-     */
-    public static final String TABLE = "Profile";
-
-    /**
-     * Defines the profile's id field.
-     */
-    public static final String ID = "id_profile";
-
-    /**
-     * Defines the profile's avatar field.
-     */
-    public static final String AVATAR = "avatar";
-
-    /**
-     * Defines the profile's description field.
-     */
-    public static final String DESCRIPTION = "description";
-
     /**
      * Stores the base of the profiles API url.
      */
@@ -50,6 +36,9 @@ public final class ProfileDBManager extends DBManager {
      */
     public ProfileDBManager(Context context) {
         super(context);
+
+        this.table = TABLE;
+        this.ids = new String[]{ID};
     }
 
     /**
@@ -64,7 +53,7 @@ public final class ProfileDBManager extends DBManager {
             data.put(ID, entity.getId());
             data.put(AVATAR, entity.getAvatar());
             data.put(DESCRIPTION, entity.getDescription());
-            DBManager.database.insertOrThrow(TABLE, null, data);
+            DBManager.database.insertOrThrow(this.table, null, data);
 
             return true;
         } catch (SQLiteException e) {
@@ -72,16 +61,6 @@ public final class ProfileDBManager extends DBManager {
 
             return false;
         }
-    }
-
-    /**
-     * Queries the value of a specific field from a specific id.
-     * @param field The field to access.
-     * @param id The id of the db entity to access.
-     * @return The value of the field.
-     */
-    public String getFieldSQLite(String field, int id) {
-        return this.getFieldSQLite(field, TABLE, ID, id);
     }
 
     /**
@@ -98,7 +77,7 @@ public final class ProfileDBManager extends DBManager {
             data.put(AVATAR, entity.getAvatar());
             data.put(DESCRIPTION, entity.getDescription());
 
-            return DBManager.database.update(TABLE, data, whereClause, whereArgs) != 0;
+            return DBManager.database.update(this.table, data, whereClause, whereArgs) != 0;
         } catch (SQLiteException e) {
             Log.e(SQLITE_TAG, e.getMessage());
 
@@ -114,7 +93,7 @@ public final class ProfileDBManager extends DBManager {
     public Profile loadSQLite(int id) {
         try {
             String[] selectArgs = {String.valueOf(id)};
-            String query = String.format(SIMPLE_QUERY_ALL, TABLE, ID);
+            String query = String.format(SIMPLE_QUERY_ALL, this.table, ID);
             Cursor result = DBManager.database.rawQuery(query, selectArgs);
 
             return new Profile(result);
@@ -126,24 +105,6 @@ public final class ProfileDBManager extends DBManager {
     }
 
     /**
-     * From an id given in parameter, deletes the associated entity in the database.
-     * @param id The id of the entity to delete.
-     * @return true if success else false.
-     */
-    public boolean deleteSQLite(int id) {
-        try {
-            String whereClause = String.format("%s = ?", ID);
-            String[] whereArgs = new String[]{String.valueOf(id)};
-
-            return DBManager.database.delete(TABLE, whereClause, whereArgs) != 0;
-        } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
-
-            return false;
-        }
-    }
-
-    /**
      * Query all the profiles from the database.
      * @return The list of profiles.
      */
@@ -151,7 +112,7 @@ public final class ProfileDBManager extends DBManager {
         List<Profile> profiles = new ArrayList<>();
 
         try {
-            Cursor result = DBManager.database.rawQuery(String.format(QUERY_ALL, TABLE), null);
+            Cursor result = DBManager.database.rawQuery(String.format(QUERY_ALL, this.table), null);
 
             if (result.getCount() > 0) {
                 do {
@@ -171,8 +132,8 @@ public final class ProfileDBManager extends DBManager {
      * From the API, query the list of all profiles from the MySQL database in order to stores it into the SQLite
      * database.
      */
-    public void importAllFromMySQL() {
-        super.importAllFromMySQL(baseUrl + APIManager.READ);
+    public void importFromMySQL() {
+        super.importFromMySQL(baseUrl + APIManager.READ);
     }
 
     /**
@@ -184,7 +145,7 @@ public final class ProfileDBManager extends DBManager {
                 profile.getAvatar(),
                 profile.getDescription());
 
-        super.requestString(url, null);
+        super.requestString(Request.Method.POST, url, null);
     }
 
     /**
@@ -197,7 +158,7 @@ public final class ProfileDBManager extends DBManager {
                 profile.getAvatar(),
                 profile.getDescription());
 
-        super.requestString(url, null);
+        super.requestString(Request.Method.PUT, url, null);
     }
 
     /**
@@ -211,7 +172,7 @@ public final class ProfileDBManager extends DBManager {
                 id,
                 value);
 
-        super.requestString(url, null);
+        super.requestString(Request.Method.PUT, url, null);
     }
 
     /**
@@ -224,7 +185,7 @@ public final class ProfileDBManager extends DBManager {
 
         String url = String.format(baseUrl + APIManager.READ + ID + "=%s", id);
 
-        super.requestJsonObject(url, new Response.Listener<JSONObject>() {
+        super.requestJsonObject(Request.Method.GET, url, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
                 profile.init(response);
@@ -241,7 +202,7 @@ public final class ProfileDBManager extends DBManager {
     public void deleteMySQL(int id) {
         String url = String.format(baseUrl + APIManager.DELETE + ID + "=%s", id);
 
-        super.requestString(url, null);
+        super.requestString(Request.Method.PUT, url, null);
     }
 
     /**
@@ -251,7 +212,7 @@ public final class ProfileDBManager extends DBManager {
     public void restoreMySQL(int id) {
         String url = String.format(baseUrl + APIManager.RESTORE + ID + "=%s", id);
 
-        super.requestString(url, null);
+        super.requestString(Request.Method.PUT, url, null);
     }
 
     /**
@@ -270,7 +231,7 @@ public final class ProfileDBManager extends DBManager {
             data.put(ID, entity.getInt(ID));
             data.put(AVATAR, entity.getString(AVATAR));
             data.put(DESCRIPTION, entity.getString(DESCRIPTION));
-            DBManager.database.insertOrThrow(TABLE, null, data);
+            DBManager.database.insertOrThrow(this.table, null, data);
         } catch (SQLiteException e) {
             Log.e(SQLITE_TAG, e.getMessage());
         } catch (JSONException e) {

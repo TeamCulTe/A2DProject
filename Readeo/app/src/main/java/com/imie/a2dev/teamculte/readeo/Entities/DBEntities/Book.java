@@ -5,13 +5,13 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.util.Log;
 import com.imie.a2dev.teamculte.readeo.App;
-import com.imie.a2dev.teamculte.readeo.DBManagers.BookDBManager;
-import com.imie.a2dev.teamculte.readeo.DBManagers.BookListTypeDBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.CategoryDBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.DBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.QuoteDBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.ReviewDBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.WriterDBManager;
+import com.imie.a2dev.teamculte.readeo.DBSchemas.BookDBSchema;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -290,13 +290,13 @@ public final class Book extends DBEntity {
 
             Context context = App.getAppContext();
 
-            this.id = result.getInt(result.getColumnIndexOrThrow(BookDBManager.ID));
-            this.title = result.getString(result.getColumnIndexOrThrow(BookDBManager.TITLE));
-            this.cover = result.getString(result.getColumnIndexOrThrow(BookDBManager.COVER));
-            this.summary = result.getString(result.getColumnIndexOrThrow(BookDBManager.SUMMARY));
-            this.datePublished = result.getInt(result.getColumnIndexOrThrow(BookDBManager.DATE));
+            this.id = result.getInt(result.getColumnIndexOrThrow(BookDBSchema.ID));
+            this.title = result.getString(result.getColumnIndexOrThrow(BookDBSchema.TITLE));
+            this.cover = result.getString(result.getColumnIndexOrThrow(BookDBSchema.COVER));
+            this.summary = result.getString(result.getColumnIndexOrThrow(BookDBSchema.SUMMARY));
+            this.datePublished = result.getInt(result.getColumnIndexOrThrow(BookDBSchema.DATE));
             this.category = new CategoryDBManager(context).loadSQLite(result.getInt(result.getColumnIndexOrThrow
-                    (BookDBManager.CATEGORY)));
+                    (BookDBSchema.CATEGORY)));
             this.reviews = new ReviewDBManager(context).loadBookSQLite(this.id);
             this.quotes = new QuoteDBManager(context).loadBookSQLite(this.id);
             this.authors = new WriterDBManager(context).loadSQLiteAuthors(this.id);

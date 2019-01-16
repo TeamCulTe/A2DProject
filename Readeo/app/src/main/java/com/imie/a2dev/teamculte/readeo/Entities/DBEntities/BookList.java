@@ -5,7 +5,7 @@ import android.database.Cursor;
 import android.util.Log;
 import com.imie.a2dev.teamculte.readeo.App;
 import com.imie.a2dev.teamculte.readeo.DBManagers.BookDBManager;
-import com.imie.a2dev.teamculte.readeo.DBManagers.BookListDBManager;
+import com.imie.a2dev.teamculte.readeo.DBSchemas.BookListDBSchema;
 import com.imie.a2dev.teamculte.readeo.DBManagers.BookListTypeDBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.DBManager;
 import org.json.JSONArray;
@@ -64,6 +64,14 @@ public final class BookList extends DBEntity {
     }
 
     /**
+     * BookList's full filled constructor providing all its attributes values from a json object.
+     * @param result The json array.
+     */
+    public BookList(JSONArray result) {
+        this.init(result);
+    }
+
+    /**
      * Gets the type attribute.
      * @return The BookListType value of type attribute.
      */
@@ -111,11 +119,11 @@ public final class BookList extends DBEntity {
             JSONObject first = array.getJSONObject(0);
 
             for (int i = 0; i < array.length(); i++) {
-                this.books.add(bookDBManager.loadSQLite(array.getJSONObject(i).getInt(BookListDBManager.BOOK)));
+                this.books.add(bookDBManager.loadSQLite(array.getJSONObject(i).getInt(BookListDBSchema.BOOK)));
             }
 
-            this.id = first.getInt(BookListDBManager.USER);
-            this.type = new BookListTypeDBManager(App.getAppContext()).loadSQLite(first.getInt(BookListDBManager.TYPE));
+            this.id = first.getInt(BookListDBSchema.USER);
+            this.type = new BookListTypeDBManager(App.getAppContext()).loadSQLite(first.getInt(BookListDBSchema.TYPE));
         } catch (JSONException e) {
             Log.e(DBManager.JSON_TAG, e.getMessage());
         }
