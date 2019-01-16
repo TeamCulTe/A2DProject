@@ -16,17 +16,17 @@ class BookDbManager extends DbManager
     /**
      * Stores the associated database fields.
      */
-    const FIELDS = ["id_book", "id_category", "title", "cover", "summary", "date_published", "deleted"];
+    public const FIELDS = ["id_book", "id_category", "title", "cover", "summary", "date_published", "deleted"];
 
     /**
      * Stores the placeholders for prepared queries.
      */
-    const PLACEHOLDERS = [":idB", ":idC", ":title", ":cover", ":summary", ":date"];
+    public const PLACEHOLDERS = [":idB", ":idC", ":title", ":cover", ":summary", ":date"];
 
     /**
      * Stores the associated table name.
      */
-    const TABLE = "Book";
+    public const TABLE = "Book";
 
     /**
      * Creates a book into the database.
@@ -103,7 +103,7 @@ class BookDbManager extends DbManager
     public function getBookId(string $title, string $date)
     {
         $statement = sprintf("SELECT %s FROM %s WHERE %s = %s AND %s = %s AND deleted = 0",
-            static::FIELDS[0],static::TABLE, static::FIELDS[2], static::PLACEHOLDERS[2], static::FIELDS[5],
+            static::FIELDS[0], static::TABLE, static::FIELDS[2], static::PLACEHOLDERS[2], static::FIELDS[5],
             static::PLACEHOLDERS[5]);
         $req = $this->db->prepare($statement);
 
@@ -223,9 +223,21 @@ class BookDbManager extends DbManager
             static::FIELDS[5], static::TABLE, $limitPlaceholder, $offsetPlaceholder);
         $req = $this->db->prepare($statement);
 
-        $req->bindValue($offsetPlaceholder, ($start - 1), PDO::PARAM_INT);
-        $req->bindValue($limitPlaceholder, ($end - $start + 1), PDO::PARAM_INT);
+        $req->bindValue($offsetPlaceholder, $start, PDO::PARAM_INT);
+        $req->bindValue($limitPlaceholder, $end, PDO::PARAM_INT);
+        $req->execute();
 
+        $response = $req->fetchAll(PDO::FETCH_ASSOC);
+
+        return (!empty($response)) ? json_encode($response) : null;
+    }
+
+    /**
+     * Counts the number of entities in the database.
+     */
+    public function count() {
+        $statement = sprintf("SELECT COUNT(*) as %s FROM %s WHERE deleted = 0", static::COUNT, static::TABLE);
+        $req = $this->db->query($statement);
         $response = $req->fetchAll(PDO::FETCH_ASSOC);
 
         return (!empty($response)) ? json_encode($response) : null;

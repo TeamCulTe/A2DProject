@@ -3,8 +3,10 @@ package com.imie.a2dev.teamculte.readeo.Entities.DBEntities;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.util.Log;
+import com.imie.a2dev.teamculte.readeo.App;
 import com.imie.a2dev.teamculte.readeo.DBManagers.DBManager;
-import com.imie.a2dev.teamculte.readeo.DBManagers.UserDBManager;
+import com.imie.a2dev.teamculte.readeo.DBManagers.ProfileDBManager;
+import com.imie.a2dev.teamculte.readeo.DBSchemas.UserDBSchema;
 
 /**
  * Final class representing a public user of the application (without personal data, book lists and
@@ -109,9 +111,10 @@ public class PublicUser extends DBEntity {
                 result.moveToNext();
             }
 
-            this.id = result.getInt(result.getColumnIndexOrThrow(UserDBManager.ID));
-            this.pseudo = result.getString(result.getColumnIndexOrThrow(UserDBManager.PSEUDO));
-            this.profile = new Profile(result, false);
+            this.id = result.getInt(result.getColumnIndexOrThrow(UserDBSchema.ID));
+            this.pseudo = result.getString(result.getColumnIndexOrThrow(UserDBSchema.PSEUDO));
+            this.profile = new ProfileDBManager(App.getAppContext()).loadSQLite(
+                    result.getInt(result.getColumnIndexOrThrow(UserDBSchema.PROFILE)));
 
             if (close) {
                 result.close();

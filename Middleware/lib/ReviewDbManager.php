@@ -16,17 +16,17 @@ class ReviewDbManager extends DbManager
     /**
      * Stores the associated database fields.
      */
-    const FIELDS = ["id_user", "id_book", "review", "shared", "deleted"];
+    public const FIELDS = ["id_user", "id_book", "review", "shared", "deleted"];
 
     /**
      * Stores the placeholders for prepared queries.
      */
-    const PLACEHOLDERS = [":idU", ":idB", ":review", ":shared"];
+    public const PLACEHOLDERS = [":idU", ":idB", ":review", ":shared"];
 
     /**
      * Stores the associated table name.
      */
-    const TABLE = "Review";
+    public const TABLE = "Review";
 
     /**
      * Creates a review into the database.
@@ -74,6 +74,28 @@ class ReviewDbManager extends DbManager
     }
 
     /**
+     * Gets a shared review written by a specific user for a specific book.
+     * @param int $idUser The id of the user.
+     * @param int $idBook The id of the book.
+     * @return null|string The json response if exists else null.
+     */
+    public function getSharedReview(int $idUser, int $idBook)
+    {
+        $statement = sprintf("SELECT %s FROM %s WHERE %s = 1 AND %s = %s AND %s = %s AND deleted = 0",
+            static::FIELDS[2], static::TABLE, static::FIELDS[3], static::FIELDS[0],
+            static::PLACEHOLDERS[0], static::FIELDS[1], static::PLACEHOLDERS[1]);
+        $req = $this->db->prepare($statement);
+
+        $req->bindValue(static::PLACEHOLDERS[0], $idUser, PDO::PARAM_INT);
+        $req->bindValue(static::PLACEHOLDERS[1], $idBook, PDO::PARAM_INT);
+        $req->execute();
+
+        $response = $req->fetchAll(PDO::FETCH_ASSOC);
+
+        return (!empty($response)) ? json_encode($response) : null;
+    }
+
+    /**
      * Gets the reviews written for a specific book.
      * @param int $idBook The id of the book.
      * @return null|string The json response if exists else null.
@@ -82,6 +104,26 @@ class ReviewDbManager extends DbManager
     {
         $statement = sprintf("SELECT %s, %s, %s FROM %s WHERE %s = %s AND deleted = 0",
             static::FIELDS[0], static::FIELDS[2], static::FIELDS[3], static::TABLE, static::FIELDS[1],
+            static::PLACEHOLDERS[1]);
+        $req = $this->db->prepare($statement);
+
+        $req->bindValue(static::PLACEHOLDERS[1], $idBook, PDO::PARAM_INT);
+        $req->execute();
+
+        $response = $req->fetchAll(PDO::FETCH_ASSOC);
+
+        return (!empty($response)) ? json_encode($response) : null;
+    }
+
+    /**
+     * Gets the reviews written for a specific book.
+     * @param int $idBook The id of the book.
+     * @return null|string The json response if exists else null.
+     */
+    public function getBookSharedReviews(int $idBook)
+    {
+        $statement = sprintf("SELECT %s, %s FROM %s WHERE %s = 1 AND %s = %s AND deleted = 0",
+            static::FIELDS[0], static::FIELDS[2], static::TABLE, static::FIELDS[3], static::FIELDS[1],
             static::PLACEHOLDERS[1]);
         $req = $this->db->prepare($statement);
 
@@ -103,6 +145,26 @@ class ReviewDbManager extends DbManager
         $statement = sprintf("SELECT %s, %s, %s FROM %s WHERE %s = %s AND deleted = 0",
             static::FIELDS[1], static::FIELDS[2], static::FIELDS[3], static::TABLE, static::FIELDS[0],
             static::PLACEHOLDERS[0]);
+        $req = $this->db->prepare($statement);
+
+        $req->bindValue(static::PLACEHOLDERS[0], $idUser, PDO::PARAM_INT);
+        $req->execute();
+
+        $response = $req->fetchAll(PDO::FETCH_ASSOC);
+
+        return (!empty($response)) ? json_encode($response) : null;
+    }
+
+    /**
+     * Gets the shared reviews written by a specific user.
+     * @param int $idUser The id of the book.
+     * @return null|string The json response if exists else null.
+     */
+    public function getUserSharedReviews(int $idUser)
+    {
+        $statement = sprintf("SELECT %s, %s FROM %s WHERE %s = 1 AND %s = %s AND deleted = 0",
+            static::FIELDS[1], static::FIELDS[2], static::TABLE, static::FIELDS[3],
+            static::FIELDS[0], static::PLACEHOLDERS[0]);
         $req = $this->db->prepare($statement);
 
         $req->bindValue(static::PLACEHOLDERS[0], $idUser, PDO::PARAM_INT);
@@ -320,6 +382,20 @@ class ReviewDbManager extends DbManager
     }
 
     /**
+     * Query all shared reviews from database.
+     * @return null|string The json response if found else null.
+     */
+    public function queryAllShared()
+    {
+        $statement = sprintf("SELECT %s, %s, %s FROM %s WHERE %s = 1 AND deleted = 0",
+            static::FIELDS[0], static::FIELDS[1], static::FIELDS[2], static::TABLE, static::FIELDS[3]);
+        $req = $this->db->query($statement);
+        $response = $req->fetchAll(PDO::FETCH_ASSOC);
+
+        return (!empty($response)) ? json_encode($response) : null;
+    }
+
+    /**
      * Query all reviews from database with pagination (number parameters included).
      * @param int $start The start index of the results to get.
      * @param int $end The last index of the results to get.
@@ -337,6 +413,53 @@ class ReviewDbManager extends DbManager
         $req->bindValue($offsetPlaceholder, ($start - 1), PDO::PARAM_INT);
         $req->bindValue($limitPlaceholder, ($end - $start + 1), PDO::PARAM_INT);
 
+        $response = $req->fetchAll(PDO::FETCH_ASSOC);
+
+        return (!empty($response)) ? json_encode($response) : null;
+    }
+
+    /**
+     * Query all shared reviews from database with pagination (number parameters included).
+     * @param int $start The start index of the results to get.
+     * @param int $end The last index of the results to get.
+     * @return null|string The json response if found else null.
+     */
+    public function queryAllSharedPaginated(int $start, int $end)
+    {
+        $offsetPlaceholder = ":startResult";
+        $limitPlaceholder = ":endResult";
+        $statement = sprintf("SELECT %s, %s, %s FROM %s WHERE %s = 1 AND deleted = 0 LIMIT %s OFFSET %s",
+            static::FIELDS[0], static::FIELDS[1], static::FIELDS[2], static::TABLE, static::FIELDS[3],
+            $limitPlaceholder, $offsetPlaceholder);
+        $req = $this->db->prepare($statement);
+
+        $req->bindValue($offsetPlaceholder, $start, PDO::PARAM_INT);
+        $req->bindValue($limitPlaceholder, $end, PDO::PARAM_INT);
+        $req->execute();
+
+        $response = $req->fetchAll(PDO::FETCH_ASSOC);
+
+        return (!empty($response)) ? json_encode($response) : null;
+    }
+
+    /**
+     * Counts the number of entities in the database.
+     */
+    public function count() {
+        $statement = sprintf("SELECT COUNT(*) as %s FROM %s WHERE deleted = 0", static::COUNT, static::TABLE);
+        $req = $this->db->query($statement);
+        $response = $req->fetchAll(PDO::FETCH_ASSOC);
+
+        return (!empty($response)) ? json_encode($response) : null;
+    }
+
+    /**
+     * Counts the number of shared reviews in the database.
+     */
+    public function countShared() {
+        $statement = sprintf("SELECT COUNT(*) as %s FROM %s WHERE deleted = 0 AND %s = 1", static::COUNT,
+            static::TABLE, static::FIELDS[3]);
+        $req = $this->db->query($statement);
         $response = $req->fetchAll(PDO::FETCH_ASSOC);
 
         return (!empty($response)) ? json_encode($response) : null;

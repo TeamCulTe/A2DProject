@@ -8,12 +8,9 @@
 
 require_once "common_header.php";
 
-if (isset($_POST[$avatar]) && isset($_POST[$description]))
-{
+if (isset($_POST[$avatar]) && isset($_POST[$description])) {
     $response_code = ($dbManager->create($_POST[$avatar], $_POST[$description])) ? 201 : 404;
-}
-else
-{
+} else {
     $response_code = 400;
 }
 

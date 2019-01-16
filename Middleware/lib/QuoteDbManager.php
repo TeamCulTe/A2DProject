@@ -16,17 +16,17 @@ class QuoteDbManager extends DbManager
     /**
      * Stores the associated database fields.
      */
-    const FIELDS = ["id_quote", "id_user", "id_book", "quote", "deleted"];
+    public const FIELDS = ["id_quote", "id_user", "id_book", "quote", "deleted"];
 
     /**
      * Stores the placeholders for prepared queries.
      */
-    const PLACEHOLDERS = [":idQ", ":idU", ":idB", ":quote"];
+    public const PLACEHOLDERS = [":idQ", ":idU", ":idB", ":quote"];
 
     /**
      * Stores the associated table name.
      */
-    const TABLE = "Quote";
+    public const TABLE = "Quote";
 
     /**
      * Creates a quote into the database.
@@ -322,9 +322,21 @@ class QuoteDbManager extends DbManager
             $limitPlaceholder, $offsetPlaceholder);
         $req = $this->db->prepare($statement);
 
-        $req->bindValue($offsetPlaceholder, ($start - 1), PDO::PARAM_INT);
-        $req->bindValue($limitPlaceholder, ($end - $start + 1), PDO::PARAM_INT);
+        $req->bindValue($offsetPlaceholder, $start, PDO::PARAM_INT);
+        $req->bindValue($limitPlaceholder, $end, PDO::PARAM_INT);
+        $req->execute();
 
+        $response = $req->fetchAll(PDO::FETCH_ASSOC);
+
+        return (!empty($response)) ? json_encode($response) : null;
+    }
+
+    /**
+     * Counts the number of entities in the database.
+     */
+    public function count() {
+        $statement = sprintf("SELECT COUNT(*) as %s FROM %s WHERE deleted = 0", static::COUNT, static::TABLE);
+        $req = $this->db->query($statement);
         $response = $req->fetchAll(PDO::FETCH_ASSOC);
 
         return (!empty($response)) ? json_encode($response) : null;

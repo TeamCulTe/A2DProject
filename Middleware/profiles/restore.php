@@ -8,12 +8,9 @@
 
 require_once "common_header.php";
 
-if (isset($_POST[$id]))
-{
-    $response_code = ($dbManager->restoreSoftDeleted($_POST[$id])) ? 200 : 404;
-}
-else
-{
+if (isset($_PUT[$id])) {
+    $response_code = ($dbManager->restoreSoftDeleted($_PUT[$id])) ? 200 : 404;
+} else {
     $response_code = 400;
 }
 

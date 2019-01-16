@@ -4,7 +4,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.util.Log;
 import com.imie.a2dev.teamculte.readeo.DBManagers.DBManager;
-import com.imie.a2dev.teamculte.readeo.DBManagers.ProfileDBManager;
+import com.imie.a2dev.teamculte.readeo.DBSchemas.ProfileDBSchema;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -73,6 +73,14 @@ public final class Profile extends DBEntity {
     }
 
     /**
+     * Profile's full filled constructor providing all its attributes values from a json object.
+     * @param result The json object.
+     */
+    public Profile(JSONObject result) {
+        this.init(result);
+    }
+
+    /**
      * Gets the avatar attribute.
      * @return The String value of avatar attribute.
      */
@@ -110,9 +118,9 @@ public final class Profile extends DBEntity {
      */
     public void init(JSONObject object) {
         try {
-            this.setId(object.getInt(ProfileDBManager.ID));
-            this.setAvatar(object.getString(ProfileDBManager.AVATAR));
-            this.setDescription(object.getString(ProfileDBManager.DESCRIPTION));
+            this.id = object.getInt(ProfileDBSchema.ID);
+            this.avatar = object.getString(ProfileDBSchema.AVATAR);
+            this.description = object.getString(ProfileDBSchema.DESCRIPTION);
         } catch (JSONException e) {
             Log.e(DBManager.JSON_TAG, e.getMessage());
         }
@@ -125,9 +133,9 @@ public final class Profile extends DBEntity {
                 result.moveToNext();
             }
 
-            this.id = result.getInt(result.getColumnIndexOrThrow(ProfileDBManager.ID));
-            this.avatar = result.getString(result.getColumnIndexOrThrow(ProfileDBManager.AVATAR));
-            this.description = result.getString(result.getColumnIndexOrThrow(ProfileDBManager.DESCRIPTION));
+            this.id = result.getInt(result.getColumnIndexOrThrow(ProfileDBSchema.ID));
+            this.avatar = result.getString(result.getColumnIndexOrThrow(ProfileDBSchema.AVATAR));
+            this.description = result.getString(result.getColumnIndexOrThrow(ProfileDBSchema.DESCRIPTION));
 
             if (close) {
                 result.close();

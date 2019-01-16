@@ -3,11 +3,12 @@ package com.imie.a2dev.teamculte.readeo.Entities.DBEntities;
 import android.content.Context;
 import android.util.Log;
 import com.imie.a2dev.teamculte.readeo.App;
+import com.imie.a2dev.teamculte.readeo.DBManagers.BookListDBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.CityDBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.CountryDBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.DBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.ReviewDBManager;
-import com.imie.a2dev.teamculte.readeo.DBManagers.UserDBManager;
+import com.imie.a2dev.teamculte.readeo.DBSchemas.UserDBSchema;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -121,6 +122,14 @@ public final class PrivateUser extends PublicUser {
     }
 
     /**
+     * Private user's full filled constructor providing all its attributes values from a json object.
+     * @param result The json object.
+     */
+    public PrivateUser(JSONObject result) {
+        this.init(result);
+    }
+
+    /**
      * Gets the password attribute.
      * @return The String value of password attribute.
      */
@@ -224,14 +233,14 @@ public final class PrivateUser extends PublicUser {
         try {
             Context context = App.getAppContext();
 
-            this.id = object.getInt(UserDBManager.ID);
-            this.pseudo = object.getString(UserDBManager.PSEUDO);
-            this.password = object.getString(UserDBManager.PASSWORD);
-            this.email = object.getString(UserDBManager.EMAIL);
-            this.city = new CityDBManager(context).loadSQLite(object.getInt(UserDBManager.CITY));
-            this.country = new CountryDBManager(context).loadSQLite(object.getInt(UserDBManager.COUNTRY));
+            this.id = object.getInt(UserDBSchema.ID);
+            this.pseudo = object.getString(UserDBSchema.PSEUDO);
+            this.password = object.getString(UserDBSchema.PASSWORD);
+            this.email = object.getString(UserDBSchema.EMAIL);
+            this.city = new CityDBManager(context).loadSQLite(object.getInt(UserDBSchema.CITY));
+            this.country = new CountryDBManager(context).loadSQLite(object.getInt(UserDBSchema.COUNTRY));
             this.reviews = new ReviewDBManager(context).loadUserSQLite(this.id);
-            // TODO : See how to get book lists.
+            this.bookLists = new BookListDBManager(context).loadUserMySQL(this.id);
         } catch (JSONException e) {
             Log.e(DBManager.JSON_TAG, e.getMessage());
         }

@@ -3,8 +3,8 @@ package com.imie.a2dev.teamculte.readeo.Entities.DBEntities;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.util.Log;
-import com.imie.a2dev.teamculte.readeo.DBManagers.CountryDBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.DBManager;
+import com.imie.a2dev.teamculte.readeo.DBSchemas.CountryDBSchema;
 
 /**
  * Final class representing a country from the application.
@@ -74,8 +74,8 @@ public final class Country extends DBEntity {
                 result.moveToNext();
             }
 
-            this.id = result.getInt(result.getColumnIndexOrThrow(CountryDBManager.ID));
-            this.name = result.getString(result.getColumnIndexOrThrow(CountryDBManager.NAME));
+            this.id = result.getInt(result.getColumnIndexOrThrow(CountryDBSchema.ID));
+            this.name = result.getString(result.getColumnIndexOrThrow(CountryDBSchema.NAME));
 
             if (close) {
                 result.close();

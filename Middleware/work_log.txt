@@ -1,9 +1,7 @@
 Methods not tested :
-- queryAll / queryAllPaginated (all classes).
+- queryAllPaginated (all classes).
 - restoreSoftDeleted (all methods and all classes).
 - softDelete (author and book from Review class).
 - delete (author and book from Review class).
-
+- Review xxxShared methods.
 Possible methods to add :
-- pagination for SELECT queries.
-- filters for SELECT queries.

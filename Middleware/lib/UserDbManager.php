@@ -16,17 +16,17 @@ class UserDbManager extends DbManager
     /**
      * Stores the associated database fields.
      */
-    const FIELDS = ["id_user", "pseudo", "password", "email", "id_profile", "id_city", "id_country", "deleted"];
+    public const FIELDS = ["id_user", "pseudo", "password", "email", "id_profile", "id_city", "id_country", "deleted"];
 
     /**
      * Stores the placeholders for prepared queries.
      */
-    const PLACEHOLDERS = [":idU", ":pseudo", ":password", ":email", ":idP", ":idCi", ":idCo"];
+    public const PLACEHOLDERS = [":idU", ":pseudo", ":password", ":email", ":idP", ":idCi", ":idCo"];
 
     /**
      * Stores the associated table name.
      */
-    const TABLE = "User";
+    public const TABLE = "User";
 
     /**
      * Creates a user into the database.
@@ -186,7 +186,7 @@ class UserDbManager extends DbManager
     public function getUserId(string $pseudo)
     {
         $statement = sprintf("SELECT %s FROM %s WHERE %s = %s AND deleted = 0",
-            static::FIELDS[0],static::TABLE, static::FIELDS[1], static::PLACEHOLDERS[1]);
+            static::FIELDS[0], static::TABLE, static::FIELDS[1], static::PLACEHOLDERS[1]);
         $req = $this->db->prepare($statement);
 
         $req->bindValue(static::PLACEHOLDERS[1], $pseudo, PDO::PARAM_STR);
@@ -466,8 +466,9 @@ class UserDbManager extends DbManager
             static::FIELDS[5], static::FIELDS[6], static::TABLE, $limitPlaceholder, $offsetPlaceholder);
         $req = $this->db->prepare($statement);
 
-        $req->bindValue($offsetPlaceholder, ($start - 1), PDO::PARAM_INT);
-        $req->bindValue($limitPlaceholder, ($end - $start + 1), PDO::PARAM_INT);
+        $req->bindValue($offsetPlaceholder, $start, PDO::PARAM_INT);
+        $req->bindValue($limitPlaceholder, $end, PDO::PARAM_INT);
+        $req->execute();
 
         $response = $req->fetchAll(PDO::FETCH_ASSOC);
 
@@ -489,9 +490,21 @@ class UserDbManager extends DbManager
             $offsetPlaceholder);
         $req = $this->db->prepare($statement);
 
-        $req->bindValue($offsetPlaceholder, ($start - 1), PDO::PARAM_INT);
-        $req->bindValue($limitPlaceholder, ($end - $start + 1), PDO::PARAM_INT);
+        $req->bindValue($offsetPlaceholder, $start, PDO::PARAM_INT);
+        $req->bindValue($limitPlaceholder, $end, PDO::PARAM_INT);
+        $req->execute();
 
+        $response = $req->fetchAll(PDO::FETCH_ASSOC);
+
+        return (!empty($response)) ? json_encode($response) : null;
+    }
+
+    /**
+     * Counts the number of entities in the database.
+     */
+    public function count() {
+        $statement = sprintf("SELECT COUNT(*) as %s FROM %s WHERE deleted = 0", static::COUNT, static::TABLE);
+        $req = $this->db->query($statement);
         $response = $req->fetchAll(PDO::FETCH_ASSOC);
 
         return (!empty($response)) ? json_encode($response) : null;

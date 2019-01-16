@@ -3,8 +3,8 @@ package com.imie.a2dev.teamculte.readeo.Entities.DBEntities;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.util.Log;
-import com.imie.a2dev.teamculte.readeo.DBManagers.BookListTypeDBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.DBManager;
+import com.imie.a2dev.teamculte.readeo.DBSchemas.BookListTypeDBSchema;
 
 /**
  * Final class representing a book list type from the application.
@@ -74,8 +74,8 @@ public final class BookListType extends DBEntity {
                 result.moveToNext();
             }
 
-            this.id = result.getInt(result.getColumnIndexOrThrow(BookListTypeDBManager.ID));
-            this.name = result.getString(result.getColumnIndexOrThrow(BookListTypeDBManager.NAME));
+            this.id = result.getInt(result.getColumnIndexOrThrow(BookListTypeDBSchema.ID));
+            this.name = result.getString(result.getColumnIndexOrThrow(BookListTypeDBSchema.NAME));
 
             if (close) {
                 result.close();

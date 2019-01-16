@@ -16,17 +16,17 @@ class WriterDbManager extends DbManager
     /**
      * Stores the associated database fields.
      */
-    const FIELDS = ["id_author", "id_book", "deleted"];
+    public const FIELDS = ["id_author", "id_book", "deleted"];
 
     /**
      * Stores the placeholders for prepared queries.
      */
-    const PLACEHOLDERS = [":idA", ":idB"];
+    public const PLACEHOLDERS = [":idA", ":idB"];
 
     /**
      * Stores the associated table name.
      */
-    const TABLE = "Writer";
+    public const TABLE = "Writer";
 
     /**
      * Creates a writer into the database.
@@ -246,9 +246,20 @@ class WriterDbManager extends DbManager
             $offsetPlaceholder);
         $req = $this->db->prepare($statement);
 
-        $req->bindValue($offsetPlaceholder, ($start - 1), PDO::PARAM_INT);
-        $req->bindValue($limitPlaceholder, ($end - $start + 1), PDO::PARAM_INT);
+        $req->bindValue($offsetPlaceholder, $start, PDO::PARAM_INT);
+        $req->bindValue($limitPlaceholder, $end, PDO::PARAM_INT);
 
+        $response = $req->fetchAll(PDO::FETCH_ASSOC);
+
+        return (!empty($response)) ? json_encode($response) : null;
+    }
+
+    /**
+     * Counts the number of entities in the database.
+     */
+    public function count() {
+        $statement = sprintf("SELECT COUNT(*) as %s FROM %s WHERE deleted = 0", static::COUNT, static::TABLE);
+        $req = $this->db->query($statement);
         $response = $req->fetchAll(PDO::FETCH_ASSOC);
 
         return (!empty($response)) ? json_encode($response) : null;

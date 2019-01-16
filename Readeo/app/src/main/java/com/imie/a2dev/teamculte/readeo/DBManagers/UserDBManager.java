@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import com.android.volley.Request;
 import com.android.volley.Response;
 import com.imie.a2dev.teamculte.readeo.APIManager;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.PrivateUser;
@@ -16,50 +17,19 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.imie.a2dev.teamculte.readeo.DBSchemas.UserDBSchema.CITY;
+import static com.imie.a2dev.teamculte.readeo.DBSchemas.UserDBSchema.COUNTRY;
+import static com.imie.a2dev.teamculte.readeo.DBSchemas.UserDBSchema.EMAIL;
+import static com.imie.a2dev.teamculte.readeo.DBSchemas.UserDBSchema.ID;
+import static com.imie.a2dev.teamculte.readeo.DBSchemas.UserDBSchema.PASSWORD;
+import static com.imie.a2dev.teamculte.readeo.DBSchemas.UserDBSchema.PROFILE;
+import static com.imie.a2dev.teamculte.readeo.DBSchemas.UserDBSchema.PSEUDO;
+import static com.imie.a2dev.teamculte.readeo.DBSchemas.UserDBSchema.TABLE;
+
 /**
  * Manager class used to manage the user entities from databases.
  */
 public final class UserDBManager extends DBManager {
-    /**
-     * Defines the user's table name.
-     */
-    public static final String TABLE = "User";
-
-    /**
-     * Defines the user's id field.
-     */
-    public static final String ID = "id_user";
-
-    /**
-     * Defines the user's pseudo field.
-     */
-    public static final String PSEUDO = "pseudo";
-
-    /**
-     * Defines the user's password field.
-     */
-    public static final String PASSWORD = "password";
-
-    /**
-     * Defines the user's email field.
-     */
-    public static final String EMAIL = "email";
-
-    /**
-     * Defines the user's profile id field.
-     */
-    public static final String PROFILE = ProfileDBManager.ID;
-
-    /**
-     * Defines the user's city id field.
-     */
-    public static final String CITY = "id_city";
-
-    /**
-     * Defines the user's country id field.
-     */
-    public static final String COUNTRY = "id_country";
-
     /**
      * Stores the base of the users API url.
      */
@@ -71,6 +41,9 @@ public final class UserDBManager extends DBManager {
      */
     public UserDBManager(Context context) {
         super(context);
+
+        this.table = TABLE;
+        this.ids = new String[]{ID};
     }
 
     /**
@@ -85,7 +58,7 @@ public final class UserDBManager extends DBManager {
             data.put(ID, entity.getId());
             data.put(PSEUDO, entity.getPseudo());
             data.put(PROFILE, entity.getProfile().getId());
-            DBManager.database.insertOrThrow(TABLE, null, data);
+            DBManager.database.insertOrThrow(this.table, null, data);
 
             return true;
         } catch (SQLiteException e) {
@@ -96,23 +69,13 @@ public final class UserDBManager extends DBManager {
     }
 
     /**
-     * Queries the value of a specific field from a specific id.
-     * @param field The field to access.
-     * @param id The id of the db entity to access.
-     * @return The value of the field.
-     */
-    public String getFieldSQLite(String field, int id) {
-        return this.getFieldSQLite(field, TABLE, ID, id);
-    }
-
-    /**
      * Queries the value of a specific field from a specific pseudo.
      * @param field The field to access.
-     * @param id The pseudo of the db entity to access.
+     * @param pseudo The pseudo of the db entity to access.
      * @return The value of the field.
      */
-    public String getFieldSQLite(String field, String id) {
-        return this.getFieldSQLite(field, TABLE, PSEUDO, id);
+    public String getFieldFromPseudoSQLite(String field, String pseudo) {
+        return this.getFieldSQLite(field, PSEUDO, pseudo);
     }
 
     /**
@@ -121,7 +84,7 @@ public final class UserDBManager extends DBManager {
      * @return The id associated to the pseudo.
      */
     public int SQLiteGetId(String pseudo) {
-        return Integer.valueOf(this.getFieldSQLite(ID, pseudo));
+        return Integer.valueOf(this.getFieldFromPseudoSQLite(ID, pseudo));
     }
 
     /**
@@ -139,7 +102,7 @@ public final class UserDBManager extends DBManager {
             data.put(PSEUDO, entity.getPseudo());
             data.put(PROFILE, entity.getProfile().getId());
 
-            return DBManager.database.update(TABLE, data, whereClause, whereArgs) != 0;
+            return DBManager.database.update(this.table, data, whereClause, whereArgs) != 0;
         } catch (SQLiteException e) {
             Log.e(SQLITE_TAG, e.getMessage());
 
@@ -155,7 +118,7 @@ public final class UserDBManager extends DBManager {
     public PublicUser loadSQLite(int id) {
         try {
             String[] selectArgs = {String.valueOf(id)};
-            String query = String.format(SIMPLE_QUERY_ALL, TABLE, ID);
+            String query = String.format(SIMPLE_QUERY_ALL, this.table, ID);
             Cursor result = DBManager.database.rawQuery(query, selectArgs);
 
             return new PublicUser(result);
@@ -167,20 +130,46 @@ public final class UserDBManager extends DBManager {
     }
 
     /**
-     * From an id given in parameter, deletes the associated entity in the database.
-     * @param id The id of the entity to delete.
-     * @return true if success else false.
+     * From a pseudo, returns the associated java entity.
+     * @param pseudo The pseudo of entity to load from the database.
+     * @return The loaded entity if exists else null.
      */
-    public boolean deleteSQLite(int id) {
+    public PublicUser loadSQLite(String pseudo) {
         try {
-            String whereClause = String.format("%s = ?", ID);
-            String[] whereArgs = new String[]{String.valueOf(id)};
+            String[] selectArgs = {pseudo};
+            String query = String.format(SIMPLE_QUERY_ALL, this.table, PSEUDO);
+            Cursor result = DBManager.database.rawQuery(query, selectArgs);
 
-            return DBManager.database.delete(TABLE, whereClause, whereArgs) != 0;
+            return new PublicUser(result);
         } catch (SQLiteException e) {
             Log.e(SQLITE_TAG, e.getMessage());
 
-            return false;
+            return null;
+        }
+    }
+
+    /**
+     * From a string and a field, returns the associated java entities where the string matches in the field values.
+     * @param field The field to filter on.
+     * @param filter The string contained in the pseudo of the entity to load from the database.
+     * @return The loaded entities if exists else null.
+     */
+    public List<PublicUser> loadFilteredSQLite(String field, String filter) {
+        try {
+            List<PublicUser> users = new ArrayList<>();
+            String[] selectArgs = {filter};
+            String query = String.format(SIMPLE_QUERY_ALL_LIKE_START, this.table, field);
+            Cursor result = DBManager.database.rawQuery(query, selectArgs);
+
+            while (result.moveToNext()) {
+                users.add(new PublicUser(result));
+            }
+
+            return users;
+        } catch (SQLiteException e) {
+            Log.e(SQLITE_TAG, e.getMessage());
+
+            return null;
         }
     }
 
@@ -192,7 +181,7 @@ public final class UserDBManager extends DBManager {
         List<PublicUser> users = new ArrayList<>();
 
         try {
-            Cursor result = DBManager.database.rawQuery(String.format(QUERY_ALL, TABLE), null);
+            Cursor result = DBManager.database.rawQuery(String.format(QUERY_ALL, this.table), null);
 
             if (result.getCount() > 0) {
                 do {
@@ -212,8 +201,8 @@ public final class UserDBManager extends DBManager {
      * From the API, query the list of all public users from the MySQL database in order to stores it into the SQLite
      * database.
      */
-    public void importAllFromMySQL() {
-        super.importAllFromMySQL(this.baseUrl + APIManager.READ + "?public=true");
+    public void importFromMySQL() {
+        super.importFromMySQL(this.baseUrl + APIManager.READ + "?public=true");
     }
 
     /**
@@ -230,7 +219,7 @@ public final class UserDBManager extends DBManager {
                 user.getCity().getId(),
                 user.getCountry().getId());
 
-        super.requestString(url, null);
+        super.requestString(Request.Method.POST, url, null);
     }
 
     /**
@@ -248,7 +237,7 @@ public final class UserDBManager extends DBManager {
                 user.getCity().getId(),
                 user.getCountry().getId());
 
-        super.requestString(url, null);
+        super.requestString(Request.Method.PUT, url, null);
     }
 
     /**
@@ -262,7 +251,7 @@ public final class UserDBManager extends DBManager {
                 id,
                 value);
 
-        super.requestString(url, null);
+        super.requestString(Request.Method.PUT, url, null);
     }
 
     /**
@@ -275,7 +264,7 @@ public final class UserDBManager extends DBManager {
 
         String url = String.format(baseUrl + APIManager.READ + ID + "=%s", idUser);
 
-        super.requestJsonObject(url, new Response.Listener<JSONObject>() {
+        super.requestJsonObject(Request.Method.GET, url, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
                 user.init(response);
@@ -296,7 +285,7 @@ public final class UserDBManager extends DBManager {
 
         String url = String.format(baseUrl + APIManager.READ + EMAIL + "=%s&" + PASSWORD + "=%s", email, password);
 
-        super.requestJsonObject(url, new Response.Listener<JSONObject>() {
+        super.requestJsonObject(Request.Method.GET, url, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
                 user.init(response);
@@ -314,7 +303,7 @@ public final class UserDBManager extends DBManager {
     public void deleteMySQL(String email, String password) {
         String url = String.format(baseUrl + APIManager.DELETE + EMAIL + "=%s&" + PASSWORD + "=%s", email, password);
 
-        super.requestString(url, null);
+        super.requestString(Request.Method.PUT, url, null);
     }
 
     /**
@@ -325,7 +314,7 @@ public final class UserDBManager extends DBManager {
     public void restoreMySQL(String email, String password) {
         String url = String.format(baseUrl + APIManager.RESTORE + EMAIL + "=%s&" + PASSWORD + "=%s", email, password);
 
-        super.requestString(url, null);
+        super.requestString(Request.Method.PUT, url, null);
     }
 
     /**
@@ -335,7 +324,7 @@ public final class UserDBManager extends DBManager {
     public void restoreMySQL(int idUser) {
         String url = String.format(baseUrl + APIManager.RESTORE + ID + "=%s", idUser);
 
-        super.requestString(url, null);
+        super.requestString(Request.Method.PUT, url, null);
     }
 
     /**
@@ -354,7 +343,7 @@ public final class UserDBManager extends DBManager {
             data.put(ID, entity.getInt(ID));
             data.put(PSEUDO, entity.getString(PSEUDO));
             data.put(PROFILE, entity.getInt(PROFILE));
-            DBManager.database.insertOrThrow(TABLE, null, data);
+            DBManager.database.insertOrThrow(this.table, null, data);
         } catch (SQLiteException e) {
             Log.e(SQLITE_TAG, e.getMessage());
         } catch (JSONException e) {

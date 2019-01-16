@@ -8,14 +8,11 @@
 
 require_once "common_header.php";
 
-if (isset($_POST[$idBook]) && isset($_POST[$idCategory]) && isset($_POST[$title]) && isset($_POST[$cover]) &&
-    isset($_POST[$summary]) && isset($_POST[$datePublished]))
-{
-    $response_code = ($dbManager->update($_POST[$idBook], $_POST[$idCategory], $_POST[$title], $_POST[$cover],
-        $_POST[$summary])) ? 201 : 404;
-}
-else
-{
+if (isset($_PUT[$idBook]) && isset($_PUT[$idCategory]) && isset($_PUT[$title]) && isset($_PUT[$cover]) &&
+    isset($_PUT[$summary]) && isset($_PUT[$datePublished])) {
+    $response_code = ($dbManager->update($_PUT[$idBook], $_PUT[$idCategory], $_PUT[$title], $_PUT[$cover],
+        $_PUT[$summary])) ? 201 : 404;
+} else {
     $response_code = 400;
 }
 

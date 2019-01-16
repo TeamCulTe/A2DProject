@@ -5,13 +5,6 @@ from string import ascii_lowercase
 import configparser
 import requests
 
-book_getter = BookGetter("volumes", {"q": ""}, use_default=True)
-db_manager = ReadeoDBManager()
-config = configparser.ConfigParser()
-end_loop = 25
-config_file = "extract.conf"
-
-config.read(config_file)
 
 """
 Updates the config starts indexes.
@@ -25,6 +18,7 @@ def update_indexes(section, new_first_start, new_second_start):
 
     with open(config_file, "w") as conf:
         config.write(conf)
+
 
 """
 Called when an error occurs, displays the message, save the starts indexes and exit.
@@ -40,6 +34,15 @@ def handle_error(exception, section, new_first_start, new_second_start):
     exit(1)
 
 
+book_getter = BookGetter("volumes", {"q": ""}, use_default=True)
+db_manager = ReadeoDBManager()
+config = configparser.ConfigParser()
+end_loop = 25
+config_file = "extract.conf"
+
+config.read(config_file)
+
+
 for elt in ["CONTENT", "AUTHOR", "TITLE", "CATEGORY"]:
     first_start = int(config[elt]["firstLoopStart"])
     second_start = int(config[elt]["secondLoopStart"])
@@ -50,6 +53,8 @@ for elt in ["CONTENT", "AUTHOR", "TITLE", "CATEGORY"]:
     try:
         if elt == "CONTENT":
             for upper in ascii_uppercase[first_start:]:
+                second_start = 0
+
                 for lower in ascii_lowercase[second_start:]:
                     try:
                         book_list = book_getter.query_content_filtered_books("{}{}".format(upper, lower))
@@ -60,7 +65,6 @@ for elt in ["CONTENT", "AUTHOR", "TITLE", "CATEGORY"]:
 
                     second_start += 1
 
-                second_start = 0
                 first_start += 1
             # TODO: SEE IF FIXES SEC UPDATE
             update_indexes(elt, first_start, second_start)
@@ -74,6 +78,8 @@ for elt in ["CONTENT", "AUTHOR", "TITLE", "CATEGORY"]:
             queryFilter = BookGetter.CATEGORY_FILTER
 
         for upper in ascii_uppercase[first_start:]:
+            second_start = 0
+
             for lower in ascii_lowercase[second_start:]:
                 try:
                     book_list = book_getter.query_filtered_books(queryFilter, "{}{}".format(upper, lower))
@@ -84,8 +90,8 @@ for elt in ["CONTENT", "AUTHOR", "TITLE", "CATEGORY"]:
 
                 second_start += 1
 
-            second_start = 0
             first_start += 1
+
     except requests.exceptions.SSLError as e:
         handle_error(e, elt, first_start, second_start)
 

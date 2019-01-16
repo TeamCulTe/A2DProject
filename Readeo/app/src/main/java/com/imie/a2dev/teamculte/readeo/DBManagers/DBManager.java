@@ -13,6 +13,17 @@ import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.imie.a2dev.teamculte.readeo.App;
+import com.imie.a2dev.teamculte.readeo.DBSchemas.AuthorDBSchema;
+import com.imie.a2dev.teamculte.readeo.DBSchemas.BookDBSchema;
+import com.imie.a2dev.teamculte.readeo.DBSchemas.BookListTypeDBSchema;
+import com.imie.a2dev.teamculte.readeo.DBSchemas.CategoryDBSchema;
+import com.imie.a2dev.teamculte.readeo.DBSchemas.CityDBSchema;
+import com.imie.a2dev.teamculte.readeo.DBSchemas.CountryDBSchema;
+import com.imie.a2dev.teamculte.readeo.DBSchemas.ProfileDBSchema;
+import com.imie.a2dev.teamculte.readeo.DBSchemas.QuoteDBSchema;
+import com.imie.a2dev.teamculte.readeo.DBSchemas.ReviewDBSchema;
+import com.imie.a2dev.teamculte.readeo.DBSchemas.UserDBSchema;
+import com.imie.a2dev.teamculte.readeo.DBSchemas.WriterDBSchema;
 import com.imie.a2dev.teamculte.readeo.HTTPRequestQueueSingleton;
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -57,9 +68,19 @@ public abstract class DBManager {
     protected final static String QUERY_ALL = "SELECT * FROM %s";
 
     /**
+     * Defines the default all fields database query with paginated results.
+     */
+    protected final static String QUERY_ALL_PAGINATED = "SELECT * FROM %s LIMIT %s OFFSET %s";
+
+    /**
      * Defines the default all fields database query with a simple where clause.
      */
     protected final static String SIMPLE_QUERY_ALL = "SELECT * FROM %s WHERE %s = ?";
+
+    /**
+     * Defines the default all fields database query with a simple where - like (from start) clause.
+     */
+    protected final static String SIMPLE_QUERY_ALL_LIKE_START = "SELECT * FROM %s WHERE %s LIKE '?%%'";
 
     /**
      * Defines the default field database query with a simple where clause.
@@ -76,10 +97,32 @@ public abstract class DBManager {
      */
     protected final static String DOUBLE_QUERY_ALL = "SELECT * FROM %s WHERE %s = ? AND %s = ?";
 
+    // Other attributes
+
+    /**
+     * Defines the count param and json value from MySQL query alias.
+     */
+    protected static final String COUNT = "count";
+
+    /**
+     * Defines the default pagination results.
+     */
+    protected static final int PAGINATION = 2000;
+
     /**
      * Stores the managers database in order to manage.
      */
     protected static SQLiteDatabase database;
+
+    /**
+     * Stores the DBManager's managed table.
+     */
+    protected String table;
+
+    /**
+     * Stores the DBManager's managed entities id.
+     */
+    protected String[] ids;
 
     /**
      * Stores the associated context in order to use other managers from managers classes.
@@ -103,13 +146,6 @@ public abstract class DBManager {
     }
 
     /**
-     * Overriding destructor in order to close the database object.
-     */
-    public void finalize() {
-        this.close();
-    }
-
-    /**
      * Gets the database attribute.
      * @return The SQLiteDatabase value of database attribute.
      */
@@ -121,7 +157,7 @@ public abstract class DBManager {
      * Gets the handler attribute.
      * @return The DBHandler value of handler attribute.
      */
-    public DBHandler getHandler() {
+    public final DBHandler getHandler() {
         return this.handler;
     }
 
@@ -129,7 +165,7 @@ public abstract class DBManager {
      * Gets the context attribute.
      * @return The Context value of context attribute.
      */
-    public Context getContext() {
+    public final Context getContext() {
         return this.context;
     }
 
@@ -137,7 +173,7 @@ public abstract class DBManager {
      * Sets the handler attribute.
      * @param newHandler The new DBHandler value to set.
      */
-    public void setHandler(DBHandler newHandler) {
+    public final void setHandler(DBHandler newHandler) {
         this.handler = newHandler;
     }
 
@@ -145,22 +181,197 @@ public abstract class DBManager {
      * Sets the context attribute.
      * @param newContext The new Context value to set.
      */
-    public void setContext(Context newContext) {
+    public final void setContext(Context newContext) {
         this.context = newContext;
+    }
+
+    /**
+     * Queries the number of entries for a specific table.
+     * @return The number of entries or -1 if an error occurred.
+     */
+    public final int countSQLite() {
+        try {
+            String[] selectArgs = {};
+            String query = String.format("SELECT COUNT(*) as %s FROM %s", COUNT, this.table);
+            Cursor result = DBManager.database.rawQuery(query, selectArgs);
+
+            result.moveToNext();
+
+            int count = result.getInt(result.getColumnIndexOrThrow(COUNT));
+
+            result.close();
+
+            return count;
+        } catch (SQLiteException e) {
+            Log.e(SQLITE_TAG, e.getMessage());
+
+            return -1;
+        }
     }
 
     /**
      * Queries the value of a specific field from a specific id.
      * @param field The field to access.
-     * @param table The concerned database table.
+     * @param id The id of the db entity to access.
+     * @return The value of the field.
+     */
+    public String getFieldSQLite(String field, int id) {
+        return this.getFieldSQLite(field, this.ids[0], String.valueOf(id));
+    }
+
+    /**
+     * From an id given in parameter, deletes the associated entity in the database.
+     * @param id The id of the entity to delete.
+     * @return true if success else false.
+     */
+    public boolean deleteSQLite(int id) {
+        try {
+            String whereClause = String.format("%s = ?", this.ids[0]);
+            String[] whereArgs = new String[]{String.valueOf(id)};
+
+            return DBManager.database.delete(this.table, whereClause, whereArgs) != 0;
+        } catch (SQLiteException e) {
+            Log.e(SQLITE_TAG, e.getMessage());
+
+            return false;
+        }
+    }
+
+    /**
+     * From the API, query the list of entities (depending on the url) from the MySQL database in order to stores it
+     * into the SQLite database.
+     * @param url The url to request.
+     */
+    public final void importFromMySQL(String url) {
+        this.requestJsonArray(Request.Method.GET, url, new Response.Listener<JSONArray>() {
+            @Override
+            public void onResponse(JSONArray response) {
+                for (int i = 0; i < response.length(); i++) {
+                    try {
+                        DBManager.this.createSQLite(response.getJSONObject(i));
+                    } catch (JSONException e) {
+                        Log.e(JSON_TAG, e.getMessage());
+                    }
+                }
+
+                HTTPRequestQueueSingleton.getInstance(DBManager.this.context).finishRequest();
+            }
+        });
+    }
+
+    /**
+     * From the API, query the list of all entities from the MySQL database with pagination in order to stores it into
+     * the SQLite database.
+     * @param url The url to request.
+     */
+    public final void importPaginatedFromMySQL(final String url) {
+        final Integer[] max = new Integer[1];
+        final Integer[] indexes = new Integer[]{0, 0};
+
+        this.requestJsonArray(Request.Method.GET, url + "?" + COUNT, new Response.Listener<JSONArray>() {
+            @Override
+            public void onResponse(JSONArray response) {
+                try {
+                    max[0] = response.getJSONObject(0).getInt(COUNT);
+                    indexes[1] = (max[0] > PAGINATION) ? PAGINATION : max[0];
+
+                    while (!indexes[0].equals(max[0])) {
+                        DBManager.this.importFromMySQL(String.format("%s?start=%s&end=%s", url, indexes[0], indexes[1]));
+                        DBManager.this.updateIndexes(indexes, max[0]);
+                    }
+                } catch (JSONException e) {
+                    Log.e(JSON_TAG, e.getMessage());
+                }
+            }
+        });
+    }
+
+    /**
+     * Imports all the MySQL database into the SQLite one.
+     */
+    public static void importMySQLDatabase() {
+        Context context = App.getAppContext();
+
+        new AuthorDBManager(context).importFromMySQL();
+        new CategoryDBManager(context).importFromMySQL();
+        new CityDBManager(context).importFromMySQL();
+        new CountryDBManager(context).importFromMySQL();
+        new BookListTypeDBManager(context).importFromMySQL();
+        new ProfileDBManager(context).importFromMySQL();
+        new BookDBManager(context).importFromMySQL();
+        new UserDBManager(context).importFromMySQL();
+        new QuoteDBManager(context).importFromMySQL();
+        new ReviewDBManager(context).importFromMySQL();
+        new WriterDBManager(context).importFromMySQL();
+    }
+
+    /**
+     * Imports all the MySQL table into the SQLite one.
+     */
+    public static void importMySQLTable(String table) {
+        Context context = App.getAppContext();
+
+        switch (table) {
+            case AuthorDBSchema.TABLE:
+                new AuthorDBManager(context).importFromMySQL();
+
+                break;
+            case CategoryDBSchema.TABLE:
+                new CategoryDBManager(context).importFromMySQL();
+
+                break;
+            case CityDBSchema.TABLE:
+                new CityDBManager(context).importFromMySQL();
+
+                break;
+            case CountryDBSchema.TABLE:
+                new CountryDBManager(context).importFromMySQL();
+
+                break;
+            case BookListTypeDBSchema.TABLE:
+                new BookListTypeDBManager(context).importFromMySQL();
+
+                break;
+            case ProfileDBSchema.TABLE:
+                new ProfileDBManager(context).importFromMySQL();
+
+                break;
+            case BookDBSchema.TABLE:
+                new BookDBManager(context).importFromMySQL();
+
+                break;
+            case UserDBSchema.TABLE:
+                new UserDBManager(context).importFromMySQL();
+
+                break;
+            case QuoteDBSchema.TABLE:
+                new QuoteDBManager(context).importFromMySQL();
+
+                break;
+            case ReviewDBSchema.TABLE:
+                new ReviewDBManager(context).importFromMySQL();
+
+                break;
+            case WriterDBSchema.TABLE:
+                new WriterDBManager(context).importFromMySQL();
+
+                break;
+            default:
+                break;
+        }
+    }
+
+    /**
+     * Queries the value of a specific field from a specific id.
+     * @param field The field to access.
      * @param filter The name of the column to filter on.
      * @param filterValue The value to filter on.
      * @return The value of the field.
      */
-    public String getFieldSQLite(String field, String table, String filter, String filterValue) {
+    protected final String getFieldSQLite(String field, String filter, String filterValue) {
         try {
             String[] selectArgs = {filterValue};
-            String query = String.format(SIMPLE_QUERY_FIELD, field, table, filter);
+            String query = String.format(SIMPLE_QUERY_FIELD, field, this.table, filter);
             Cursor result = DBManager.database.rawQuery(query, selectArgs);
 
             result.moveToNext();
@@ -178,66 +389,14 @@ public abstract class DBManager {
     }
 
     /**
-     * Queries the value of a specific field from a specific id.
-     * @param field The field to access.
-     * @param table The concerned database table.
-     * @param idColumn The name of the id column to filter on.
-     * @param id The id of the db entity to access.
-     * @return The value of the field.
-     */
-    public String getFieldSQLite(String field, String table, String idColumn, int id) {
-        return this.getFieldSQLite(field, table, idColumn, String.valueOf(id));
-    }
-
-    /**
-     * From the API, query the list of all entities from the MySQL database in order to stores it into the SQLite
-     * database.
-     * @param url The url to request.
-     */
-    public void importAllFromMySQL(String url) {
-        this.requestJsonArray(url, new Response.Listener<JSONArray>() {
-            @Override
-            public void onResponse(JSONArray response) {
-                for (int i = 0; i < response.length(); i++) {
-                    try {
-                        DBManager.this.createSQLite(response.getJSONObject(i));
-                    } catch (JSONException e) {
-                        Log.e(JSON_TAG, e.getMessage());
-                    }
-                }
-
-                HTTPRequestQueueSingleton.getInstance(DBManager.this.context).finishRequest();
-            }
-        });
-    }
-
-    /**
-     * Imports all the MySQL database into the SQLite one.
-     */
-    public static void importMySQLDatabase() {
-        Context context = App.getAppContext();
-
-        new AuthorDBManager(context).importAllFromMySQL();
-        new CategoryDBManager(context).importAllFromMySQL();
-        new CityDBManager(context).importAllFromMySQL();
-        new CountryDBManager(context).importAllFromMySQL();
-        new BookListTypeDBManager(context).importAllFromMySQL();
-        new ProfileDBManager(context).importAllFromMySQL();
-        new BookDBManager(context).importAllFromMySQL();
-        new UserDBManager(context).importAllFromMySQL();
-        new QuoteDBManager(context).importAllFromMySQL();
-        new ReviewDBManager(context).importAllFromMySQL();
-        new WriterDBManager(context).importAllFromMySQL();
-    }
-
-    /**
      * Adds a JsonArray HTTP request to the queue.
+     * @param method The method to use (POST, GET, PUT...).
      * @param url The url to request.
      * @param successListener The instance implementing response listener in order to call the associated callback
      * function.
      */
-    protected void requestJsonArray(String url, Response.Listener<JSONArray> successListener) {
-        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(Request.Method.POST,
+    protected final void requestJsonArray(int method, String url, Response.Listener<JSONArray> successListener) {
+        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(method,
                 url,
                 null,
                 successListener,
@@ -248,12 +407,13 @@ public abstract class DBManager {
 
     /**
      * Adds a JsonObject HTTP request to the queue.
+     * @param method The method to use (POST, GET, PUT...).
      * @param url The url to request.
      * @param successListener The instance implementing response listener in order to call the associated callback
      * function.
      */
-    protected void requestJsonObject(String url, Response.Listener<JSONObject> successListener) {
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(Request.Method.POST,
+    protected final void requestJsonObject(int method, String url, Response.Listener<JSONObject> successListener) {
+        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(method,
                 url,
                 null,
                 successListener,
@@ -264,24 +424,15 @@ public abstract class DBManager {
 
     /**
      * Adds a String HTTP request to the queue.
+     * @param method The method to use (POST, GET, PUT...).
      * @param url The url to request.
      * @param successListener The instance implementing response listener in order to call the associated callback
      * function.
      */
-    protected void requestString(String url, Response.Listener<String> successListener) {
-        StringRequest stringRequest = new StringRequest(Request.Method.POST, url, successListener, new OnRequestError());
+    protected final void requestString(int method, String url, Response.Listener<String> successListener) {
+        StringRequest stringRequest = new StringRequest(method, url, successListener, new OnRequestError());
 
         HTTPRequestQueueSingleton.getInstance(this.context).addToRequestQueue(stringRequest);
-    }
-
-    /**
-     * Inner class used to manage HTTP request errors while contacting the API.
-     */
-    protected class OnRequestError implements Response.ErrorListener {
-        @Override
-        public void onErrorResponse(VolleyError error) {
-            Log.e(SERVER_TAG, error.getMessage());
-        }
     }
 
     /**
@@ -300,9 +451,32 @@ public abstract class DBManager {
     }
 
     /**
+     * Updates the indexes depending on the max result number.
+     * @param maxIndex The max results number.
+     */
+    private void updateIndexes(Integer cursorIndexes[], int maxIndex) {
+        if (cursorIndexes.length != 2) {
+            return;
+        }
+
+        cursorIndexes[0] = cursorIndexes[1];
+        cursorIndexes[1] = (cursorIndexes[1] + PAGINATION > maxIndex) ? maxIndex : cursorIndexes[1] + PAGINATION;
+    }
+
+    /**
      * Closes the database.
      */
     private void close() {
         this.handler.close();
+    }
+
+    /**
+     * Inner class used to manage HTTP request errors while contacting the API.
+     */
+    protected final class OnRequestError implements Response.ErrorListener {
+        @Override
+        public void onErrorResponse(VolleyError error) {
+            Log.e(SERVER_TAG, error.getMessage());
+        }
     }
 }

@@ -16,17 +16,17 @@ class CountryDbManager extends DbManager
     /**
      * Stores the associated database fields.
      */
-    const FIELDS = ["id_country", "name_country", "deleted"];
+    public const FIELDS = ["id_country", "name_country", "deleted"];
 
     /**
      * Stores the placeholders for prepared queries.
      */
-    const PLACEHOLDERS = [":idCo", ":nameCo"];
+    public const PLACEHOLDERS = [":idCo", ":nameCo"];
 
     /**
      * Stores the associated table name.
      */
-    const TABLE = "Country";
+    public const TABLE = "Country";
 
     /**
      * Creates a country in the database.
@@ -45,10 +45,10 @@ class CountryDbManager extends DbManager
     }
 
     /**
- * Gets the country associated to the id given in parameter.
- * @param int $id The id of the country to get.
- * @return null|string The json response if exists else null.
- */
+     * Gets the country associated to the id given in parameter.
+     * @param int $id The id of the country to get.
+     * @return null|string The json response if exists else null.
+     */
     public function getCountry(int $id)
     {
         $statement = sprintf("SELECT %s FROM %s WHERE %s = %s AND deleted = 0",
@@ -177,9 +177,21 @@ class CountryDbManager extends DbManager
             $offsetPlaceholder);
         $req = $this->db->prepare($statement);
 
-        $req->bindValue($offsetPlaceholder, ($start - 1), PDO::PARAM_INT);
-        $req->bindValue($limitPlaceholder, ($end - $start + 1), PDO::PARAM_INT);
+        $req->bindValue($offsetPlaceholder, $start, PDO::PARAM_INT);
+        $req->bindValue($limitPlaceholder, $end, PDO::PARAM_INT);
+        $req->execute();
 
+        $response = $req->fetchAll(PDO::FETCH_ASSOC);
+
+        return (!empty($response)) ? json_encode($response) : null;
+    }
+
+    /**
+     * Counts the number of entities in the database.
+     */
+    public function count() {
+        $statement = sprintf("SELECT COUNT(*) as %s FROM %s WHERE deleted = 0", static::COUNT, static::TABLE);
+        $req = $this->db->query($statement);
         $response = $req->fetchAll(PDO::FETCH_ASSOC);
 
         return (!empty($response)) ? json_encode($response) : null;
