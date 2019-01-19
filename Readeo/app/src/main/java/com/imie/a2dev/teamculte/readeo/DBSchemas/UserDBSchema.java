@@ -54,13 +54,15 @@ public abstract class UserDBSchema {
      * Defines the user create table statement.
      */
     public static final String USER_TABLE_STATEMENT = String.format("CREATE TABLE IF NOT EXISTS %s (%s INTEGER " +
-                    "PRIMARY KEY, %s TEXT(%s) UNIQUE NOT NULL, %s INTEGER NOT NULL, CONSTRAINT User_Profile_FK " +
-                    "FOREIGN KEY (%s) REFERENCES Profile(%s));",
+                    "PRIMARY KEY, %s TEXT(%s) UNIQUE NOT NULL, %s INTEGER NOT NULL, %s DATETIME NOT NULL DEFAULT %s, " +
+                    "CONSTRAINT User_Profile_FK FOREIGN KEY (%s) REFERENCES Profile(%s));",
             UserDBSchema.TABLE,
             UserDBSchema.ID,
             UserDBSchema.PSEUDO,
             PSEUDO_SIZE,
             UserDBSchema.PROFILE,
+            CommonDBSchema.UPDATE,
+            CommonDBSchema.UPDATE_DEFAULT,
             UserDBSchema.PROFILE,
             ProfileDBSchema.ID);
 

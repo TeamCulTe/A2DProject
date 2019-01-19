@@ -2,18 +2,23 @@ package com.imie.a2dev.teamculte.readeo.Entities.DBEntities;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import com.imie.a2dev.teamculte.readeo.App;
 import com.imie.a2dev.teamculte.readeo.DBManagers.DBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.UserDBManager;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.QuoteDBSchema;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.UserDBSchema;
+import lombok.Getter;
+import lombok.Setter;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
  * Final class representing a quote from a user to a specific book.
  */
+@Getter
+@Setter
 public final class Quote extends DBEntity {
     /**
      * Stores the pseudo of the user who wrote the quote.
@@ -92,58 +97,10 @@ public final class Quote extends DBEntity {
     }
 
     /**
-     * Gets the author attribute.
-     * @return The String value of author attribute.
-     */
-    public String getAuthor() {
-        return this.author;
-    }
-
-    /**
-     * Gets the bookId attribute.
-     * @return The int value of bookId attribute.
-     */
-    public int getBookId() {
-        return this.bookId;
-    }
-
-    /**
-     * Gets the quote attribute.
-     * @return The String value of quote attribute.
-     */
-    public String getQuote() {
-        return this.quote;
-    }
-
-    /**
-     * Sets the author attribute.
-     * @param newAuthor The new String value to set.
-     */
-    public void setAuthor(String newAuthor) {
-        this.author = newAuthor;
-    }
-
-    /**
-     * Sets the bookId attribute.
-     * @param newBookId The new int value to set.
-     */
-    public void setBookId(int newBookId) {
-        this.bookId = newBookId;
-    }
-
-    /**
-     * Sets the quote attribute.
-     * @param newQuote The new String value to set.
-     */
-    public void setQuote(String newQuote) {
-        this.quote = newQuote;
-    }
-
-    /**
      * Initializes the quote from a JSON response object.
      * @param object The JSON response from the API.
      */
-    public void init(JSONObject object) {
+    public void init(@NonNull JSONObject object) {
         try {
             this.id = object.getInt(QuoteDBSchema.ID);
             this.bookId = object.getInt(QuoteDBSchema.BOOK);
@@ -156,7 +113,7 @@ public final class Quote extends DBEntity {
     }
 
     @Override
-    protected void init(Cursor result, boolean close) {
+    protected void init(@NonNull Cursor result, boolean close) {
         try {
             if (result.getPosition() == -1) {
                 result.moveToNext();

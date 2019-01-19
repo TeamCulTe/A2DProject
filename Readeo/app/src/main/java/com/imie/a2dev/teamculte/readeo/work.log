@@ -1,0 +1,3 @@
+TODO :
+Review BookDBManager's methods -> Better performances.
+Review API / Read methods in order to get only the needed fields.

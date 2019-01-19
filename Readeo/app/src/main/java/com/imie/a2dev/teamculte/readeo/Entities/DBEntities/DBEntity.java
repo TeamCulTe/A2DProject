@@ -1,10 +1,14 @@
 package com.imie.a2dev.teamculte.readeo.Entities.DBEntities;
 
 import android.database.Cursor;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Abstract class defining the base attributes of the database entities classes.
  */
+@Getter
+@Setter
 public abstract class DBEntity {
     /**
      * Stores the database identifier.
@@ -24,22 +28,6 @@ public abstract class DBEntity {
      */
     protected DBEntity(int id) {
         this.id = id;
-    }
-
-    /**
-     * Gets the id attribute.
-     * @return The int value of id attribute.
-     */
-    public final int getId() {
-        return this.id;
-    }
-
-    /**
-     * Sets the id attribute.
-     * @param newId The new int value to set.
-     */
-    public final void setId(int newId) {
-        this.id = newId;
     }
 
     /**

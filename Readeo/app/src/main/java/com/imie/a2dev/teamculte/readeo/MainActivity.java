@@ -68,18 +68,18 @@ public class MainActivity extends AppCompatActivity implements HTTPRequestQueueS
         Quote quote = new Quote();
         Review review = new Review();
 
-//        DBManager.importMySQLDatabase();
+        DBManager.importMySQLDatabase();
 
-        List<Author> authors = authorDBManager.queryAllSQLite();
-        List<Category> categories = categoryDBManager.queryAllSQLite();
-        List<City> cities = cityDBManager.queryAllSQLite();
-        List<Country> countries = countryDBManager.queryAllSQLite();
-        List<Profile> profiles = profileDBManager.queryAllSQLite();
-        List<Book> books = bookDBManager.queryAllSQLite();
-        List<BookListType> bookListTypes = bookListTypeDBManager.queryAllSQLite();
-        List<PublicUser> publicUsers = userDBManager.queryAllSQLite();
-        List<Quote> quotes = quoteDBManager.queryAllSQLite();
-        List<Review> reviews = reviewDBManager.queryAllSQLite();
+//        List<Author> authors = authorDBManager.queryAllSQLite();
+//        List<Category> categories = categoryDBManager.queryAllSQLite();
+//        List<City> cities = cityDBManager.queryAllSQLite();
+//        List<Country> countries = countryDBManager.queryAllSQLite();
+//        List<Profile> profiles = profileDBManager.queryAllSQLite();
+//        List<Book> books = bookDBManager.queryAllSQLite();
+//        List<BookListType> bookListTypes = bookListTypeDBManager.queryAllSQLite();
+//        List<PublicUser> publicUsers = userDBManager.queryAllSQLite();
+//        List<Quote> quotes = quoteDBManager.queryAllSQLite();
+//        List<Review> reviews = reviewDBManager.queryAllSQLite();
 
         HTTPRequestQueueSingleton r = HTTPRequestQueueSingleton.getInstance(this);
         r.setListener(this);

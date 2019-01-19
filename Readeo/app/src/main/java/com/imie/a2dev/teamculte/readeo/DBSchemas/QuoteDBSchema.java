@@ -34,14 +34,16 @@ public abstract class QuoteDBSchema {
      * Defines the quote create table statement.
      */
     public static final String QUOTE_TABLE_STATEMENT = String.format("CREATE TABLE IF NOT EXISTS %s (%s INTEGER " +
-                    "PRIMARY KEY, %s INTEGER NOT NULL, %s INTEGER NOT NULL, %s TEXT NOT NULL, CONSTRAINT " +
-                    "Quote_User_FK FOREIGN KEY (%s) REFERENCES User(%s), CONSTRAINT Quote_Book_FK FOREIGN KEY (%s) " +
-                    "REFERENCES Book(%s));",
+                    "PRIMARY KEY, %s INTEGER NOT NULL, %s INTEGER NOT NULL, %s TEXT NOT NULL, %s DATETIME NOT NULL " +
+                    "DEFAULT %s, CONSTRAINT Quote_User_FK FOREIGN KEY (%s) REFERENCES User(%s), " +
+                    "CONSTRAINT Quote_Book_FK FOREIGN KEY (%s) REFERENCES Book(%s));",
             QuoteDBSchema.TABLE,
             QuoteDBSchema.ID,
             QuoteDBSchema.USER,
             QuoteDBSchema.BOOK,
             QuoteDBSchema.QUOTE,
+            CommonDBSchema.UPDATE,
+            CommonDBSchema.UPDATE_DEFAULT,
             QuoteDBSchema.USER,
             UserDBSchema.ID,
             QuoteDBSchema.BOOK,
