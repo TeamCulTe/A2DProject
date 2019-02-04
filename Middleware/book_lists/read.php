@@ -8,7 +8,9 @@
 
 require_once "common_header.php";
 
-if (isset($_GET[$idUser]) && isset($_GET[$idBookListType])) {
+if (isset($_GET[$updateQuery])) {
+    $response = $dbManager->queryUpdateFields();
+} elseif (isset($_GET[$idUser]) && isset($_GET[$idBookListType])) {
     $response = $dbManager->getBookList($_GET[$idUser], $_GET[$idBookListType]);
 } elseif (isset($_GET[$idUser])) {
     $response = $dbManager->getBookListTypeId($_GET[$idUser]);

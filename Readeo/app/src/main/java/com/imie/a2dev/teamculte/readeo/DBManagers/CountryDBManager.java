@@ -12,8 +12,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
+import static com.imie.a2dev.teamculte.readeo.DBSchemas.CommonDBSchema.UPDATE;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.CountryDBSchema.ID;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.CountryDBSchema.NAME;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.CountryDBSchema.TABLE;
@@ -71,6 +73,7 @@ public final class CountryDBManager extends DBManager {
             String[] whereArgs = new String[]{String.valueOf(entity.getId())};
 
             data.put(NAME, entity.getName());
+            data.put(UPDATE, new Date().toString());
 
             return DBManager.database.update(this.table, data, whereClause, whereArgs) != 0;
         } catch (SQLiteException e) {

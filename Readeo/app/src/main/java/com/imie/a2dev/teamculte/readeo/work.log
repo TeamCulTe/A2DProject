@@ -1,3 +1,12 @@
 TODO :
 Review BookDBManager's methods -> Better performances.
 Review API / Read methods in order to get only the needed fields.
+Use last update field in order to update sqlite database values from distant database.
+See if excluding the last update fetching in every manager classes (QUERY_ALL).
+
+Update steps :
+    1 - DBManager queries the list of id/update from MySQL db.
+    2 - Do the same for the SQLite db.
+    3 - Browse both lists in order to get the id of the entities to update.
+    4 - Updating the one that exists (id in both lists).
+    5 - Creating the id that doesn't exists in SQLite.

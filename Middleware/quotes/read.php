@@ -8,10 +8,16 @@
 
 require_once "common_header.php";
 
-if (isset($_GET[$idUser]) && isset($_GET[$idBook])) {
+if (isset($_GET[$updateQuery])) {
+    $response = $dbManager->queryUpdateFields();
+} elseif (isset($_GET[$idUser]) && isset($_GET[$idBook])) {
     $response = $dbManager->getUserBookQuotes($_GET[$idUser], $_GET[$idBook]);
-} elseif (isset($_GET[$idQuote])) {
-    $response = $dbManager->getQuote($_GET[$idQuote]);
+} elseif (isset($_GET[$above]) && isset($_GET[$id])) {
+    $response = $dbManager->queryAbove(($_GET[$id]));
+} elseif (isset($_GET[$new]) && isset($_GET[$update])) {
+    $response = $dbManager->queryNewer(($_GET[$update]));
+} elseif (isset($_GET[$id])) {
+    $response = $dbManager->getQuote($_GET[$id]);
 } elseif (isset($_GET[$idUser])) {
     $response = $dbManager->getUserQuotes($_GET[$idUser]);
 } elseif (isset($_GET[$idBook])) {

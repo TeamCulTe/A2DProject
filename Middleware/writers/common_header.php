@@ -12,3 +12,4 @@ $dbManager = new WriterDbManager();
 
 $idAuthor = WriterDbManager::FIELDS[0];
 $idBook = WriterDbManager::FIELDS[1];
+$update = WriterDbManager::FIELDS[3];

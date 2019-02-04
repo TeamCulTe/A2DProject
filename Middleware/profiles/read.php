@@ -8,7 +8,13 @@
 
 require_once "common_header.php";
 
-if (isset($_GET[$id])) {
+if (isset($_GET[$updateQuery])) {
+    $response = $dbManager->queryUpdateFields();
+} elseif (isset($_GET[$above]) && isset($_GET[$id])) {
+    $response = $dbManager->queryAbove(($_GET[$id]));
+} elseif (isset($_GET[$new]) && isset($_GET[$update])) {
+    $response = $dbManager->queryNewer(($_GET[$update]));
+} elseif (isset($_GET[$id])) {
     $response = $dbManager->getProfile($_GET[$id]);
 } elseif (isset($_GET[$count])) {
     $response = $dbManager->count();

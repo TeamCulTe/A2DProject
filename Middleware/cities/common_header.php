@@ -12,3 +12,4 @@ $dbManager = new CityDbManager();
 
 $id = CityDbManager::FIELDS[0];
 $name = CityDbManager::FIELDS[1];
+$update = CityDbManager::FIELDS[2];

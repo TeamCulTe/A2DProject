@@ -15,6 +15,7 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.imie.a2dev.teamculte.readeo.DBSchemas.CommonDBSchema.UPDATE;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.WriterDBSchema.AUTHOR;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.WriterDBSchema.BOOK;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.WriterDBSchema.TABLE;
@@ -222,6 +223,33 @@ public final class WriterDBManager extends DBManager {
             Log.e(SQLITE_TAG, e.getMessage());
         } catch (JSONException e) {
             Log.e(SQLITE_TAG, e.getMessage());
+        }
+    }
+
+    @Override
+    protected String[][] getUpdateFieldsSQLite() {
+        try {
+            int fieldsNumber = 3;
+            String query = String.format(DOUBLE_QUERY_UPDATE, ids[0], ids[1], this.table);
+            Cursor result = DBManager.database.rawQuery(query, null);
+            String[][] data = new String[result.getCount() - 1][fieldsNumber];
+            int i = 0;
+
+            while (result.moveToNext()) {
+                data[i][0] = result.getString(result.getColumnIndex(ids[0]));
+                data[i][1] = result.getString(result.getColumnIndex(ids[1]));
+                data[i][2] = result.getString(result.getColumnIndex(UPDATE));
+
+                i++;
+            }
+
+            result.close();
+
+            return data;
+        } catch (SQLiteException e) {
+            Log.e(SQLITE_TAG, e.getMessage());
+
+            return null;
         }
     }
 }

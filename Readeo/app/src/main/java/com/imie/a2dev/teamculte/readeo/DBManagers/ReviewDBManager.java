@@ -14,8 +14,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
+import static com.imie.a2dev.teamculte.readeo.DBSchemas.CommonDBSchema.UPDATE;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.ReviewDBSchema.BOOK;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.ReviewDBSchema.REVIEW;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.ReviewDBSchema.SHARED;
@@ -103,6 +105,7 @@ public final class ReviewDBManager extends DBManager {
                     String.valueOf(new UserDBManager(this.getContext()).SQLiteGetId(entity.getAuthor()))};
 
             data.put(REVIEW, entity.getReview());
+            data.put(UPDATE, new Date().toString());
 
             return DBManager.database.update(this.table, data, whereClause, whereArgs) != 0;
         } catch (SQLiteException e) {
@@ -402,6 +405,33 @@ public final class ReviewDBManager extends DBManager {
             Log.e(SQLITE_TAG, e.getMessage());
         } catch (JSONException e) {
             Log.e(SQLITE_TAG, e.getMessage());
+        }
+    }
+
+    @Override
+    protected String[][] getUpdateFieldsSQLite() {
+        try {
+            int fieldsNumber = 3;
+            String query = String.format(DOUBLE_QUERY_UPDATE, ids[0], ids[1], this.table);
+            Cursor result = DBManager.database.rawQuery(query, null);
+            String[][] data = new String[result.getCount() - 1][fieldsNumber];
+            int i = 0;
+
+            while (result.moveToNext()) {
+                data[i][0] = result.getString(result.getColumnIndex(ids[0]));
+                data[i][1] = result.getString(result.getColumnIndex(ids[1]));
+                data[i][2] = result.getString(result.getColumnIndex(UPDATE));
+
+                i++;
+            }
+
+            result.close();
+
+            return data;
+        } catch (SQLiteException e) {
+            Log.e(SQLITE_TAG, e.getMessage());
+
+            return null;
         }
     }
 

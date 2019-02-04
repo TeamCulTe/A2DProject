@@ -82,7 +82,12 @@ public abstract class APIManager {
     /**
      * Stores the read script file name / mapping.
      */
-    public static final String READ = "read.php";
+    public static final String READ = "read.php?";
+
+    /**
+     * Stores the read script file name / mapping for getting the id and last update fields (providing the parameter).
+     */
+    public static final String READ_UPDATE = "read.php?update_query";
 
     /**
      * Stores the update script file name / mapping.

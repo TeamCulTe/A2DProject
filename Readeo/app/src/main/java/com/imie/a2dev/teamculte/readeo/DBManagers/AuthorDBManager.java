@@ -6,17 +6,22 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import com.android.volley.Request;
+import com.android.volley.Response;
 import com.imie.a2dev.teamculte.readeo.APIManager;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Author;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.AuthorDBSchema.TABLE;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.AuthorDBSchema.ID;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.AuthorDBSchema.NAME;
+import static com.imie.a2dev.teamculte.readeo.DBSchemas.CommonDBSchema.UPDATE;
 
 /**
  * Manager class used to manage the author entities from databases.
@@ -71,6 +76,7 @@ public final class AuthorDBManager extends DBManager {
             String[] whereArgs = new String[]{String.valueOf(entity.getId())};
 
             data.put(NAME, entity.getName());
+            data.put(UPDATE, new Date().toString());
 
             return DBManager.database.update(this.table, data, whereClause, whereArgs) != 0;
         } catch (SQLiteException e) {
@@ -155,6 +161,19 @@ public final class AuthorDBManager extends DBManager {
      */
     public void importFromMySQL() {
         super.importFromMySQL(baseUrl + APIManager.READ);
+    }
+
+    /**
+     * Gets the list of MySQL ids and last update fields in order to check which entities needs to be updated.
+     */
+    public void getUpdateFromMySQL() {
+        final String[][] mysqlUpdateFIelds = this.getUpdateFieldsSQLite();
+        this.requestJsonArray(Request.Method.POST, baseUrl + APIManager.READ_UPDATE, new Response.Listener<JSONArray>() {
+            @Override
+            public void onResponse(JSONArray response) {
+                //TODO : Create a double array and compare both id/last_update fields.
+            }
+        });
     }
 
     @Override

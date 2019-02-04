@@ -53,7 +53,7 @@ for elt in ["CONTENT", "AUTHOR", "TITLE", "CATEGORY"]:
     try:
         if elt == "CONTENT":
             for upper in ascii_uppercase[first_start:]:
-                second_start = 0 if (second_start == end_loop) else second_start
+                second_start = 0 if (second_start >= end_loop) else second_start
 
                 for lower in ascii_lowercase[second_start:]:
                     try:
@@ -78,7 +78,7 @@ for elt in ["CONTENT", "AUTHOR", "TITLE", "CATEGORY"]:
             queryFilter = BookGetter.CATEGORY_FILTER
 
         for upper in ascii_uppercase[first_start:]:
-            second_start = 0 if (second_start == end_loop) else second_start
+            second_start = 0 if (second_start >= end_loop) else second_start
 
             for lower in ascii_lowercase[second_start:]:
                 try:
@@ -95,6 +95,9 @@ for elt in ["CONTENT", "AUTHOR", "TITLE", "CATEGORY"]:
     # Catching every exception in order to save the last position.
     except Exception as e:
         handle_error(e, elt, first_start, second_start)
+
+    except KeyboardInterrupt as k:
+        handle_error(k, elt, first_start, second_start)
 
     update_indexes(elt, first_start, second_start)
 

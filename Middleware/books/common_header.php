@@ -10,9 +10,10 @@ require_once "../common_config.php";
 
 $dbManager = new BookDbManager();
 
-$idBook = BookDbManager::FIELDS[0];
+$id = BookDbManager::FIELDS[0];
 $idCategory = BookDbManager::FIELDS[1];
 $title = BookDbManager::FIELDS[2];
 $cover = BookDbManager::FIELDS[3];
 $summary = BookDbManager::FIELDS[4];
 $datePublished = BookDbManager::FIELDS[5];
+$update = BookDbManager::FIELDS[6];

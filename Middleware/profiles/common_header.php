@@ -13,3 +13,4 @@ $dbManager = new ProfileDbManager();
 $id = ProfileDbManager::FIELDS[0];
 $avatar = ProfileDbManager::FIELDS[1];
 $description = ProfileDbManager::FIELDS[2];
+$update = ProfileDbManager::FIELDS[3];
