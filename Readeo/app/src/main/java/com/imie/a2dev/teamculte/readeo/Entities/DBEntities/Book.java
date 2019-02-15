@@ -3,6 +3,7 @@ package com.imie.a2dev.teamculte.readeo.Entities.DBEntities;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import com.imie.a2dev.teamculte.readeo.App;
 import com.imie.a2dev.teamculte.readeo.DBManagers.CategoryDBManager;
@@ -11,6 +12,8 @@ import com.imie.a2dev.teamculte.readeo.DBManagers.QuoteDBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.ReviewDBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.WriterDBManager;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.BookDBSchema;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +21,8 @@ import java.util.List;
 /**
  * Final class representing a book from the application.
  */
+@Getter
+@Setter
 public final class Book extends DBEntity {
     /**
      * Stores the title of the book.
@@ -153,136 +158,8 @@ public final class Book extends DBEntity {
         this.init(result, close);
     }
 
-    /**
-     * Gets the title attribute.
-     * @return The String value of title attribute.
-     */
-    public String getTitle() {
-        return this.title;
-    }
-
-    /**
-     * Gets the author attribute.
-     * @return The List<Author> value of author attribute.
-     */
-    public List<Author> getAuthors() {
-        return this.authors;
-    }
-
-    /**
-     * Gets the cover attribute.
-     * @return The String value of cover attribute.
-     */
-    public String getCover() {
-        return this.cover;
-    }
-
-    /**
-     * Gets the summary attribute.
-     * @return The String value of summary attribute.
-     */
-    public String getSummary() {
-        return this.summary;
-    }
-
-    /**
-     * Gets the datePublished attribute.
-     * @return The int value of datePublished attribute.
-     */
-    public int getDatePublished() {
-        return this.datePublished;
-    }
-
-    /**
-     * Gets the category attribute.
-     * @return The Category value of category attribute.
-     */
-    public Category getCategory() {
-        return this.category;
-    }
-
-    /**
-     * Gets the quotes attribute.
-     * @return The List<Quote> value of quotes attribute.
-     */
-    public List<Quote> getQuotes() {
-        return this.quotes;
-    }
-
-    /**
-     * Gets the reviews attribute.
-     * @return The List<Review> value of reviews attribute.
-     */
-    public List<Review> getReviews() {
-        return this.reviews;
-    }
-
-    /**
-     * Sets the title attribute.
-     * @param newTitle The new String value to set.
-     */
-    public void setTitle(String newTitle) {
-        this.title = newTitle;
-    }
-
-    /**
-     * Sets the author attribute.
-     * @param newAuthors The new List<Author> value to set.
-     */
-    public void setAuthors(List<Author> newAuthors) {
-        this.authors = newAuthors;
-    }
-
-    /**
-     * Sets the cover attribute.
-     * @param newCover The new String value to set.
-     */
-    public void setCover(String newCover) {
-        this.cover = newCover;
-    }
-
-    /**
-     * Sets the summary attribute.
-     * @param newSummary The new String value to set.
-     */
-    public void setSummary(String newSummary) {
-        this.summary = newSummary;
-    }
-
-    /**
-     * Sets the datePublished attribute.
-     * @param newDatePublished The new int value to set.
-     */
-    public void setDatePublished(int newDatePublished) {
-        this.datePublished = newDatePublished;
-    }
-
-    /**
-     * Sets the category attribute.
-     * @param newCategory The new Category value to set.
-     */
-    public void setCategory(Category newCategory) {
-        this.category = newCategory;
-    }
-
-    /**
-     * Sets the quotes attribute.
-     * @param newQuotes The new List<Quote> value to set.
-     */
-    public void setQuotes(List<Quote> newQuotes) {
-        this.quotes = newQuotes;
-    }
-
-    /**
-     * Sets the reviews attribute.
-     * @param newReviews The new List<Review> value to set.
-     */
-    public void setReviews(List<Review> newReviews) {
-        this.reviews = newReviews;
-    }
-
     @Override
-    protected void init(Cursor result, boolean close) {
+    protected void init(@NonNull Cursor result, boolean close) {
         try {
             if (result.getPosition() == -1) {
                 result.moveToNext();

@@ -12,11 +12,13 @@ import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.City;
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.CityDBSchema.ID;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.CityDBSchema.NAME;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.CityDBSchema.TABLE;
+import static com.imie.a2dev.teamculte.readeo.DBSchemas.CommonDBSchema.UPDATE;
 
 /**
  * Manager class used to manage the city entities from databases.
@@ -71,6 +73,7 @@ public final class CityDBManager extends DBManager {
             String[] whereArgs = new String[]{String.valueOf(entity.getId())};
 
             data.put(NAME, entity.getName());
+            data.put(UPDATE, new Date().toString());
 
             return DBManager.database.update(this.table, data, whereClause, whereArgs) != 0;
         } catch (SQLiteException e) {

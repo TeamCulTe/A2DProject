@@ -22,3 +22,7 @@ header("Content-Type: application/json; charset=UTF-8");
 $end = "end";
 $start = "start";
 $count = "count";
+$max = "max";
+$above = "above";
+$new = "new";
+$updateQuery = "update_query";

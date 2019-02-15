@@ -34,13 +34,15 @@ public abstract class ReviewDBSchema {
      * Defines the review create table statement.
      */
     public static final String REVIEW_TABLE_STATEMENT = String.format("CREATE TABLE IF NOT EXISTS %s (%s INTEGER NOT " +
-                    "NULL, %s INTEGER NOT NULL, %s TEXT NOT NULL, CONSTRAINT Review_PK PRIMARY KEY (%s, %s), " +
-                    "CONSTRAINT Review_User_FK FOREIGN KEY (%s) REFERENCES User(%s), CONSTRAINT Review_Book_FK " +
-                    "FOREIGN KEY (%s) REFERENCES Book(%s));",
+                    "NULL, %s INTEGER NOT NULL, %s TEXT NOT NULL, %s DATETIME NOT NULL DEFAULT %s, CONSTRAINT " +
+                    "Review_PK PRIMARY KEY (%s, %s), CONSTRAINT Review_User_FK FOREIGN KEY (%s) REFERENCES User(%s), " +
+                    "CONSTRAINT Review_Book_FK FOREIGN KEY (%s) REFERENCES Book(%s));",
             ReviewDBSchema.TABLE,
             ReviewDBSchema.USER,
             ReviewDBSchema.BOOK,
             ReviewDBSchema.REVIEW,
+            CommonDBSchema.UPDATE,
+            CommonDBSchema.UPDATE_DEFAULT,
             ReviewDBSchema.USER,
             ReviewDBSchema.BOOK,
             ReviewDBSchema.USER,

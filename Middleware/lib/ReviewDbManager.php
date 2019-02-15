@@ -16,7 +16,7 @@ class ReviewDbManager extends DbManager
     /**
      * Stores the associated database fields.
      */
-    public const FIELDS = ["id_user", "id_book", "review", "shared", "deleted"];
+    public const FIELDS = ["id_user", "id_book", "review", "shared", "last_update", "deleted"];
 
     /**
      * Stores the placeholders for prepared queries.
@@ -59,8 +59,8 @@ class ReviewDbManager extends DbManager
      */
     public function getReview(int $idUser, int $idBook)
     {
-        $statement = sprintf("SELECT %s, %s FROM %s WHERE %s = %s AND %s = %s AND deleted = 0",
-            static::FIELDS[2], static::FIELDS[3], static::TABLE, static::FIELDS[0],
+        $statement = sprintf("SELECT %s, %s, %s FROM %s WHERE %s = %s AND %s = %s AND deleted = 0",
+            static::FIELDS[2], static::FIELDS[3], static::FIELDS[4], static::TABLE, static::FIELDS[0],
             static::PLACEHOLDERS[0], static::FIELDS[1], static::PLACEHOLDERS[1]);
         $req = $this->db->prepare($statement);
 
@@ -81,8 +81,8 @@ class ReviewDbManager extends DbManager
      */
     public function getSharedReview(int $idUser, int $idBook)
     {
-        $statement = sprintf("SELECT %s FROM %s WHERE %s = 1 AND %s = %s AND %s = %s AND deleted = 0",
-            static::FIELDS[2], static::TABLE, static::FIELDS[3], static::FIELDS[0],
+        $statement = sprintf("SELECT %s, %s FROM %s WHERE %s = 1 AND %s = %s AND %s = %s AND deleted = 0",
+            static::FIELDS[2], static::FIELDS[4], static::TABLE, static::FIELDS[3], static::FIELDS[0],
             static::PLACEHOLDERS[0], static::FIELDS[1], static::PLACEHOLDERS[1]);
         $req = $this->db->prepare($statement);
 
@@ -102,8 +102,8 @@ class ReviewDbManager extends DbManager
      */
     public function getBookReviews(int $idBook)
     {
-        $statement = sprintf("SELECT %s, %s, %s FROM %s WHERE %s = %s AND deleted = 0",
-            static::FIELDS[0], static::FIELDS[2], static::FIELDS[3], static::TABLE, static::FIELDS[1],
+        $statement = sprintf("SELECT %s, %s, %s, %s FROM %s WHERE %s = %s AND deleted = 0",
+            static::FIELDS[0], static::FIELDS[2], static::FIELDS[3], static::FIELDS[4], static::TABLE, static::FIELDS[1],
             static::PLACEHOLDERS[1]);
         $req = $this->db->prepare($statement);
 
@@ -122,8 +122,8 @@ class ReviewDbManager extends DbManager
      */
     public function getBookSharedReviews(int $idBook)
     {
-        $statement = sprintf("SELECT %s, %s FROM %s WHERE %s = 1 AND %s = %s AND deleted = 0",
-            static::FIELDS[0], static::FIELDS[2], static::TABLE, static::FIELDS[3], static::FIELDS[1],
+        $statement = sprintf("SELECT %s, %s, %s FROM %s WHERE %s = 1 AND %s = %s AND deleted = 0",
+            static::FIELDS[0], static::FIELDS[2], static::FIELDS[4], static::TABLE, static::FIELDS[3], static::FIELDS[1],
             static::PLACEHOLDERS[1]);
         $req = $this->db->prepare($statement);
 
@@ -142,8 +142,8 @@ class ReviewDbManager extends DbManager
      */
     public function getUserReviews(int $idUser)
     {
-        $statement = sprintf("SELECT %s, %s, %s FROM %s WHERE %s = %s AND deleted = 0",
-            static::FIELDS[1], static::FIELDS[2], static::FIELDS[3], static::TABLE, static::FIELDS[0],
+        $statement = sprintf("SELECT %s, %s, %s, %s FROM %s WHERE %s = %s AND deleted = 0",
+            static::FIELDS[1], static::FIELDS[2], static::FIELDS[3], static::FIELDS[4], static::TABLE, static::FIELDS[0],
             static::PLACEHOLDERS[0]);
         $req = $this->db->prepare($statement);
 
@@ -162,8 +162,8 @@ class ReviewDbManager extends DbManager
      */
     public function getUserSharedReviews(int $idUser)
     {
-        $statement = sprintf("SELECT %s, %s FROM %s WHERE %s = 1 AND %s = %s AND deleted = 0",
-            static::FIELDS[1], static::FIELDS[2], static::TABLE, static::FIELDS[3],
+        $statement = sprintf("SELECT %s, %s, %s FROM %s WHERE %s = 1 AND %s = %s AND deleted = 0",
+            static::FIELDS[1], static::FIELDS[2], static::FIELDS[4], static::TABLE, static::FIELDS[3],
             static::FIELDS[0], static::PLACEHOLDERS[0]);
         $req = $this->db->prepare($statement);
 
@@ -184,8 +184,8 @@ class ReviewDbManager extends DbManager
      */
     public function updateReview(int $idUser, int $idBook, string $review)
     {
-        $statement = sprintf("UPDATE %s SET %s = %s WHERE %s = %s AND %s = %s", static::TABLE,
-            static::FIELDS[2], static::PLACEHOLDERS[2], static::FIELDS[0], static::PLACEHOLDERS[0], static::FIELDS[1],
+        $statement = sprintf("UPDATE %s SET %s = %s, %s = CURRENT_TIMESTAMP WHERE %s = %s AND %s = %s", static::TABLE,
+            static::FIELDS[2], static::PLACEHOLDERS[2], static::FIELDS[4], static::FIELDS[0], static::PLACEHOLDERS[0], static::FIELDS[1],
             static::PLACEHOLDERS[1]);
         $req = $this->db->prepare($statement);
 
@@ -205,8 +205,8 @@ class ReviewDbManager extends DbManager
      */
     public function updateReviewSharing(int $idUser, int $idBook, bool $shared)
     {
-        $statement = sprintf("UPDATE %s SET %s = %s WHERE %s = %s AND %s = %s", static::TABLE,
-            static::FIELDS[3], static::PLACEHOLDERS[3], static::FIELDS[0], static::PLACEHOLDERS[0], static::FIELDS[1],
+        $statement = sprintf("UPDATE %s SET %s = %s, %s = CURRENT_TIMESTAMP WHERE %s = %s AND %s = %s", static::TABLE,
+            static::FIELDS[3], static::PLACEHOLDERS[3], static::FIELDS[4], static::FIELDS[0], static::PLACEHOLDERS[0], static::FIELDS[1],
             static::PLACEHOLDERS[1]);
         $req = $this->db->prepare($statement);
 
@@ -225,8 +225,8 @@ class ReviewDbManager extends DbManager
      */
     public function softDelete(int $idUser, $idBook)
     {
-        $statement = sprintf("UPDATE %s SET deleted = 1 WHERE %s = %s AND %s = %s",
-            static::TABLE, static::FIELDS[0], static::PLACEHOLDERS[0], static::FIELDS[1], static::PLACEHOLDERS[1]);
+        $statement = sprintf("UPDATE %s SET deleted = 1, %s = CURRENT_TIMESTAMP WHERE %s = %s AND %s = %s",
+            static::TABLE, static::FIELDS[4], static::FIELDS[0], static::PLACEHOLDERS[0], static::FIELDS[1], static::PLACEHOLDERS[1]);
         $req = $this->db->prepare($statement);
 
         $req->bindValue(static::PLACEHOLDERS[0], $idUser, PDO::PARAM_INT);
@@ -243,8 +243,8 @@ class ReviewDbManager extends DbManager
      */
     public function restoreSoftDeleted(int $idUser, $idBook)
     {
-        $statement = sprintf("UPDATE %s SET deleted = 0 WHERE %s = %s AND %s = %s",
-            static::TABLE, static::FIELDS[0], static::PLACEHOLDERS[0], static::FIELDS[1], static::PLACEHOLDERS[1]);
+        $statement = sprintf("UPDATE %s SET deleted = 0, %s = CURRENT_TIMESTAMP WHERE %s = %s AND %s = %s",
+            static::TABLE, static::FIELDS[4], static::FIELDS[0], static::PLACEHOLDERS[0], static::FIELDS[1], static::PLACEHOLDERS[1]);
         $req = $this->db->prepare($statement);
 
         $req->bindValue(static::PLACEHOLDERS[0], $idUser, PDO::PARAM_INT);
@@ -260,8 +260,8 @@ class ReviewDbManager extends DbManager
      */
     public function softDeleteUserReviews(int $idUser)
     {
-        $statement = sprintf("UPDATE %s SET deleted = 1 WHERE %s = %s",
-            static::TABLE, static::FIELDS[0], static::PLACEHOLDERS[0]);
+        $statement = sprintf("UPDATE %s SET deleted = 1, %s = CURRENT_TIMESTAMP WHERE %s = %s",
+            static::TABLE, static::FIELDS[4], static::FIELDS[0], static::PLACEHOLDERS[0]);
         $req = $this->db->prepare($statement);
 
         $req->bindValue(static::PLACEHOLDERS[0], $idUser, PDO::PARAM_INT);
@@ -276,8 +276,8 @@ class ReviewDbManager extends DbManager
      */
     public function restoreSoftDeletedUserReviews(int $idUser)
     {
-        $statement = sprintf("UPDATE %s SET deleted = 0 WHERE %s = %s",
-            static::TABLE, static::FIELDS[0], static::PLACEHOLDERS[0]);
+        $statement = sprintf("UPDATE %s SET deleted = 0, %s = CURRENT_TIMESTAMP WHERE %s = %s",
+            static::TABLE, static::FIELDS[4], static::FIELDS[0], static::PLACEHOLDERS[0]);
         $req = $this->db->prepare($statement);
 
         $req->bindValue(static::PLACEHOLDERS[0], $idUser, PDO::PARAM_INT);
@@ -292,8 +292,8 @@ class ReviewDbManager extends DbManager
      */
     public function softDeleteBooksReviews(int $idBook)
     {
-        $statement = sprintf("UPDATE %s SET deleted = 1 WHERE %s = %s",
-            static::TABLE, static::FIELDS[1], static::PLACEHOLDERS[1]);
+        $statement = sprintf("UPDATE %s SET deleted = 1, %s = CURRENT_TIMESTAMP WHERE %s = %s",
+            static::TABLE, static::FIELDS[4], static::FIELDS[1], static::PLACEHOLDERS[1]);
         $req = $this->db->prepare($statement);
 
         $req->bindValue(static::PLACEHOLDERS[1], $idBook, PDO::PARAM_INT);
@@ -308,8 +308,8 @@ class ReviewDbManager extends DbManager
      */
     public function restoreSoftDeletedBookReviews(int $idBook)
     {
-        $statement = sprintf("UPDATE %s SET deleted = 0 WHERE %s = %s",
-            static::TABLE, static::FIELDS[1], static::PLACEHOLDERS[1]);
+        $statement = sprintf("UPDATE %s SET deleted = 0, %s = CURRENT_TIMESTAMP WHERE %s = %s",
+            static::TABLE, static::FIELDS[4], static::FIELDS[1], static::PLACEHOLDERS[1]);
         $req = $this->db->prepare($statement);
 
         $req->bindValue(static::PLACEHOLDERS[1], $idBook, PDO::PARAM_INT);
@@ -373,8 +373,8 @@ class ReviewDbManager extends DbManager
      */
     public function queryAll()
     {
-        $statement = sprintf("SELECT %s, %s, %s, %s FROM %s WHERE deleted = 0",
-            static::FIELDS[0], static::FIELDS[1], static::FIELDS[2], static::FIELDS[3], static::TABLE);
+        $statement = sprintf("SELECT %s, %s, %s, %s, %s FROM %s WHERE deleted = 0",
+            static::FIELDS[0], static::FIELDS[1], static::FIELDS[2], static::FIELDS[3], static::FIELDS[4], static::TABLE);
         $req = $this->db->query($statement);
         $response = $req->fetchAll(PDO::FETCH_ASSOC);
 
@@ -387,8 +387,8 @@ class ReviewDbManager extends DbManager
      */
     public function queryAllShared()
     {
-        $statement = sprintf("SELECT %s, %s, %s FROM %s WHERE %s = 1 AND deleted = 0",
-            static::FIELDS[0], static::FIELDS[1], static::FIELDS[2], static::TABLE, static::FIELDS[3]);
+        $statement = sprintf("SELECT %s, %s, %s, %s FROM %s WHERE %s = 1 AND deleted = 0",
+            static::FIELDS[0], static::FIELDS[1], static::FIELDS[2], static::FIELDS[4], static::TABLE, static::FIELDS[3]);
         $req = $this->db->query($statement);
         $response = $req->fetchAll(PDO::FETCH_ASSOC);
 
@@ -405,8 +405,8 @@ class ReviewDbManager extends DbManager
     {
         $offsetPlaceholder = ":startResult";
         $limitPlaceholder = ":endResult";
-        $statement = sprintf("SELECT %s, %s, %s, %s FROM %s WHERE deleted = 0 LIMIT %s OFFSET %s",
-            static::FIELDS[0], static::FIELDS[1], static::FIELDS[2], static::FIELDS[3], static::TABLE,
+        $statement = sprintf("SELECT %s, %s, %s, %s, %s FROM %s WHERE deleted = 0 LIMIT %s OFFSET %s",
+            static::FIELDS[0], static::FIELDS[1], static::FIELDS[2], static::FIELDS[3], static::FIELDS[4], static::TABLE,
             $limitPlaceholder, $offsetPlaceholder);
         $req = $this->db->prepare($statement);
 
@@ -428,8 +428,8 @@ class ReviewDbManager extends DbManager
     {
         $offsetPlaceholder = ":startResult";
         $limitPlaceholder = ":endResult";
-        $statement = sprintf("SELECT %s, %s, %s FROM %s WHERE %s = 1 AND deleted = 0 LIMIT %s OFFSET %s",
-            static::FIELDS[0], static::FIELDS[1], static::FIELDS[2], static::TABLE, static::FIELDS[3],
+        $statement = sprintf("SELECT %s, %s, %s, %s FROM %s WHERE %s = 1 AND deleted = 0 LIMIT %s OFFSET %s",
+            static::FIELDS[0], static::FIELDS[1], static::FIELDS[2], static::FIELDS[4], static::TABLE, static::FIELDS[3],
             $limitPlaceholder, $offsetPlaceholder);
         $req = $this->db->prepare($statement);
 
@@ -444,6 +444,7 @@ class ReviewDbManager extends DbManager
 
     /**
      * Counts the number of entities in the database.
+     * @return null|string The json response if found else null.
      */
     public function count() {
         $statement = sprintf("SELECT COUNT(*) as %s FROM %s WHERE deleted = 0", static::COUNT, static::TABLE);
@@ -455,10 +456,77 @@ class ReviewDbManager extends DbManager
 
     /**
      * Counts the number of shared reviews in the database.
+     * @return null|string The json response if found else null.
      */
     public function countShared() {
         $statement = sprintf("SELECT COUNT(*) as %s FROM %s WHERE deleted = 0 AND %s = 1", static::COUNT,
             static::TABLE, static::FIELDS[3]);
+        $req = $this->db->query($statement);
+        $response = $req->fetchAll(PDO::FETCH_ASSOC);
+
+        return (!empty($response)) ? json_encode($response) : null;
+    }
+
+    /**
+     * Get the entries that has been updated after than the date value given in parameter.
+     * @param string $date The date to query entities.
+     * @return null|string The json response if found else null.
+     */
+    public function queryNewer(string $date) {
+        $statement = sprintf("SELECT %s, %s, %s, %s, %s FROM %s WHERE %s > %s AND deleted = 0",
+            static::FIELDS[0], static::FIELDS[1], static::FIELDS[2], static::FIELDS[3], static::FIELDS[4], static::TABLE,
+            static::FIELDS[4], static::PLACEHOLDERS[4]);
+        $req = $this->db->prepare($statement);
+
+        $req->bindValue(static::PLACEHOLDERS[4], $date, PDO::PARAM_STR);
+        $req->execute();
+
+        $response = $req->fetchAll(PDO::FETCH_ASSOC);
+
+        return (!empty($response)) ? json_encode($response) : null;
+    }
+
+    /**
+     * Get the shared entries that has been updated after than the date value given in parameter.
+     * @param string $date The date to query entities.
+     * @return null|string The json response if found else null.
+     */
+    public function querySharedNewer(string $date) {
+        $statement = sprintf("SELECT %s, %s, %s, %s FROM %s WHERE %s > %s AND deleted = 0 AND %s = 1",
+            static::FIELDS[0], static::FIELDS[1], static::FIELDS[2], static::FIELDS[4], static::TABLE,
+            static::FIELDS[4], static::PLACEHOLDERS[4], static::FIELDS[3]);
+        $req = $this->db->prepare($statement);
+
+        $req->bindValue(static::PLACEHOLDERS[4], $date, PDO::PARAM_STR);
+        $req->execute();
+
+        $response = $req->fetchAll(PDO::FETCH_ASSOC);
+
+        return (!empty($response)) ? json_encode($response) : null;
+    }
+
+    /**
+     * Query all review ids and last_update fields from database in order to use it to determine which entities to update.
+     * @return null|string The json response if found else null.
+     */
+    public function queryUpdateFields()
+    {
+        $statement = sprintf("SELECT %s, %s, %s FROM %s",
+            static::FIELDS[0], static::FIELDS[1], static::FIELDS[4], static::TABLE);
+        $req = $this->db->query($statement);
+        $response = $req->fetchAll(PDO::FETCH_ASSOC);
+
+        return (!empty($response)) ? json_encode($response) : null;
+    }
+
+    /**
+     * Query all shared review ids and last_update fields from database in order to use it to determine which entities to update.
+     * @return null|string The json response if found else null.
+     */
+    public function querySharedUpdateFields()
+    {
+        $statement = sprintf("SELECT %s, %s, %s FROM %s WHERE %s = 1",
+            static::FIELDS[0], static::FIELDS[1], static::FIELDS[4], static::TABLE, static::FIELDS[3]);
         $req = $this->db->query($statement);
         $response = $req->fetchAll(PDO::FETCH_ASSOC);
 

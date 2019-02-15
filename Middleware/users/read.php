@@ -8,20 +8,26 @@
 
 require_once "common_header.php";
 
-if (isset($_GET[$email]) && isset($_GET[$publicMode])) {
+if (isset($_GET[$updateQuery])) {
+    $response = $dbManager->queryUpdateFields();
+} elseif (isset($_GET[$email]) && isset($_GET[$publicMode])) {
     if ($_GET[$publicMode] == true) {
         $response = $dbManager->getPublicUserFromEmail($_GET[$email]);
     } elseif ($_GET[$publicMode] == false) {
         $response = $dbManager->getUserFromEmail($_GET[$email]);
     }
-} elseif (isset($_GET[$idUser])) {
-    $response = $dbManager->getUser($_GET[$idUser]);
+} elseif (isset($_GET[$above]) && isset($_GET[$id])) {
+    $response = $dbManager->queryAbove(($_GET[$id]));
+} elseif (isset($_GET[$id])) {
+    $response = $dbManager->getUser($_GET[$id]);
 } elseif (isset($_GET[$pseudo]) && isset($_GET[$publicMode])) {
     if ($_GET[$publicMode] == true) {
         $response = $dbManager->getPublicUserFromPseudo($_GET[$pseudo]);
     } elseif ($_GET[$publicMode] == false) {
         $response = $dbManager->getUserFromPseudo($_GET[$pseudo]);
     }
+} elseif (isset($_GET[$new]) && isset($_GET[$update])) {
+    $response = $dbManager->queryNewer(($_GET[$update]));
 } elseif (isset($_GET[$email]) && isset($_GET[$password])) {
     $response = $dbManager->getUserFromAuth($_GET[$email], $_GET[$password]);
 } elseif (isset($_GET[$pseudo])) {

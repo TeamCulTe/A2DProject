@@ -12,3 +12,4 @@ $dbManager = new CountryDbManager();
 
 $id = CountryDbManager::FIELDS[0];
 $name = CountryDbManager::FIELDS[1];
+$update = CountryDbManager::FIELDS[2];

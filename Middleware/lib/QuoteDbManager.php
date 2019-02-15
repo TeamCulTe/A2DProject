@@ -16,12 +16,12 @@ class QuoteDbManager extends DbManager
     /**
      * Stores the associated database fields.
      */
-    public const FIELDS = ["id_quote", "id_user", "id_book", "quote", "deleted"];
+    public const FIELDS = ["id_quote", "id_user", "id_book", "quote", "last_update", "deleted"];
 
     /**
      * Stores the placeholders for prepared queries.
      */
-    public const PLACEHOLDERS = [":idQ", ":idU", ":idB", ":quote"];
+    public const PLACEHOLDERS = [":idQ", ":idU", ":idB", ":quote", "update"];
 
     /**
      * Stores the associated table name.
@@ -56,8 +56,8 @@ class QuoteDbManager extends DbManager
      */
     public function getQuote(int $id)
     {
-        $statement = sprintf("SELECT %s, %s, %s FROM %s WHERE %s = %s AND deleted = 0",
-            static::FIELDS[1], static::FIELDS[2], static::FIELDS[3], static::TABLE, static::FIELDS[0],
+        $statement = sprintf("SELECT %s, %s, %s, %s FROM %s WHERE %s = %s AND deleted = 0",
+            static::FIELDS[1], static::FIELDS[2], static::FIELDS[3], static::FIELDS[4], static::TABLE, static::FIELDS[0],
             static::PLACEHOLDERS[0]);
         $req = $this->db->prepare($statement);
 
@@ -76,8 +76,8 @@ class QuoteDbManager extends DbManager
      */
     public function getUserQuotes(int $idUser)
     {
-        $statement = sprintf("SELECT %s, %s, %s FROM %s WHERE %s = %s AND deleted = 0",
-            static::FIELDS[0], static::FIELDS[2], static::FIELDS[3], static::TABLE, static::FIELDS[1],
+        $statement = sprintf("SELECT %s, %s, %s, %s FROM %s WHERE %s = %s AND deleted = 0",
+            static::FIELDS[0], static::FIELDS[2], static::FIELDS[3], static::FIELDS[4], static::TABLE, static::FIELDS[1],
             static::PLACEHOLDERS[1]);
         $req = $this->db->prepare($statement);
 
@@ -96,8 +96,8 @@ class QuoteDbManager extends DbManager
      */
     public function getBookQuotes(int $idBook)
     {
-        $statement = sprintf("SELECT %s, %s, %s FROM %s WHERE %s = %s AND deleted = 0",
-            static::FIELDS[0], static::FIELDS[1], static::FIELDS[3], static::TABLE, static::FIELDS[2],
+        $statement = sprintf("SELECT %s, %s, %s, %s FROM %s WHERE %s = %s AND deleted = 0",
+            static::FIELDS[0], static::FIELDS[1], static::FIELDS[3], static::FIELDS[4], static::TABLE, static::FIELDS[2],
             static::PLACEHOLDERS[2]);
         $req = $this->db->prepare($statement);
 
@@ -117,8 +117,8 @@ class QuoteDbManager extends DbManager
      */
     public function getUserBookQuotes(int $idUser, int $idBook)
     {
-        $statement = sprintf("SELECT %s, %s FROM %s WHERE %s = %s AND %s = %s AND deleted = 0",
-            static::FIELDS[0], static::FIELDS[3], static::TABLE, static::FIELDS[1],
+        $statement = sprintf("SELECT %s, %s, %s FROM %s WHERE %s = %s AND %s = %s AND deleted = 0",
+            static::FIELDS[0], static::FIELDS[3], static::FIELDS[4], static::TABLE, static::FIELDS[1],
             static::PLACEHOLDERS[1], static::FIELDS[2], static::PLACEHOLDERS[2]);
         $req = $this->db->prepare($statement);
 
@@ -139,8 +139,8 @@ class QuoteDbManager extends DbManager
      */
     public function update(int $id, string $quote)
     {
-        $statement = sprintf("UPDATE %s SET %s = %s WHERE %s = %s", static::TABLE,
-            static::FIELDS[3], static::PLACEHOLDERS[3], static::FIELDS[0], static::PLACEHOLDERS[0]);
+        $statement = sprintf("UPDATE %s SET %s = %s, %s = CURRENT_TIMESTAMP WHERE %s = %s", static::TABLE,
+            static::FIELDS[3], static::PLACEHOLDERS[3], static::FIELDS[4], static::FIELDS[0], static::PLACEHOLDERS[0]);
         $req = $this->db->prepare($statement);
 
         $req->bindValue(static::PLACEHOLDERS[0], $id, PDO::PARAM_INT);
@@ -156,8 +156,8 @@ class QuoteDbManager extends DbManager
      */
     public function softDelete(int $id)
     {
-        $statement = sprintf("UPDATE %s SET deleted = 1 WHERE %s = %s",
-            static::TABLE, static::FIELDS[0], static::PLACEHOLDERS[0]);
+        $statement = sprintf("UPDATE %s SET deleted = 1, %s = CURRENT_TIMESTAMP WHERE %s = %s",
+            static::TABLE, static::FIELDS[4], static::FIELDS[0], static::PLACEHOLDERS[0]);
         $req = $this->db->prepare($statement);
 
         $req->bindValue(static::PLACEHOLDERS[0], $id, PDO::PARAM_INT);
@@ -172,8 +172,8 @@ class QuoteDbManager extends DbManager
      */
     public function restoreSoftDeleted(int $id)
     {
-        $statement = sprintf("UPDATE %s SET deleted = 0 WHERE %s = %s",
-            static::TABLE, static::FIELDS[0], static::PLACEHOLDERS[0]);
+        $statement = sprintf("UPDATE %s SET deleted = 0, %s = CURRENT_TIMESTAMP WHERE %s = %s",
+            static::TABLE, static::FIELDS[4], static::FIELDS[0], static::PLACEHOLDERS[0]);
         $req = $this->db->prepare($statement);
 
         $req->bindValue(static::PLACEHOLDERS[0], $id, PDO::PARAM_INT);
@@ -188,8 +188,8 @@ class QuoteDbManager extends DbManager
      */
     public function softDeleteUserQuotes(int $idUser)
     {
-        $statement = sprintf("UPDATE %s SET deleted = 1 WHERE %s = %s",
-            static::TABLE, static::FIELDS[1], static::PLACEHOLDERS[1]);
+        $statement = sprintf("UPDATE %s SET deleted = 1, %s = CURRENT_TIMESTAMP WHERE %s = %s",
+            static::TABLE, static::FIELDS[4], static::FIELDS[1], static::PLACEHOLDERS[1]);
         $req = $this->db->prepare($statement);
 
         $req->bindValue(static::PLACEHOLDERS[1], $idUser, PDO::PARAM_INT);
@@ -204,8 +204,8 @@ class QuoteDbManager extends DbManager
      */
     public function restoreSoftDeletedUserQuotes(int $idUser)
     {
-        $statement = sprintf("UPDATE %s SET deleted = 0 WHERE %s = %s",
-            static::TABLE, static::FIELDS[1], static::PLACEHOLDERS[1]);
+        $statement = sprintf("UPDATE %s SET deleted = 0, %s = CURRENT_TIMESTAMP WHERE %s = %s",
+            static::TABLE, static::FIELDS[4], static::FIELDS[1], static::PLACEHOLDERS[1]);
         $req = $this->db->prepare($statement);
 
         $req->bindValue(static::PLACEHOLDERS[1], $idUser, PDO::PARAM_INT);
@@ -220,8 +220,8 @@ class QuoteDbManager extends DbManager
      */
     public function softDeleteBooksQuotes(int $idBook)
     {
-        $statement = sprintf("UPDATE %s SET deleted = 1 WHERE %s = %s",
-            static::TABLE, static::FIELDS[2], static::PLACEHOLDERS[2]);
+        $statement = sprintf("UPDATE %s SET deleted = 1, %s = CURRENT_TIMESTAMP WHERE %s = %s",
+            static::TABLE, static::FIELDS[4], static::FIELDS[2], static::PLACEHOLDERS[2]);
         $req = $this->db->prepare($statement);
 
         $req->bindValue(static::PLACEHOLDERS[2], $idBook, PDO::PARAM_INT);
@@ -236,8 +236,8 @@ class QuoteDbManager extends DbManager
      */
     public function restoreSoftDeletedBookQuotes(int $idBook)
     {
-        $statement = sprintf("UPDATE %s SET deleted = 0 WHERE %s = %s",
-            static::TABLE, static::FIELDS[1], static::PLACEHOLDERS[1]);
+        $statement = sprintf("UPDATE %s SET deleted = 0, %s = CURRENT_TIMESTAMP WHERE %s = %s",
+            static::TABLE, static::FIELDS[4], static::FIELDS[1], static::PLACEHOLDERS[1]);
         $req = $this->db->prepare($statement);
 
         $req->bindValue(static::PLACEHOLDERS[1], $idBook, PDO::PARAM_INT);
@@ -299,8 +299,8 @@ class QuoteDbManager extends DbManager
      */
     public function queryAll()
     {
-        $statement = sprintf("SELECT %s, %s, %s, %s FROM %s WHERE deleted = 0",
-            static::FIELDS[0], static::FIELDS[1], static::FIELDS[2], static::FIELDS[3], static::TABLE);
+        $statement = sprintf("SELECT %s, %s, %s, %s, %s FROM %s WHERE deleted = 0",
+            static::FIELDS[0], static::FIELDS[1], static::FIELDS[2], static::FIELDS[3], static::FIELDS[4], static::TABLE);
         $req = $this->db->query($statement);
         $response = $req->fetchAll(PDO::FETCH_ASSOC);
 
@@ -317,8 +317,8 @@ class QuoteDbManager extends DbManager
     {
         $offsetPlaceholder = ":startResult";
         $limitPlaceholder = ":endResult";
-        $statement = sprintf("SELECT %s, %s, %s, %s FROM %s WHERE deleted = 0 LIMIT %s OFFSET %s",
-            static::FIELDS[0], static::FIELDS[1], static::FIELDS[2], static::FIELDS[3], static::TABLE,
+        $statement = sprintf("SELECT %s, %s, %s, %s, %s FROM %s WHERE deleted = 0 LIMIT %s OFFSET %s",
+            static::FIELDS[0], static::FIELDS[1], static::FIELDS[2], static::FIELDS[3], static::FIELDS[4], static::TABLE,
             $limitPlaceholder, $offsetPlaceholder);
         $req = $this->db->prepare($statement);
 
@@ -333,9 +333,62 @@ class QuoteDbManager extends DbManager
 
     /**
      * Counts the number of entities in the database.
+     * @return null|string The json response if found else null.
      */
     public function count() {
         $statement = sprintf("SELECT COUNT(*) as %s FROM %s WHERE deleted = 0", static::COUNT, static::TABLE);
+        $req = $this->db->query($statement);
+        $response = $req->fetchAll(PDO::FETCH_ASSOC);
+
+        return (!empty($response)) ? json_encode($response) : null;
+    }
+
+    /**
+     * Get the entries greater than the id value given in parameter.
+     * @param int $id The id which query the entries above.
+     * @return null|string The json response if found else null.
+     */
+    public function queryAbove(int $id) {
+        $statement = sprintf("SELECT %s, %s, %s, %s, %s FROM %s WHERE %s > %s AND deleted = 0",
+            static::FIELDS[0], static::FIELDS[1], static::FIELDS[2], static::FIELDS[3], static::FIELDS[4], static::TABLE,
+            static::FIELDS[0], static::PLACEHOLDERS[0]);
+        $req = $this->db->prepare($statement);
+
+        $req->bindValue(static::PLACEHOLDERS[0], $id, PDO::PARAM_INT);
+        $req->execute();
+
+        $response = $req->fetchAll(PDO::FETCH_ASSOC);
+
+        return (!empty($response)) ? json_encode($response) : null;
+    }
+
+    /**
+     * Get the entries that has been updated after than the date value given in parameter.
+     * @param string $date The date to query entities.
+     * @return null|string The json response if found else null.
+     */
+    public function queryNewer(string $date) {
+        $statement = sprintf("SELECT %s, %s, %s, %s, %s FROM %s WHERE %s > %s AND deleted = 0",
+            static::FIELDS[0], static::FIELDS[1], static::FIELDS[2], static::FIELDS[3], static::FIELDS[4], static::TABLE,
+            static::FIELDS[4], static::PLACEHOLDERS[4]);
+        $req = $this->db->prepare($statement);
+
+        $req->bindValue(static::PLACEHOLDERS[4], $date, PDO::PARAM_STR);
+        $req->execute();
+
+        $response = $req->fetchAll(PDO::FETCH_ASSOC);
+
+        return (!empty($response)) ? json_encode($response) : null;
+    }
+
+    /**
+     * Query all quote id and last_update fields from database in order to use it to determine which entities to update.
+     * @return null|string The json response if found else null.
+     */
+    public function queryUpdateFields()
+    {
+        $statement = sprintf("SELECT %s, %s FROM %s",
+            static::FIELDS[0], static::FIELDS[4], static::TABLE);
         $req = $this->db->query($statement);
         $response = $req->fetchAll(PDO::FETCH_ASSOC);
 

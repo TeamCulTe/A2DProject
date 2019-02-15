@@ -16,7 +16,7 @@ class WriterDbManager extends DbManager
     /**
      * Stores the associated database fields.
      */
-    public const FIELDS = ["id_author", "id_book", "deleted"];
+    public const FIELDS = ["id_author", "id_book", "last_update", "deleted"];
 
     /**
      * Stores the placeholders for prepared queries.
@@ -53,8 +53,8 @@ class WriterDbManager extends DbManager
      */
     public function getBookWriters(int $idBook)
     {
-        $statement = sprintf("SELECT %s FROM %s WHERE %s = %s AND deleted = 0",
-            static::FIELDS[0], static::TABLE, static::FIELDS[1],
+        $statement = sprintf("SELECT %s, %s FROM %s WHERE %s = %s AND deleted = 0",
+            static::FIELDS[0], static::FIELDS[2], static::TABLE, static::FIELDS[1],
             static::PLACEHOLDERS[1]);
         $req = $this->db->prepare($statement);
 
@@ -73,8 +73,8 @@ class WriterDbManager extends DbManager
      */
     public function getWriterBooks(int $idAuthor)
     {
-        $statement = sprintf("SELECT %s FROM %s WHERE %s = %s AND deleted = 0",
-            static::FIELDS[1], static::TABLE, static::FIELDS[0], static::PLACEHOLDERS[0]);
+        $statement = sprintf("SELECT %s, %s FROM %s WHERE %s = %s AND deleted = 0",
+            static::FIELDS[1], static::FIELDS[2], static::TABLE, static::FIELDS[0], static::PLACEHOLDERS[0]);
         $req = $this->db->prepare($statement);
 
         $req->bindValue(static::PLACEHOLDERS[0], $idAuthor, PDO::PARAM_INT);
@@ -93,8 +93,9 @@ class WriterDbManager extends DbManager
      */
     public function softDelete(int $idAuthor, int $idBook)
     {
-        $statement = sprintf("UPDATE %s SET deleted = 1 WHERE %s = %s AND %s = %s",
-            static::TABLE, static::FIELDS[0], static::PLACEHOLDERS[0], static::FIELDS[1], static::PLACEHOLDERS[1]);
+        $statement = sprintf("UPDATE %s SET deleted = 1, %s = CURRENT_TIMESTAMP WHERE %s = %s AND %s = %s",
+            static::TABLE, static::FIELDS[2], static::FIELDS[0], static::PLACEHOLDERS[0], static::FIELDS[1],
+            static::PLACEHOLDERS[1]);
         $req = $this->db->prepare($statement);
 
         $req->bindValue(static::PLACEHOLDERS[0], $idAuthor, PDO::PARAM_INT);
@@ -111,8 +112,8 @@ class WriterDbManager extends DbManager
      */
     public function restoreSoftDeleted(int $idAuthor, int $idBook)
     {
-        $statement = sprintf("UPDATE %s SET deleted = 0 WHERE %s = %s AND %s = %s",
-            static::TABLE, static::FIELDS[0], static::PLACEHOLDERS[0], static::FIELDS[1], static::PLACEHOLDERS[1]);
+        $statement = sprintf("UPDATE %s SET deleted = 0, %s = CURRENT_TIMESTAMP WHERE %s = %s AND %s = %s",
+            static::TABLE, static::FIELDS[2], static::FIELDS[0], static::PLACEHOLDERS[0], static::FIELDS[1], static::PLACEHOLDERS[1]);
         $req = $this->db->prepare($statement);
 
         $req->bindValue(static::PLACEHOLDERS[0], $idAuthor, PDO::PARAM_INT);
@@ -128,8 +129,8 @@ class WriterDbManager extends DbManager
      */
     public function softDeleteAuthor(int $idAuthor)
     {
-        $statement = sprintf("UPDATE %s SET deleted = 1 WHERE %s = %s",
-            static::TABLE, static::FIELDS[0], static::PLACEHOLDERS[0]);
+        $statement = sprintf("UPDATE %s SET deleted = 1, %s = CURRENT_TIMESTAMP WHERE %s = %s",
+            static::TABLE, static::FIELDS[2], static::FIELDS[0], static::PLACEHOLDERS[0]);
         $req = $this->db->prepare($statement);
 
         $req->bindValue(static::PLACEHOLDERS[0], $idAuthor, PDO::PARAM_INT);
@@ -144,8 +145,8 @@ class WriterDbManager extends DbManager
      */
     public function restoreSoftDeletedAuthor(int $idAuthor)
     {
-        $statement = sprintf("UPDATE %s SET deleted = 0 WHERE %s = %s",
-            static::TABLE, static::FIELDS[0], static::PLACEHOLDERS[0]);
+        $statement = sprintf("UPDATE %s SET deleted = 0, %s = CURRENT_TIMESTAMP WHERE %s = %s",
+            static::TABLE, static::FIELDS[2], static::FIELDS[0], static::PLACEHOLDERS[0]);
         $req = $this->db->prepare($statement);
 
         $req->bindValue(static::PLACEHOLDERS[0], $idAuthor, PDO::PARAM_INT);
@@ -160,8 +161,8 @@ class WriterDbManager extends DbManager
      */
     public function softDeleteBook(int $idBook)
     {
-        $statement = sprintf("UPDATE %s SET deleted = 1 WHERE %s = %s",
-            static::TABLE, static::FIELDS[1], static::PLACEHOLDERS[1]);
+        $statement = sprintf("UPDATE %s SET deleted = 1, %s = CURRENT_TIMESTAMP WHERE %s = %s",
+            static::TABLE, static::FIELDS[2], static::FIELDS[1], static::PLACEHOLDERS[1]);
         $req = $this->db->prepare($statement);
 
         $req->bindValue(static::PLACEHOLDERS[1], $idBook, PDO::PARAM_INT);
@@ -176,8 +177,8 @@ class WriterDbManager extends DbManager
      */
     public function restoreSoftDeletedBook(int $idBook)
     {
-        $statement = sprintf("UPDATE %s SET deleted = 0 WHERE %s = %s",
-            static::TABLE, static::FIELDS[1], static::PLACEHOLDERS[1]);
+        $statement = sprintf("UPDATE %s SET deleted = 0, %s = CURRENT_TIMESTAMP WHERE %s = %s",
+            static::TABLE, static::FIELDS[2], static::FIELDS[1], static::PLACEHOLDERS[1]);
         $req = $this->db->prepare($statement);
 
         $req->bindValue(static::PLACEHOLDERS[1], $idBook, PDO::PARAM_INT);
@@ -223,8 +224,8 @@ class WriterDbManager extends DbManager
      */
     public function queryAll()
     {
-        $statement = sprintf("SELECT %s, %s FROM %s WHERE deleted = 0",
-            static::FIELDS[0], static::FIELDS[1], static::TABLE);
+        $statement = sprintf("SELECT %s, %s, %s FROM %s WHERE deleted = 0",
+            static::FIELDS[0], static::FIELDS[1], static::FIELDS[2], static::TABLE);
         $req = $this->db->query($statement);
         $response = $req->fetchAll(PDO::FETCH_ASSOC);
 
@@ -241,8 +242,8 @@ class WriterDbManager extends DbManager
     {
         $offsetPlaceholder = ":startResult";
         $limitPlaceholder = ":endResult";
-        $statement = sprintf("SELECT %s, %s FROM %s WHERE deleted = 0 LIMIT %s OFFSET %s",
-            static::FIELDS[0], static::FIELDS[1], static::TABLE, $limitPlaceholder,
+        $statement = sprintf("SELECT %s, %s, %S FROM %s WHERE deleted = 0 LIMIT %s OFFSET %s",
+            static::FIELDS[0], static::FIELDS[1], static::FIELDS[2], static::TABLE, $limitPlaceholder,
             $offsetPlaceholder);
         $req = $this->db->prepare($statement);
 
@@ -256,9 +257,42 @@ class WriterDbManager extends DbManager
 
     /**
      * Counts the number of entities in the database.
+     * @return null|string The json response if found else null.
      */
     public function count() {
         $statement = sprintf("SELECT COUNT(*) as %s FROM %s WHERE deleted = 0", static::COUNT, static::TABLE);
+        $req = $this->db->query($statement);
+        $response = $req->fetchAll(PDO::FETCH_ASSOC);
+
+        return (!empty($response)) ? json_encode($response) : null;
+    }
+
+    /**
+     * Get the entries that has been updated after than the date value given in parameter.
+     * @param string $date The date to query entities.
+     * @return null|string The json response if found else null.
+     */
+    public function queryNewer(string $date) {
+        $statement = sprintf("SELECT %s, %s, %s FROM %s WHERE %s > %s AND deleted = 0",
+            static::FIELDS[0], static::FIELDS[1], static::FIELDS[2], static::TABLE, static::FIELDS[2], static::PLACEHOLDERS[2]);
+        $req = $this->db->prepare($statement);
+
+        $req->bindValue(static::PLACEHOLDERS[2], $date, PDO::PARAM_STR);
+        $req->execute();
+
+        $response = $req->fetchAll(PDO::FETCH_ASSOC);
+
+        return (!empty($response)) ? json_encode($response) : null;
+    }
+
+    /**
+     * Query all writer ids and last_update fields from database in order to use it to determine which entities to update.
+     * @return null|string The json response if found else null.
+     */
+    public function queryUpdateFields()
+    {
+        $statement = sprintf("SELECT %s, %s, %s FROM %s",
+            static::FIELDS[0], static::FIELDS[1], static::FIELDS[2], static::TABLE);
         $req = $this->db->query($statement);
         $response = $req->fetchAll(PDO::FETCH_ASSOC);
 

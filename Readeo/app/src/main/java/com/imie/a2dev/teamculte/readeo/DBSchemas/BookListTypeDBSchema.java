@@ -29,9 +29,11 @@ public abstract class BookListTypeDBSchema {
      * Defines the book list type create table statement.
      */
     public static final String BOOK_LIST_TYPE_TABLE_STATEMENT = String.format("CREATE TABLE IF NOT EXISTS %s (%s " +
-                    "INTEGER PRIMARY KEY, %s TEXT(%s) UNIQUE NOT NULL);",
+                    "INTEGER PRIMARY KEY, %s TEXT(%s) UNIQUE NOT NULL, %s DATETIME NOT NULL DEFAULT %s);",
             BookListTypeDBSchema.TABLE,
             BookListTypeDBSchema.ID,
             BookListTypeDBSchema.NAME,
-            NAME_SIZE);
+            NAME_SIZE,
+            CommonDBSchema.UPDATE,
+            CommonDBSchema.UPDATE_DEFAULT);
 }

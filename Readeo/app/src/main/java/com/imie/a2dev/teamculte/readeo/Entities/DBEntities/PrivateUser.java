@@ -1,6 +1,7 @@
 package com.imie.a2dev.teamculte.readeo.Entities.DBEntities;
 
 import android.content.Context;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import com.imie.a2dev.teamculte.readeo.App;
 import com.imie.a2dev.teamculte.readeo.DBManagers.BookListDBManager;
@@ -9,6 +10,8 @@ import com.imie.a2dev.teamculte.readeo.DBManagers.CountryDBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.DBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.ReviewDBManager;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.UserDBSchema;
+import lombok.Getter;
+import lombok.Setter;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -20,6 +23,8 @@ import java.util.Map;
 /**
  * Final class representing a private user of the application (the one connected with all its attribute).
  */
+@Getter
+@Setter
 public final class PrivateUser extends PublicUser {
     /**
      * Stores the user's hashed password.
@@ -130,106 +135,10 @@ public final class PrivateUser extends PublicUser {
     }
 
     /**
-     * Gets the password attribute.
-     * @return The String value of password attribute.
-     */
-    public String getPassword() {
-        return this.password;
-    }
-
-    /**
-     * Gets the email attribute.
-     * @return The String value of email attribute.
-     */
-    public String getEmail() {
-        return this.email;
-    }
-
-    /**
-     * Gets the country attribute.
-     * @return The Country value of country attribute.
-     */
-    public Country getCountry() {
-        return this.country;
-    }
-
-    /**
-     * Gets the city attribute.
-     * @return The City value of city attribute.
-     */
-    public City getCity() {
-        return this.city;
-    }
-
-    /**
-     * Gets the bookLists attribute.
-     * @return The Map<String, BookList> value of bookLists attribute.
-     */
-    public Map<String, BookList> getBookLists() {
-        return this.bookLists;
-    }
-
-    /**
-     * Gets the reviews attribute.
-     * @return The List<Review> value of reviews attribute.
-     */
-    public List<Review> getReviews() {
-        return this.reviews;
-    }
-
-    /**
-     * Sets the password attribute.
-     * @param newPassword The new String value to set.
-     */
-    public void setPassword(String newPassword) {
-        this.password = newPassword;
-    }
-
-    /**
-     * Sets the email attribute.
-     * @param newEmail The new String value to set.
-     */
-    public void setEmail(String newEmail) {
-        this.email = newEmail;
-    }
-
-    /**
-     * Sets the country attribute.
-     * @param newCountry The new Country value to set.
-     */
-    public void setCountry(Country newCountry) {
-        this.country = newCountry;
-    }
-
-    /**
-     * Sets the city attribute.
-     * @param newCity The new City value to set.
-     */
-    public void setCity(City newCity) {
-        this.city = newCity;
-    }
-
-    /**
-     * Sets the bookLists attribute.
-     * @param newBookLists The new Map<String, BookList> value to set.
-     */
-    public void setBookLists(Map<String, BookList> newBookLists) {
-        this.bookLists = newBookLists;
-    }
-
-    /**
-     * Sets the reviews attribute.
-     * @param newReviews The new List<Review> value to set.
-     */
-    public void setReviews(List<Review> newReviews) {
-        this.reviews = newReviews;
-    }
-
-    /**
      * Initializes the user from a JSON response object.
      * @param object The JSON response from the API.
      */
-    public void init(JSONObject object) {
+    public void init(@NonNull JSONObject object) {
         try {
             Context context = App.getAppContext();
 

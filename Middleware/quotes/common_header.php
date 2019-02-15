@@ -10,7 +10,8 @@ require_once "../common_config.php";
 
 $dbManager = new QuoteDbManager();
 
-$idQuote = QuoteDbManager::FIELDS[0];
+$id = QuoteDbManager::FIELDS[0];
 $idUser = QuoteDbManager::FIELDS[1];
 $idBook = QuoteDbManager::FIELDS[2];
 $quote = QuoteDbManager::FIELDS[3];
+$update = QuoteDbManager::FIELDS[4];

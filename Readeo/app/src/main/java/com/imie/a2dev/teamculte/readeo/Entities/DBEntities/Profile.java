@@ -2,15 +2,20 @@ package com.imie.a2dev.teamculte.readeo.Entities.DBEntities;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import com.imie.a2dev.teamculte.readeo.DBManagers.DBManager;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.ProfileDBSchema;
+import lombok.Getter;
+import lombok.Setter;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
  * Final class representing the profile of an user with its related information.
  */
+@Getter
+@Setter
 public final class Profile extends DBEntity {
     /**
      * Stores the path of the user's avatar displayed on his profile.
@@ -81,42 +86,10 @@ public final class Profile extends DBEntity {
     }
 
     /**
-     * Gets the avatar attribute.
-     * @return The String value of avatar attribute.
-     */
-    public String getAvatar() {
-        return this.avatar;
-    }
-
-    /**
-     * Gets the description attribute.
-     * @return The String value of description attribute.
-     */
-    public String getDescription() {
-        return this.description;
-    }
-
-    /**
-     * Sets the avatar attribute.
-     * @param newAvatar The new String value to set.
-     */
-    public void setAvatar(String newAvatar) {
-        this.avatar = newAvatar;
-    }
-
-    /**
-     * Sets the description attribute.
-     * @param newDescription The new String value to set.
-     */
-    public void setDescription(String newDescription) {
-        this.description = newDescription;
-    }
-
-    /**
      * Initializes the profile from a JSON response object.
      * @param object The JSON response from the API.
      */
-    public void init(JSONObject object) {
+    public void init(@NonNull JSONObject object) {
         try {
             this.id = object.getInt(ProfileDBSchema.ID);
             this.avatar = object.getString(ProfileDBSchema.AVATAR);
@@ -127,7 +100,7 @@ public final class Profile extends DBEntity {
     }
 
     @Override
-    protected void init(Cursor result, boolean close) {
+    protected void init(@NonNull Cursor result, boolean close) {
         try {
             if (result.getPosition() == -1) {
                 result.moveToNext();

@@ -14,3 +14,4 @@ $idUser = ReviewDbManager::FIELDS[0];
 $idBook = ReviewDbManager::FIELDS[1];
 $review = ReviewDbManager::FIELDS[2];
 $shared = ReviewDbManager::FIELDS[3];
+$update = ReviewDbManager::FIELDS[4];

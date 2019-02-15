@@ -15,8 +15,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
+import static com.imie.a2dev.teamculte.readeo.DBSchemas.CommonDBSchema.UPDATE;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.UserDBSchema.CITY;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.UserDBSchema.COUNTRY;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.UserDBSchema.EMAIL;
@@ -101,6 +103,7 @@ public final class UserDBManager extends DBManager {
             data.put(ID, entity.getId());
             data.put(PSEUDO, entity.getPseudo());
             data.put(PROFILE, entity.getProfile().getId());
+            data.put(UPDATE, new Date().toString());
 
             return DBManager.database.update(this.table, data, whereClause, whereArgs) != 0;
         } catch (SQLiteException e) {

@@ -2,16 +2,21 @@ package com.imie.a2dev.teamculte.readeo.Entities.DBEntities;
 
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import com.imie.a2dev.teamculte.readeo.App;
 import com.imie.a2dev.teamculte.readeo.DBManagers.DBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.ProfileDBManager;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.UserDBSchema;
+import lombok.Getter;
+import lombok.Setter;
 
 /**
  * Final class representing a public user of the application (without personal data, book lists and
  * reviews).
  */
+@Getter
+@Setter
 public class PublicUser extends DBEntity {
     /**
      * Stores the user's pseudo.
@@ -72,40 +77,8 @@ public class PublicUser extends DBEntity {
         this.init(result, close);
     }
 
-    /**
-     * Gets the pseudo attribute.
-     * @return The String value of pseudo attribute.
-     */
-    public String getPseudo() {
-        return this.pseudo;
-    }
-
-    /**
-     * Gets the profile attribute.
-     * @return The Profile value of profile attribute.
-     */
-    public Profile getProfile() {
-        return this.profile;
-    }
-
-    /**
-     * Sets the pseudo attribute.
-     * @param newPseudo The new String value to set.
-     */
-    public void setPseudo(String newPseudo) {
-        this.pseudo = newPseudo;
-    }
-
-    /**
-     * Sets the profile attribute.
-     * @param newProfile The new Profile value to set.
-     */
-    public void setProfile(Profile newProfile) {
-        this.profile = newProfile;
-    }
-
     @Override
-    protected void init(Cursor result, boolean close) {
+    protected void init(@NonNull Cursor result, boolean close) {
         try {
             if (result.getPosition() == -1) {
                 result.moveToNext();

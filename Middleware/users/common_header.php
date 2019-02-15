@@ -10,7 +10,7 @@ require_once "../common_config.php";
 
 $dbManager = new UserDbManager();
 
-$idUser = UserDbManager::FIELDS[0];
+$id = UserDbManager::FIELDS[0];
 $pseudo = UserDbManager::FIELDS[1];
 $password = UserDbManager::FIELDS[2];
 $email = UserDbManager::FIELDS[3];
@@ -18,3 +18,4 @@ $idProfile = UserDbManager::FIELDS[4];
 $idCity = UserDbManager::FIELDS[5];
 $idCountry = UserDbManager::FIELDS[6];
 $publicMode = "public";
+$update = UserDbManager::FIELDS[7];

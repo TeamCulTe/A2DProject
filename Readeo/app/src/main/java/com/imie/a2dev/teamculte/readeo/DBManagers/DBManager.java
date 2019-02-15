@@ -29,6 +29,8 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import static com.imie.a2dev.teamculte.readeo.DBSchemas.CommonDBSchema.UPDATE;
+
 /**
  * Abstract class extended by all DBManager classes (used to manage entities into databases).
  */
@@ -97,6 +99,16 @@ public abstract class DBManager {
      */
     protected final static String DOUBLE_QUERY_ALL = "SELECT * FROM %s WHERE %s = ? AND %s = ?";
 
+    /**
+     * Defines the default simple update query (getting the id and the last_update fields) from SQLite db.
+     */
+    protected final static String SIMPLE_QUERY_UPDATE = "SELECT %s, " + UPDATE + " FROM %s";
+
+    /**
+     * Defines the default double update query (getting the id and the last_update fields) from SQLite db.
+     */
+    protected final static String DOUBLE_QUERY_UPDATE = "SELECT %s, %s, " + UPDATE + " FROM %s";
+
     // Other attributes
 
     /**
@@ -120,7 +132,7 @@ public abstract class DBManager {
     protected String table;
 
     /**
-     * Stores the DBManager's managed entities id.
+     * Stores the DBManager's managed entities id labels.
      */
     protected String[] ids;
 
@@ -268,7 +280,7 @@ public abstract class DBManager {
         final Integer[] max = new Integer[1];
         final Integer[] indexes = new Integer[]{0, 0};
 
-        this.requestJsonArray(Request.Method.GET, url + "?" + COUNT, new Response.Listener<JSONArray>() {
+        this.requestJsonArray(Request.Method.GET, url + COUNT, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
                 try {
@@ -276,12 +288,14 @@ public abstract class DBManager {
                     indexes[1] = (max[0] > PAGINATION) ? PAGINATION : max[0];
 
                     while (!indexes[0].equals(max[0])) {
-                        DBManager.this.importFromMySQL(String.format("%s?start=%s&end=%s", url, indexes[0], indexes[1]));
+                        DBManager.this.importFromMySQL(String.format("%sstart=%s&end=%s", url, indexes[0], indexes[1]));
                         DBManager.this.updateIndexes(indexes, max[0]);
                     }
                 } catch (JSONException e) {
                     Log.e(JSON_TAG, e.getMessage());
                 }
+
+                HTTPRequestQueueSingleton.getInstance(DBManager.this.context).finishRequest();
             }
         });
     }
@@ -303,6 +317,13 @@ public abstract class DBManager {
         new QuoteDBManager(context).importFromMySQL();
         new ReviewDBManager(context).importFromMySQL();
         new WriterDBManager(context).importFromMySQL();
+    }
+
+    /**
+     * Imports all new entries and updated entities from MySQL database into the SQLite one.
+     */
+    public static void updateDatabase() {
+
     }
 
     /**
@@ -440,6 +461,35 @@ public abstract class DBManager {
      * @param entity The JSON object to store into the database.
      */
     protected abstract void createSQLite(@NonNull JSONObject entity);
+
+    /**
+     * Gets the list of id / last_update from the SQLite database.
+     * @return A string array of strings containing the id at index 0 and the date at index 1.
+     */
+    protected String[][] getUpdateFieldsSQLite() {
+        try {
+            int fieldsNumber = 2;
+            String query = String.format(SIMPLE_QUERY_UPDATE, ids[0], this.table);
+            Cursor result = DBManager.database.rawQuery(query, null);
+            String[][] data = new String[result.getCount()][fieldsNumber];
+            int i = 0;
+
+            while (result.moveToNext()) {
+                data[i][0] = result.getString(result.getColumnIndex(ids[0]));
+                data[i][1] = result.getString(result.getColumnIndex(UPDATE));
+
+                i++;
+            }
+
+            result.close();
+
+            return data;
+        } catch (SQLiteException e) {
+            Log.e(SQLITE_TAG, e.getMessage());
+
+            return null;
+        }
+    }
 
     /**
      * Opens and set the SQLiteDatabase.

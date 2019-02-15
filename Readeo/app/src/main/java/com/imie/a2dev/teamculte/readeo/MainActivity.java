@@ -1,5 +1,6 @@
 package com.imie.a2dev.teamculte.readeo;
 
+import android.net.wifi.SupplicantState;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import com.android.volley.RequestQueue;
@@ -29,6 +30,7 @@ import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.PublicUser;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Quote;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Review;
 
+import java.util.Date;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements HTTPRequestQueueSingleton.HTTPRequestQueueListener {
@@ -68,18 +70,22 @@ public class MainActivity extends AppCompatActivity implements HTTPRequestQueueS
         Quote quote = new Quote();
         Review review = new Review();
 
-//        DBManager.importMySQLDatabase();
+        String[][] a = authorDBManager.getUpdateFieldsSQLite();
+        System.err.print(a);
 
-        List<Author> authors = authorDBManager.queryAllSQLite();
-        List<Category> categories = categoryDBManager.queryAllSQLite();
-        List<City> cities = cityDBManager.queryAllSQLite();
-        List<Country> countries = countryDBManager.queryAllSQLite();
-        List<Profile> profiles = profileDBManager.queryAllSQLite();
-        List<Book> books = bookDBManager.queryAllSQLite();
-        List<BookListType> bookListTypes = bookListTypeDBManager.queryAllSQLite();
-        List<PublicUser> publicUsers = userDBManager.queryAllSQLite();
-        List<Quote> quotes = quoteDBManager.queryAllSQLite();
-        List<Review> reviews = reviewDBManager.queryAllSQLite();
+
+        //DBManager.importMySQLDatabase();
+
+//        List<Author> authors = authorDBManager.queryAllSQLite();
+//        List<Category> categories = categoryDBManager.queryAllSQLite();
+//        List<City> cities = cityDBManager.queryAllSQLite();
+//        List<Country> countries = countryDBManager.queryAllSQLite();
+//        List<Profile> profiles = profileDBManager.queryAllSQLite();
+//        List<Book> books = bookDBManager.queryAllSQLite();
+//        List<BookListType> bookListTypes = bookListTypeDBManager.queryAllSQLite();
+//        List<PublicUser> publicUsers = userDBManager.queryAllSQLite();
+//        List<Quote> quotes = quoteDBManager.queryAllSQLite();
+//        List<Review> reviews = reviewDBManager.queryAllSQLite();
 
         HTTPRequestQueueSingleton r = HTTPRequestQueueSingleton.getInstance(this);
         r.setListener(this);

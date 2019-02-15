@@ -5,16 +5,20 @@ import android.database.sqlite.SQLiteException;
 import android.util.Log;
 import com.imie.a2dev.teamculte.readeo.App;
 import com.imie.a2dev.teamculte.readeo.DBManagers.DBManager;
-import com.imie.a2dev.teamculte.readeo.DBManagers.ReviewDBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.UserDBManager;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.ReviewDBSchema;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.UserDBSchema;
+import lombok.Getter;
+import lombok.NonNull;
+import lombok.Setter;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 /**
  * Final class representing a review written by an user for a specific book.
  */
+@Getter
+@Setter
 public final class Review extends DBEntity {
     /**
      * Stores the author's pseudo.
@@ -93,58 +97,10 @@ public final class Review extends DBEntity {
     }
 
     /**
-     * Gets the author attribute.
-     * @return The String value of author attribute.
-     */
-    public String getAuthor() {
-        return this.author;
-    }
-
-    /**
-     * Gets the review attribute.
-     * @return The String value of review attribute.
-     */
-    public String getReview() {
-        return this.review;
-    }
-
-    /**
-     * Gets the shared attribute.
-     * @return The boolean value of the sgit hared attribute.
-     */
-    public boolean isShared() {
-        return this.shared;
-    }
-
-    /**
-     * Sets the author attribute.
-     * @param newAuthor The new User value to set.
-     */
-    public void setAuthor(String newAuthor) {
-        this.author = newAuthor;
-    }
-
-    /**
-     * Sets the review attribute.
-     * @param newReview The new String value to set.
-     */
-    public void setReview(String newReview) {
-        this.review = newReview;
-    }
-
-    /**
-     * Sets the shared attribute.
-     * @param newShared The new boolean value to set.
-     */
-    public void setShared(boolean newShared) {
-        this.shared = newShared;
-    }
-
-    /**
      * Initializes the review from a JSON response object.
      * @param object The JSON response from the API.
      */
-    public void init(JSONObject object) {
+    public void init(@NonNull JSONObject object) {
         try {
             this.id = object.getInt(ReviewDBSchema.BOOK);
             this.author = new UserDBManager(App.getAppContext()).getFieldSQLite(UserDBSchema.PSEUDO,
@@ -156,7 +112,7 @@ public final class Review extends DBEntity {
     }
 
     @Override
-    protected void init(Cursor result, boolean close) {
+    protected void init(@NonNull Cursor result, boolean close) {
         try {
             if (result.getPosition() == -1) {
                 result.moveToNext();

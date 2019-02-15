@@ -8,11 +8,14 @@
 
 require_once "common_header.php";
 
-if (isset($_GET[$idAuthor])) {
+if (isset($_GET[$updateQuery])) {
+    $response = $dbManager->queryUpdateFields();
+} elseif (isset($_GET[$idAuthor])) {
     $response = $dbManager->getBookWriters($_GET[$idAuthor]);
-}
-if (isset($_GET[$idBook])) {
+} elseif (isset($_GET[$idBook])) {
     $response = $dbManager->getWriterBooks($_GET[$idBook]);
+} elseif (isset($_GET[$new]) && isset($_GET[$update])) {
+    $response = $dbManager->queryNewer(($_GET[$update]));
 } elseif (isset($_GET[$count])) {
     $response = $dbManager->count();
 } elseif (isset($_GET[$start]) && isset($_GET[$end])) {

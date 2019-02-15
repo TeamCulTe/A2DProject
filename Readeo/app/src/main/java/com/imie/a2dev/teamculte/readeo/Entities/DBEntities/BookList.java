@@ -2,12 +2,15 @@ package com.imie.a2dev.teamculte.readeo.Entities.DBEntities;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import com.imie.a2dev.teamculte.readeo.App;
 import com.imie.a2dev.teamculte.readeo.DBManagers.BookDBManager;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.BookListDBSchema;
 import com.imie.a2dev.teamculte.readeo.DBManagers.BookListTypeDBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.DBManager;
+import lombok.Getter;
+import lombok.Setter;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -18,6 +21,8 @@ import java.util.List;
 /**
  * Final class representing a book list from a specific user.
  */
+@Getter
+@Setter
 public final class BookList extends DBEntity {
     /**
      * Defines the type of the book list among "read", "reading", "to read".
@@ -71,40 +76,8 @@ public final class BookList extends DBEntity {
         this.init(result);
     }
 
-    /**
-     * Gets the type attribute.
-     * @return The BookListType value of type attribute.
-     */
-    public BookListType getType() {
-        return this.type;
-    }
-
-    /**
-     * Gets the books attribute.
-     * @return The List<Book> value of books attribute.
-     */
-    public List<Book> getBooks() {
-        return this.books;
-    }
-
-    /**
-     * Sets the type attribute.
-     * @param newType The new BookListType value to set.
-     */
-    public void setType(BookListType newType) {
-        this.type = newType;
-    }
-
-    /**
-     * Sets the books attribute.
-     * @param newBooks The new List<Book> value to set.
-     */
-    public void setBooks(List<Book> newBooks) {
-        this.books = newBooks;
-    }
-
     @Override
-    protected void init(Cursor result, boolean close) {
+    protected void init(@NonNull Cursor result, boolean close) {
         // Not used as the BookList is a MySQL entity, not an SQLite one.
     }
 
@@ -112,9 +85,8 @@ public final class BookList extends DBEntity {
      * Initializes the user from a JSON response array.
      * @param array The JSON response from the API.
      */
-    public void init(JSONArray array) {
+    public void init(@NonNull JSONArray array) {
         try {
-            Context context = App.getAppContext();
             BookDBManager bookDBManager = new BookDBManager(App.getAppContext());
             JSONObject first = array.getJSONObject(0);
 

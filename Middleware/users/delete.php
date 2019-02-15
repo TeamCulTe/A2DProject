@@ -8,8 +8,8 @@
 
 require_once "common_header.php";
 
-if (isset($_PUT[$idUser])) {
-    $response_code = ($dbManager->softDelete($_PUT[$idUser])) ? 200 : 404;
+if (isset($_PUT[$id])) {
+    $response_code = ($dbManager->softDelete($_PUT[$id])) ? 200 : 404;
 } elseif (isset($_PUT[$email]) && isset($_PUT[$password])) {
     $response_code = ($dbManager->softDeleteFromAuth($_PUT[$email], $_PUT[$password])) ? 200 : 404;
 } else {

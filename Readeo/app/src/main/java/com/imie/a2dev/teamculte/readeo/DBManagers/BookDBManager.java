@@ -15,6 +15,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookDBSchema.ID;
@@ -24,6 +25,7 @@ import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookDBSchema.CATEGORY;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookDBSchema.COVER;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookDBSchema.SUMMARY;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookDBSchema.DATE;
+import static com.imie.a2dev.teamculte.readeo.DBSchemas.CommonDBSchema.UPDATE;
 
 /**
  * Manager class used to manage the book entities from databases.
@@ -87,6 +89,7 @@ public final class BookDBManager extends DBManager {
             data.put(COVER, entity.getCover());
             data.put(SUMMARY, entity.getSummary());
             data.put(DATE, entity.getDatePublished());
+            data.put(UPDATE, new Date().toString());
 
             return DBManager.database.update(this.table, data, whereClause, whereArgs) != 0;
         } catch (SQLiteException e) {

@@ -4,4 +4,8 @@ Methods not tested :
 - softDelete (author and book from Review class).
 - delete (author and book from Review class).
 - Review xxxShared methods.
+
 Possible methods to add :
+
+TODO: Remove all unused methods and fields query when done (such as deletion, last_update ect..).
+TODO: See if refacto everything with inheritance by setting the fields as instance attributes (Grouping common methods such as delete, simple named entities extending a mother class...).

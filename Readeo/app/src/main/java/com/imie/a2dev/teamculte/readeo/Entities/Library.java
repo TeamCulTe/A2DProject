@@ -3,6 +3,9 @@ package com.imie.a2dev.teamculte.readeo.Entities;
 import com.imie.a2dev.teamculte.readeo.App;
 import com.imie.a2dev.teamculte.readeo.DBManagers.BookDBManager;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Book;
+import lombok.Getter;
+import lombok.Setter;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,6 +13,8 @@ import java.util.List;
  * Final class representing a library displaying a list of books to the user depending on the filter applied
  * (category, author, title...).
  */
+@Getter
+@Setter
 public final class Library {
     /**
      * Stores the type of filter applied.
@@ -41,55 +46,6 @@ public final class Library {
     public Library(String filterKey, String filterValue) {
         this.filterKey = filterKey;
         this.filterValue = filterValue;
-
         this.books = new BookDBManager(App.getAppContext()).loadFilteredSQLite(this.filterKey, this.filterValue);
-    }
-
-    /**
-     * Gets the filterKey attribute.
-     * @return The String value of filterKey attribute.
-     */
-    public String getFilterKey() {
-        return this.filterKey;
-    }
-
-    /**
-     * Gets the filterValue attribute.
-     * @return The String value of filterValue attribute.
-     */
-    public String getFilterValue() {
-        return this.filterValue;
-    }
-
-    /**
-     * Gets the books attribute.
-     * @return The List<Book> value of books attribute.
-     */
-    public List<Book> getBooks() {
-        return this.books;
-    }
-
-    /**
-     * Sets the filterKey attribute.
-     * @param newFilterKey The new String value to set.
-     */
-    public void setFilterKey(String newFilterKey) {
-        this.filterKey = newFilterKey;
-    }
-
-    /**
-     * Sets the filterValue attribute.
-     * @param newFilterValue The new String value to set.
-     */
-    public void setFilterValue(String newFilterValue) {
-        this.filterValue = newFilterValue;
-    }
-
-    /**
-     * Sets the books attribute.
-     * @param newBooks The new List<Book> value to set.
-     */
-    public void setBooks(List<Book> newBooks) {
-        this.books = newBooks;
     }
 }

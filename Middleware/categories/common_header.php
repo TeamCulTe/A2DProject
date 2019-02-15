@@ -12,3 +12,4 @@ $dbManager = new CategoryDbManager();
 
 $id = CategoryDbManager::FIELDS[0];
 $name = CategoryDbManager::FIELDS[1];
+$update = CategoryDbManager::FIELDS[2];

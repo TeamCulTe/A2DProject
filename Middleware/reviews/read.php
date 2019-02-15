@@ -12,11 +12,24 @@ if (!isset($_GET[$shared])) {
     $_GET[$shared] = false;
 }
 
-if (isset($_GET[$idUser]) && isset($_GET[$idBook])) {
+if (isset($_GET[$updateQuery])) {
+    if ($_GET[$shared]) {
+        $response = $dbManager->querySharedUpdateFields();
+    } else {
+        $response = $dbManager->queryUpdateFields();
+    }
+} elseif (isset($_GET[$idUser]) && isset($_GET[$idBook])) {
     if ($_GET[$shared]) {
         $response = $dbManager->getSharedReview($_GET[$idUser], $_GET[$idBook]);
     } else {
         $response = $dbManager->getReview($_GET[$idUser], $_GET[$idBook]);
+    }
+
+} elseif (isset($_GET[$new]) && isset($_GET[$update])) {
+    if ($_GET[$shared]) {
+        $response = $dbManager->querySharedNewer(($_GET[$update]));
+    } else {
+        $response = $dbManager->queryNewer(($_GET[$update]));
     }
 
 } elseif (isset($_GET[$idUser])) {
