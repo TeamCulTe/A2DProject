@@ -8,8 +8,8 @@
 
 require_once "common_header.php";
 
-if (isset($_PUT[$idQuote]) && isset($_PUT[$quote])) {
-    $response_code = ($dbManager->update($_PUT[$idQuote], $_PUT[$quote])) ? 200 : 404;
+if (isset($_PUT[$id]) && isset($_PUT[$quote])) {
+    $response_code = ($dbManager->update($_PUT[$id], $_PUT[$quote])) ? 200 : 404;
 } else {
     $response_code = 400;
 }

@@ -8,8 +8,8 @@
 
 require_once "common_header.php";
 
-if (isset($_PUT[$idQuote])) {
-    $response_code = ($dbManager->restoreSoftDeleted($_PUT[$idQuote])) ? 200 : 404;
+if (isset($_PUT[$id])) {
+    $response_code = ($dbManager->restoreSoftDeleted($_PUT[$id])) ? 200 : 404;
 } elseif (isset($_PUT[$idUser])) {
     $response_code = ($dbManager->restoreSoftDeletedUserQuotes($_PUT[$idUser])) ? 200 : 404;
 } elseif (isset($_PUT[$idBook])) {

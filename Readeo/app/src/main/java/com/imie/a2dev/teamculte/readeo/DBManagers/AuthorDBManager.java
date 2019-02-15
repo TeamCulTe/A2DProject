@@ -160,7 +160,7 @@ public final class AuthorDBManager extends DBManager {
      * database.
      */
     public void importFromMySQL() {
-        super.importFromMySQL(baseUrl + APIManager.READ);
+        super.importFromMySQL(this.baseUrl + APIManager.READ);
     }
 
     /**
@@ -168,7 +168,8 @@ public final class AuthorDBManager extends DBManager {
      */
     public void getUpdateFromMySQL() {
         final String[][] mysqlUpdateFIelds = this.getUpdateFieldsSQLite();
-        this.requestJsonArray(Request.Method.POST, baseUrl + APIManager.READ_UPDATE, new Response.Listener<JSONArray>() {
+        this.requestJsonArray(Request.Method.POST, this.baseUrl + APIManager.READ_UPDATE,
+                new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray response) {
                 //TODO : Create a double array and compare both id/last_update fields.
