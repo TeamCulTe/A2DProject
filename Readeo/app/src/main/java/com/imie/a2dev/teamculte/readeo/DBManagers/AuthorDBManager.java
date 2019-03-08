@@ -6,11 +6,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
 import android.util.Log;
-import com.android.volley.Request;
-import com.android.volley.Response;
 import com.imie.a2dev.teamculte.readeo.APIManager;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Author;
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -28,11 +25,6 @@ import static com.imie.a2dev.teamculte.readeo.DBSchemas.CommonDBSchema.UPDATE;
  */
 public final class AuthorDBManager extends DBManager {
     /**
-     * Stores the base of the authors API url.
-     */
-    private final String baseUrl = APIManager.API_URL + APIManager.AUTHORS;
-
-    /**
      * AuthorDBManager's constructor.
      * @param context The associated context.
      */
@@ -41,6 +33,7 @@ public final class AuthorDBManager extends DBManager {
 
         this.table = TABLE;
         this.ids = new String[]{ID};
+        this.baseUrl = APIManager.API_URL + APIManager.AUTHORS;
     }
 
     /**
@@ -54,7 +47,7 @@ public final class AuthorDBManager extends DBManager {
 
             data.put(ID, entity.getId());
             data.put(NAME, entity.getName());
-            DBManager.database.insertOrThrow(this.table, null, data);
+            this.database.insertOrThrow(this.table, null, data);
 
             return true;
         } catch (SQLiteException e) {
@@ -78,7 +71,7 @@ public final class AuthorDBManager extends DBManager {
             data.put(NAME, entity.getName());
             data.put(UPDATE, new Date().toString());
 
-            return DBManager.database.update(this.table, data, whereClause, whereArgs) != 0;
+            return this.database.update(this.table, data, whereClause, whereArgs) != 0;
         } catch (SQLiteException e) {
             Log.e(SQLITE_TAG, e.getMessage());
 
@@ -94,8 +87,8 @@ public final class AuthorDBManager extends DBManager {
     public Author loadSQLite(int id) {
         try {
             String[] selectArgs = {String.valueOf(id)};
-            String query = String.format(SIMPLE_QUERY_ALL, this.table, ID);
-            Cursor result = DBManager.database.rawQuery(query, selectArgs);
+            String query = String.format(this.SIMPLE_QUERY_ALL, this.table, ID);
+            Cursor result = this.database.rawQuery(query, selectArgs);
 
             return new Author(result);
         } catch (SQLiteException e) {
@@ -113,7 +106,7 @@ public final class AuthorDBManager extends DBManager {
         List<Author> authors = new ArrayList<>();
 
         try {
-            Cursor result = DBManager.database.rawQuery(String.format(QUERY_ALL, this.table), null);
+            Cursor result = this.database.rawQuery(String.format(this.QUERY_ALL, this.table), null);
 
             if (result.getCount() > 0) {
                 do {
@@ -139,7 +132,7 @@ public final class AuthorDBManager extends DBManager {
         List<Author> authors = new ArrayList<>();
 
         try {
-            Cursor result = DBManager.database.rawQuery(String.format(QUERY_ALL_PAGINATED, this.table, start, end), null);
+            Cursor result = this.database.rawQuery(String.format(this.QUERY_ALL_PAGINATED, this.table, start, end), null);
 
             if (result.getCount() > 0) {
                 do {
@@ -163,20 +156,6 @@ public final class AuthorDBManager extends DBManager {
         super.importFromMySQL(this.baseUrl + APIManager.READ);
     }
 
-    /**
-     * Gets the list of MySQL ids and last update fields in order to check which entities needs to be updated.
-     */
-    public void getUpdateFromMySQL() {
-        final String[][] mysqlUpdateFIelds = this.getUpdateFieldsSQLite();
-        this.requestJsonArray(Request.Method.POST, this.baseUrl + APIManager.READ_UPDATE,
-                new Response.Listener<JSONArray>() {
-            @Override
-            public void onResponse(JSONArray response) {
-                //TODO : Create a double array and compare both id/last_update fields.
-            }
-        });
-    }
-
     @Override
     protected void createSQLite(@NonNull JSONObject entity) {
         try {
@@ -184,11 +163,33 @@ public final class AuthorDBManager extends DBManager {
 
             data.put(ID, entity.getInt(ID));
             data.put(NAME, entity.getString(NAME));
-            DBManager.database.insertOrThrow(this.table, null, data);
+            this.database.insertOrThrow(this.table, null, data);
         } catch (SQLiteException e) {
             Log.e(SQLITE_TAG, e.getMessage());
         } catch (JSONException e) {
             Log.e(SQLITE_TAG, e.getMessage());
+        }
+    }
+
+    @Override
+    public boolean updateSQLite(@NonNull JSONObject entity) {
+        try {
+            ContentValues data = new ContentValues();
+            String whereClause = String.format("%s = ?", ID);
+            String[] whereArgs = new String[]{entity.getString(ID)};
+
+            data.put(NAME, entity.getString(NAME));
+            data.put(UPDATE, new Date().toString());
+
+            return this.database.update(this.table, data, whereClause, whereArgs) != 0;
+        } catch (SQLiteException e) {
+            Log.e(SQLITE_TAG, e.getMessage());
+
+            return false;
+        } catch (JSONException e) {
+            Log.e(SQLITE_TAG, e.getMessage());
+
+            return false;
         }
     }
 }

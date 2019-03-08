@@ -28,11 +28,6 @@ import static com.imie.a2dev.teamculte.readeo.DBSchemas.ProfileDBSchema.TABLE;
  */
 public final class ProfileDBManager extends DBManager {
     /**
-     * Stores the base of the profiles API url.
-     */
-    private final String baseUrl = APIManager.API_URL + APIManager.PROFILES;
-
-    /**
      * ProfileDBManager's constructor.
      * @param context The associated context.
      */
@@ -41,6 +36,7 @@ public final class ProfileDBManager extends DBManager {
 
         this.table = TABLE;
         this.ids = new String[]{ID};
+        this.baseUrl = APIManager.API_URL + APIManager.PROFILES;
     }
 
     /**
@@ -55,7 +51,7 @@ public final class ProfileDBManager extends DBManager {
             data.put(ID, entity.getId());
             data.put(AVATAR, entity.getAvatar());
             data.put(DESCRIPTION, entity.getDescription());
-            DBManager.database.insertOrThrow(this.table, null, data);
+            this.database.insertOrThrow(this.table, null, data);
 
             return true;
         } catch (SQLiteException e) {
@@ -80,7 +76,7 @@ public final class ProfileDBManager extends DBManager {
             data.put(DESCRIPTION, entity.getDescription());
             data.put(UPDATE, new Date().toString());
 
-            return DBManager.database.update(this.table, data, whereClause, whereArgs) != 0;
+            return this.database.update(this.table, data, whereClause, whereArgs) != 0;
         } catch (SQLiteException e) {
             Log.e(SQLITE_TAG, e.getMessage());
 
@@ -96,8 +92,8 @@ public final class ProfileDBManager extends DBManager {
     public Profile loadSQLite(int id) {
         try {
             String[] selectArgs = {String.valueOf(id)};
-            String query = String.format(SIMPLE_QUERY_ALL, this.table, ID);
-            Cursor result = DBManager.database.rawQuery(query, selectArgs);
+            String query = String.format(this.SIMPLE_QUERY_ALL, this.table, ID);
+            Cursor result = this.database.rawQuery(query, selectArgs);
 
             return new Profile(result);
         } catch (SQLiteException e) {
@@ -115,7 +111,7 @@ public final class ProfileDBManager extends DBManager {
         List<Profile> profiles = new ArrayList<>();
 
         try {
-            Cursor result = DBManager.database.rawQuery(String.format(QUERY_ALL, this.table), null);
+            Cursor result = this.database.rawQuery(String.format(this.QUERY_ALL, this.table), null);
 
             if (result.getCount() > 0) {
                 do {
@@ -234,11 +230,33 @@ public final class ProfileDBManager extends DBManager {
             data.put(ID, entity.getInt(ID));
             data.put(AVATAR, entity.getString(AVATAR));
             data.put(DESCRIPTION, entity.getString(DESCRIPTION));
-            DBManager.database.insertOrThrow(this.table, null, data);
+            this.database.insertOrThrow(this.table, null, data);
         } catch (SQLiteException e) {
             Log.e(SQLITE_TAG, e.getMessage());
         } catch (JSONException e) {
             Log.e(SQLITE_TAG, e.getMessage());
+        }
+    }
+
+    @Override
+    public boolean updateSQLite(@NonNull JSONObject entity) {
+        try {
+            ContentValues data = new ContentValues();
+            String whereClause = String.format("%s = ?", ID);
+            String[] whereArgs = new String[]{entity.getString(ID)};
+
+            data.put(AVATAR, entity.getString(AVATAR));
+            data.put(DESCRIPTION, entity.getString(DESCRIPTION));
+
+            return this.database.update(this.table, data, whereClause, whereArgs) != 0;
+        } catch (SQLiteException e) {
+            Log.e(SQLITE_TAG, e.getMessage());
+
+            return false;
+        } catch (JSONException e) {
+            Log.e(SQLITE_TAG, e.getMessage());
+
+            return false;
         }
     }
 }

@@ -15,4 +15,9 @@ public abstract class CommonDBSchema {
      * Stores the default lat update column value.
      */
     public static String UPDATE_DEFAULT = "(DATETIME('now'))";
+
+    /**
+     * Stores the default lat update column value.
+     */
+    public static String DATE_FORMAT = "yyyy-MM-dd HH:mm:ss";
 }

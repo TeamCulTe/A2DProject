@@ -291,7 +291,7 @@ class WriterDbManager extends DbManager
      */
     public function queryUpdateFields()
     {
-        $statement = sprintf("SELECT %s, %s, %s FROM %s",
+        $statement = sprintf("SELECT %s, %s, %s FROM %s WHERE deleted = 0",
             static::FIELDS[0], static::FIELDS[1], static::FIELDS[2], static::TABLE);
         $req = $this->db->query($statement);
         $response = $req->fetchAll(PDO::FETCH_ASSOC);
