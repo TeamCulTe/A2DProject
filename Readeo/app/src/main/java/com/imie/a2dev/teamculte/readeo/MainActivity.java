@@ -70,9 +70,8 @@ public class MainActivity extends AppCompatActivity implements HTTPRequestQueueS
         Quote quote = new Quote();
         Review review = new Review();
 
-        String[][] a = authorDBManager.getUpdateFieldsSQLite();
-        System.err.print(a);
-
+//        String[][] a = reviewDBManager.getUpdateFieldsSQLite();
+        authorDBManager.getUpdateFromMySQL();
 
         //DBManager.importMySQLDatabase();
 

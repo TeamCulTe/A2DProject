@@ -25,11 +25,6 @@ import static com.imie.a2dev.teamculte.readeo.DBSchemas.CommonDBSchema.UPDATE;
  */
 public final class BookListTypeDBManager extends DBManager {
     /**
-     * Stores the base of the categories API url.
-     */
-    private final String baseUrl = APIManager.API_URL + APIManager.BOOK_LIST_TYPES;
-
-    /**
      * CategoryDBManager's constructor.
      * @param context The associated context.
      */
@@ -38,6 +33,7 @@ public final class BookListTypeDBManager extends DBManager {
 
         this.table = TABLE;
         this.ids = new String[]{ID};
+        this.baseUrl = APIManager.API_URL + APIManager.BOOK_LIST_TYPES;
     }
 
     /**
@@ -51,7 +47,7 @@ public final class BookListTypeDBManager extends DBManager {
 
             data.put(ID, entity.getId());
             data.put(NAME, entity.getName());
-            DBManager.database.insertOrThrow(this.table, null, data);
+            this.database.insertOrThrow(this.table, null, data);
 
             return true;
         } catch (SQLiteException e) {
@@ -75,7 +71,7 @@ public final class BookListTypeDBManager extends DBManager {
             data.put(NAME, entity.getName());
             data.put(UPDATE, new Date().toString());
 
-            return DBManager.database.update(this.table, data, whereClause, whereArgs) != 0;
+            return this.database.update(this.table, data, whereClause, whereArgs) != 0;
         } catch (SQLiteException e) {
             Log.e(SQLITE_TAG, e.getMessage());
 
@@ -91,8 +87,8 @@ public final class BookListTypeDBManager extends DBManager {
     public BookListType loadSQLite(int id) {
         try {
             String[] selectArgs = {String.valueOf(id)};
-            String query = String.format(SIMPLE_QUERY_ALL, this.table, ID);
-            Cursor result = DBManager.database.rawQuery(query, selectArgs);
+            String query = String.format(this.SIMPLE_QUERY_ALL, this.table, ID);
+            Cursor result = this.database.rawQuery(query, selectArgs);
 
             return new BookListType(result);
         } catch (SQLiteException e) {
@@ -110,7 +106,7 @@ public final class BookListTypeDBManager extends DBManager {
         List<BookListType> bookListTypes = new ArrayList<>();
 
         try {
-            Cursor result = DBManager.database.rawQuery(String.format(QUERY_ALL, this.table), null);
+            Cursor result = this.database.rawQuery(String.format(this.QUERY_ALL, this.table), null);
 
             if (result.getCount() > 0) {
                 do {
@@ -141,11 +137,32 @@ public final class BookListTypeDBManager extends DBManager {
 
             data.put(ID, entity.getInt(ID));
             data.put(NAME, entity.getString(NAME));
-            DBManager.database.insertOrThrow(this.table, null, data);
+            this.database.insertOrThrow(this.table, null, data);
         } catch (SQLiteException e) {
             Log.e(SQLITE_TAG, e.getMessage());
         } catch (JSONException e) {
             Log.e(SQLITE_TAG, e.getMessage());
+        }
+    }
+
+    @Override
+    public boolean updateSQLite(@NonNull JSONObject entity) {
+        try {
+            ContentValues data = new ContentValues();
+            String whereClause = String.format("%s = ?", ID);
+            String[] whereArgs = new String[]{entity.getString(ID)};
+
+            data.put(NAME, entity.getString(NAME));
+
+            return this.database.update(this.table, data, whereClause, whereArgs) != 0;
+        } catch (SQLiteException e) {
+            Log.e(SQLITE_TAG, e.getMessage());
+
+            return false;
+        } catch (JSONException e) {
+            Log.e(SQLITE_TAG, e.getMessage());
+
+            return false;
         }
     }
 }

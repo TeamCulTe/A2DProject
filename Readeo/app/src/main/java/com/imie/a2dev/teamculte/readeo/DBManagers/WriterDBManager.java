@@ -25,11 +25,6 @@ import static com.imie.a2dev.teamculte.readeo.DBSchemas.WriterDBSchema.TABLE;
  */
 public final class WriterDBManager extends DBManager {
     /**
-     * Stores the base of the users API url.
-     */
-    private final String baseUrl = APIManager.API_URL + APIManager.WRITERS;
-
-    /**
      * UserDBManager's constructor.
      * @param context The associated context.
      */
@@ -38,6 +33,7 @@ public final class WriterDBManager extends DBManager {
 
         this.table = TABLE;
         this.ids = new String[]{AUTHOR, BOOK};
+        this.baseUrl = APIManager.API_URL + APIManager.WRITERS;
     }
 
     /**
@@ -56,7 +52,7 @@ public final class WriterDBManager extends DBManager {
 
                 data.put(BOOK, idBook);
                 data.put(AUTHOR, author.getId());
-                DBManager.database.insertOrThrow(this.table, null, data);
+                this.database.insertOrThrow(this.table, null, data);
             }
 
             return true;
@@ -77,8 +73,8 @@ public final class WriterDBManager extends DBManager {
             ArrayList<Author> authors = new ArrayList<>();
             AuthorDBManager authorDBManager = new AuthorDBManager(this.getContext());
             String[] selectArgs = {String.valueOf(idBook)};
-            String query = String.format(SIMPLE_QUERY_ALL, this.table, BOOK);
-            Cursor result = DBManager.database.rawQuery(query, selectArgs);
+            String query = String.format(this.SIMPLE_QUERY_ALL, this.table, BOOK);
+            Cursor result = this.database.rawQuery(query, selectArgs);
 
             while (result.moveToNext()) {
                 authors.add(authorDBManager.loadSQLite(result.getInt(result.getColumnIndexOrThrow(AUTHOR))));
@@ -103,8 +99,8 @@ public final class WriterDBManager extends DBManager {
         try {
             ArrayList<Book> books = new ArrayList<>();
             String[] selectArgs = {String.valueOf(idAuthor)};
-            String query = String.format(SIMPLE_QUERY_ALL, this.table, AUTHOR);
-            Cursor result = DBManager.database.rawQuery(query, selectArgs);
+            String query = String.format(this.SIMPLE_QUERY_ALL, this.table, AUTHOR);
+            Cursor result = this.database.rawQuery(query, selectArgs);
 
             while (result.moveToNext()) {
                 books.add(new Book(result, false));
@@ -131,7 +127,7 @@ public final class WriterDBManager extends DBManager {
             String whereClause = String.format("%s = ? AND %s = ?", AUTHOR, BOOK);
             String[] whereArgs = new String[]{String.valueOf(idAuthor), String.valueOf(idBook)};
 
-            return DBManager.database.delete(this.table, whereClause, whereArgs) != 0;
+            return this.database.delete(this.table, whereClause, whereArgs) != 0;
         } catch (SQLiteException e) {
             Log.e(SQLITE_TAG, e.getMessage());
 
@@ -149,7 +145,7 @@ public final class WriterDBManager extends DBManager {
             String whereClause = String.format("%s = ?", filter);
             String[] whereArgs = new String[]{String.valueOf(id)};
 
-            return DBManager.database.delete(this.table, whereClause, whereArgs) != 0;
+            return this.database.delete(this.table, whereClause, whereArgs) != 0;
         } catch (SQLiteException e) {
             Log.e(SQLITE_TAG, e.getMessage());
 
@@ -167,7 +163,7 @@ public final class WriterDBManager extends DBManager {
             String whereClause = String.format("%s = ?", AUTHOR);
             String[] whereArgs = new String[]{String.valueOf(id)};
 
-            return DBManager.database.delete(this.table, whereClause, whereArgs) != 0;
+            return this.database.delete(this.table, whereClause, whereArgs) != 0;
         } catch (SQLiteException e) {
             Log.e(SQLITE_TAG, e.getMessage());
 
@@ -185,7 +181,7 @@ public final class WriterDBManager extends DBManager {
             String whereClause = String.format("%s = ?", BOOK);
             String[] whereArgs = new String[]{String.valueOf(id)};
 
-            return DBManager.database.delete(this.table, whereClause, whereArgs) != 0;
+            return this.database.delete(this.table, whereClause, whereArgs) != 0;
         } catch (SQLiteException e) {
             Log.e(SQLITE_TAG, e.getMessage());
 
@@ -218,7 +214,7 @@ public final class WriterDBManager extends DBManager {
 
             data.put(AUTHOR, entity.getInt(AUTHOR));
             data.put(BOOK, entity.getInt(BOOK));
-            DBManager.database.insertOrThrow(this.table, null, data);
+            this.database.insertOrThrow(this.table, null, data);
         } catch (SQLiteException e) {
             Log.e(SQLITE_TAG, e.getMessage());
         } catch (JSONException e) {
@@ -227,29 +223,8 @@ public final class WriterDBManager extends DBManager {
     }
 
     @Override
-    protected String[][] getUpdateFieldsSQLite() {
-        try {
-            int fieldsNumber = 3;
-            String query = String.format(DOUBLE_QUERY_UPDATE, ids[0], ids[1], this.table);
-            Cursor result = DBManager.database.rawQuery(query, null);
-            String[][] data = new String[result.getCount() - 1][fieldsNumber];
-            int i = 0;
-
-            while (result.moveToNext()) {
-                data[i][0] = result.getString(result.getColumnIndex(ids[0]));
-                data[i][1] = result.getString(result.getColumnIndex(ids[1]));
-                data[i][2] = result.getString(result.getColumnIndex(UPDATE));
-
-                i++;
-            }
-
-            result.close();
-
-            return data;
-        } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
-
-            return null;
-        }
+    public boolean updateSQLite(@NonNull JSONObject entity) {
+        // Nothing to do as the entity is just a relation between Authors and Books.
+        return false;
     }
 }

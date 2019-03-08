@@ -24,11 +24,6 @@ import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookListDBSchema.USER;
  */
 public final class BookListDBManager extends DBManager {
     /**
-     * Stores the base of the book lists API url.
-     */
-    private final String baseUrl = APIManager.API_URL + APIManager.BOOK_LISTS;
-
-    /**
      * BookListDBManager's constructor.
      * @param context The associated context.
      */
@@ -36,6 +31,7 @@ public final class BookListDBManager extends DBManager {
         super(context);
 
         this.table = TABLE;
+        this.baseUrl = APIManager.API_URL + APIManager.BOOK_LISTS;
     }
 
     /**
@@ -167,5 +163,11 @@ public final class BookListDBManager extends DBManager {
     @Override
     protected void createSQLite(@NonNull JSONObject entity) {
         // Nothing to do as the entity is not a SQLite one.
+    }
+
+    @Override
+    public boolean updateSQLite(@NonNull JSONObject entity) {
+        // Nothing to do as the entity is not a SQLite one.
+        return false;
     }
 }

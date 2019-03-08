@@ -53,8 +53,9 @@ class ProfileDbManager extends DbManager
      */
     public function getProfile(int $id)
     {
-        $statement = sprintf("SELECT %s, %s, %s FROM %s WHERE %s = %s AND deleted = 0",
-            static::FIELDS[1], static::FIELDS[2], static::FIELDS[3], static::TABLE, static::FIELDS[0], static::PLACEHOLDERS[0]);
+        $statement = sprintf("SELECT %s, %s, %s, %s FROM %s WHERE %s = %s AND deleted = 0",
+            static::FIELDS[0], static::FIELDS[1], static::FIELDS[2], static::FIELDS[3], static::TABLE, static::FIELDS[0],
+            static::PLACEHOLDERS[0]);
         $req = $this->db->prepare($statement);
 
         $req->bindValue(static::PLACEHOLDERS[0], $id, PDO::PARAM_INT);
@@ -264,7 +265,7 @@ class ProfileDbManager extends DbManager
      */
     public function queryUpdateFields()
     {
-        $statement = sprintf("SELECT %s, %s FROM %s",
+        $statement = sprintf("SELECT %s, %s FROM %s WHERE deleted = 0",
             static::FIELDS[0], static::FIELDS[3], static::TABLE);
         $req = $this->db->query($statement);
         $response = $req->fetchAll(PDO::FETCH_ASSOC);

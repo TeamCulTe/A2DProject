@@ -33,11 +33,6 @@ import static com.imie.a2dev.teamculte.readeo.DBSchemas.UserDBSchema.TABLE;
  */
 public final class UserDBManager extends DBManager {
     /**
-     * Stores the base of the users API url.
-     */
-    private final String baseUrl = APIManager.API_URL + APIManager.USERS;
-
-    /**
      * UserDBManager's constructor.
      * @param context The associated context.
      */
@@ -46,6 +41,7 @@ public final class UserDBManager extends DBManager {
 
         this.table = TABLE;
         this.ids = new String[]{ID};
+        this.baseUrl = APIManager.API_URL + APIManager.USERS;
     }
 
     /**
@@ -60,7 +56,7 @@ public final class UserDBManager extends DBManager {
             data.put(ID, entity.getId());
             data.put(PSEUDO, entity.getPseudo());
             data.put(PROFILE, entity.getProfile().getId());
-            DBManager.database.insertOrThrow(this.table, null, data);
+            this.database.insertOrThrow(this.table, null, data);
 
             return true;
         } catch (SQLiteException e) {
@@ -105,7 +101,7 @@ public final class UserDBManager extends DBManager {
             data.put(PROFILE, entity.getProfile().getId());
             data.put(UPDATE, new Date().toString());
 
-            return DBManager.database.update(this.table, data, whereClause, whereArgs) != 0;
+            return this.database.update(this.table, data, whereClause, whereArgs) != 0;
         } catch (SQLiteException e) {
             Log.e(SQLITE_TAG, e.getMessage());
 
@@ -121,8 +117,8 @@ public final class UserDBManager extends DBManager {
     public PublicUser loadSQLite(int id) {
         try {
             String[] selectArgs = {String.valueOf(id)};
-            String query = String.format(SIMPLE_QUERY_ALL, this.table, ID);
-            Cursor result = DBManager.database.rawQuery(query, selectArgs);
+            String query = String.format(this.SIMPLE_QUERY_ALL, this.table, ID);
+            Cursor result = this.database.rawQuery(query, selectArgs);
 
             return new PublicUser(result);
         } catch (SQLiteException e) {
@@ -140,8 +136,8 @@ public final class UserDBManager extends DBManager {
     public PublicUser loadSQLite(String pseudo) {
         try {
             String[] selectArgs = {pseudo};
-            String query = String.format(SIMPLE_QUERY_ALL, this.table, PSEUDO);
-            Cursor result = DBManager.database.rawQuery(query, selectArgs);
+            String query = String.format(this.SIMPLE_QUERY_ALL, this.table, PSEUDO);
+            Cursor result = this.database.rawQuery(query, selectArgs);
 
             return new PublicUser(result);
         } catch (SQLiteException e) {
@@ -161,8 +157,8 @@ public final class UserDBManager extends DBManager {
         try {
             List<PublicUser> users = new ArrayList<>();
             String[] selectArgs = {filter};
-            String query = String.format(SIMPLE_QUERY_ALL_LIKE_START, this.table, field);
-            Cursor result = DBManager.database.rawQuery(query, selectArgs);
+            String query = String.format(this.SIMPLE_QUERY_ALL_LIKE_START, this.table, field);
+            Cursor result = this.database.rawQuery(query, selectArgs);
 
             while (result.moveToNext()) {
                 users.add(new PublicUser(result));
@@ -184,7 +180,7 @@ public final class UserDBManager extends DBManager {
         List<PublicUser> users = new ArrayList<>();
 
         try {
-            Cursor result = DBManager.database.rawQuery(String.format(QUERY_ALL, this.table), null);
+            Cursor result = this.database.rawQuery(String.format(this.QUERY_ALL, this.table), null);
 
             if (result.getCount() > 0) {
                 do {
@@ -346,11 +342,33 @@ public final class UserDBManager extends DBManager {
             data.put(ID, entity.getInt(ID));
             data.put(PSEUDO, entity.getString(PSEUDO));
             data.put(PROFILE, entity.getInt(PROFILE));
-            DBManager.database.insertOrThrow(this.table, null, data);
+            this.database.insertOrThrow(this.table, null, data);
         } catch (SQLiteException e) {
             Log.e(SQLITE_TAG, e.getMessage());
         } catch (JSONException e) {
             Log.e(SQLITE_TAG, e.getMessage());
+        }
+    }
+
+    @Override
+    public boolean updateSQLite(@NonNull JSONObject entity) {
+        try {
+            ContentValues data = new ContentValues();
+            String whereClause = String.format("%s = ?", ID);
+            String[] whereArgs = new String[]{entity.getString(ID)};
+
+            data.put(PSEUDO, entity.getString(PSEUDO));
+            data.put(PROFILE, entity.getInt(PROFILE));
+
+            return this.database.update(this.table, data, whereClause, whereArgs) != 0;
+        } catch (SQLiteException e) {
+            Log.e(SQLITE_TAG, e.getMessage());
+
+            return false;
+        } catch (JSONException e) {
+            Log.e(SQLITE_TAG, e.getMessage());
+
+            return false;
         }
     }
 }
