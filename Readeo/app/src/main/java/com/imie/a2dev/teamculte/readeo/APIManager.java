@@ -77,7 +77,7 @@ public abstract class APIManager {
     /**
      * Stores the create script file name / mapping.
      */
-    public static final String CREATE = "create.php?";
+    public static final String CREATE = "create.php";
 
     /**
      * Stores the read script file name / mapping.
@@ -92,15 +92,33 @@ public abstract class APIManager {
     /**
      * Stores the update script file name / mapping.
      */
-    public static final String UPDATE = "update.php?";
+    public static final String UPDATE = "update.php";
 
     /**
      * Stores the delete script file name / mapping.
      */
-    public static final String DELETE = "delete.php?";
+    public static final String DELETE = "delete.php";
 
     /**
      * Stores the restore script file name / mapping.
      */
-    public static final String RESTORE = "restore.php?";
+    public static final String RESTORE = "restore.php";
+
+    // Common parameters.
+
+    /**
+     * Defines the start parameter name for the API querying.
+     */
+    public static final String START = "start";
+
+    /**
+     * Defines the end parameter name for the API querying.
+     */
+    public static final String END = "end";
+
+    /**
+     * Defines the test parameter name for the API querying.
+     */
+    public static final String TEST = "test";
+
 }

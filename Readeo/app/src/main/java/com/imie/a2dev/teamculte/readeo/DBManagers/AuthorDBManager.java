@@ -6,14 +6,18 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import com.android.volley.Request;
 import com.imie.a2dev.teamculte.readeo.APIManager;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Author;
+import com.imie.a2dev.teamculte.readeo.HTTPRequestQueueSingleton;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.AuthorDBSchema.TABLE;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.AuthorDBSchema.ID;
@@ -90,6 +94,10 @@ public final class AuthorDBManager extends DBManager {
             String query = String.format(this.SIMPLE_QUERY_ALL, this.table, ID);
             Cursor result = this.database.rawQuery(query, selectArgs);
 
+            if (result.getCount() == 0) {
+                return null;
+            }
+
             return new Author(result);
         } catch (SQLiteException e) {
             Log.e(SQLITE_TAG, e.getMessage());
@@ -123,37 +131,51 @@ public final class AuthorDBManager extends DBManager {
     }
 
     /**
-     * Queries all the authors paginated from the database.
-     * @param start The start index (LIMIT).
-     * @param end The end index (OFFSET).
-     * @return The list of authors.
-     */
-    public List<Author> queryAllPaginatedSQLite(int start, int end) {
-        List<Author> authors = new ArrayList<>();
-
-        try {
-            Cursor result = this.database.rawQuery(String.format(this.QUERY_ALL_PAGINATED, this.table, start, end), null);
-
-            if (result.getCount() > 0) {
-                do {
-                    authors.add(new Author(result, false));
-                } while (result.moveToNext());
-            }
-
-            result.close();
-        } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
-        }
-
-        return authors;
-    }
-
-    /**
      * From the API, query the list of all authors from the MySQL database in order to stores it into the SQLite
      * database.
      */
     public void importFromMySQL() {
         super.importFromMySQL(this.baseUrl + APIManager.READ);
+    }
+
+    /**
+     * Creates a author entity in MySQL database.
+     * @param author The author to create.
+     */
+    public void createMySQL(Author author) {
+        String url = this.baseUrl + APIManager.CREATE;
+        Map<String, String> param = new HashMap<>();
+
+        if (author.getId() != 0) {
+            param.put(ID, String.valueOf(author.getId()));
+        }
+
+        param.put(NAME, author.getName());
+
+        super.requestString(Request.Method.POST, url, null, param);
+    }
+
+    /**
+     * Loads an author from MySQL database.
+     * @param idAuthor The id of the author.
+     * @return The loaded author.
+     */
+    public Author loadMySQL(int idAuthor) {
+        final Author author = new Author();
+        String url = this.baseUrl + APIManager.READ + ID + "=" + idAuthor;
+
+        super.requestJsonArray(Request.Method.GET, url, response -> {
+            try {
+                author.init(response.getJSONObject(0));
+                HTTPRequestQueueSingleton.getInstance(AuthorDBManager.this.getContext()).finishRequest(this.getClass().getName());
+            } catch (JSONException e) {
+                Log.e(JSON_TAG, e.getMessage());
+            }
+        });
+
+        this.waitForResponse();
+
+        return (author.isEmpty()) ? null : author;
     }
 
     @Override

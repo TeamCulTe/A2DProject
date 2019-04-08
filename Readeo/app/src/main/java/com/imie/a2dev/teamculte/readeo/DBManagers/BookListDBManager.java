@@ -2,16 +2,22 @@ package com.imie.a2dev.teamculte.readeo.DBManagers;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+import android.util.Log;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.imie.a2dev.teamculte.readeo.APIManager;
+import com.imie.a2dev.teamculte.readeo.DBSchemas.BookListDBSchema;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Book;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.BookList;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.BookListType;
+import com.imie.a2dev.teamculte.readeo.HTTPRequestQueueSingleton;
 import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookListDBSchema.BOOK;
@@ -31,6 +37,7 @@ public final class BookListDBManager extends DBManager {
         super(context);
 
         this.table = TABLE;
+        this.ids = new String[]{USER, BOOK, TYPE};
         this.baseUrl = APIManager.API_URL + APIManager.BOOK_LISTS;
     }
 
@@ -41,12 +48,14 @@ public final class BookListDBManager extends DBManager {
     public void createMySQL(BookList bookList) {
 
         for (Book book : bookList.getBooks()) {
-            String url = String.format(baseUrl + APIManager.CREATE + USER + "=%s&" + BOOK + "=%s&" + TYPE + "=%s",
-                    bookList.getId(),
-                    book.getId(),
-                    bookList.getType().getId());
+            String url = this.baseUrl + APIManager.CREATE;
+            Map<String, String> param = new HashMap<>();
 
-            super.requestString(Request.Method.POST, url, null);
+            param.put(USER, String.valueOf(bookList.getId()));
+            param.put(BOOK, String.valueOf(book.getId()));
+            param.put(TYPE, String.valueOf(bookList.getType().getId()));
+
+            super.requestString(Request.Method.POST, url, null, param);
         }
     }
 
@@ -57,12 +66,14 @@ public final class BookListDBManager extends DBManager {
      * @param idType The id of the book list type.
      */
     public void createMySQL(int idUser, int idBook, int idType) {
-        String url = String.format(baseUrl + APIManager.CREATE + USER + "=%s&" + BOOK + "=%s&" + TYPE + "=%s",
-                idUser,
-                idBook,
-                idType);
+        String url = this.baseUrl + APIManager.CREATE;
+        Map<String, String> param = new HashMap<>();
 
-        super.requestString(Request.Method.POST, url, null);
+        param.put(USER, String.valueOf(idUser));
+        param.put(BOOK, String.valueOf(idBook));
+        param.put(TYPE, String.valueOf(idType));
+
+        super.requestString(Request.Method.POST, url, null, param);
     }
 
     /**
@@ -72,18 +83,52 @@ public final class BookListDBManager extends DBManager {
      * @return The loaded book list.
      */
     public BookList loadMySQL(int idUser, int idType) {
+        // TODO : See refactor here.
         final BookList bookList = new BookList();
+        final List<Integer> bookIds = new ArrayList<>();
+        final int typeId[] = new int[1];
+        String url = this.baseUrl + APIManager.READ + USER + "=" + idUser + "&" + TYPE + "=" + idType;
 
-        String url = String.format(baseUrl + APIManager.READ + USER + "=%s&" + TYPE + "=%s", idUser, idType);
+        super.requestJsonArray(Request.Method.GET, url, response -> {
+            bookList.init(response);
 
-        super.requestJsonArray(Request.Method.GET, url, new Response.Listener<JSONArray>() {
-            @Override
-            public void onResponse(JSONArray response) {
-                bookList.init(response);
+            // TODO : See how to deal with differences between distant and local db.
+            if (bookList.getBooks().size() == 0) {
+                for (int i = 0; i < response.length(); i++) {
+                    try {
+                        bookIds.add(response.getJSONObject(i).getInt(BookListDBSchema.BOOK));
+                    } catch (JSONException e) {
+                        Log.e(JSON_TAG, e.getMessage());
+                    }
+                }
             }
+
+            if (bookList.getType() == null) {
+                try {
+                    typeId[0] = response.getJSONObject(0).getInt(BookListDBSchema.TYPE);
+                } catch (JSONException e) {
+                    Log.e(JSON_TAG, e.getMessage());
+                }
+            }
+
+            HTTPRequestQueueSingleton.getInstance(BookListDBManager.this.getContext()).finishRequest(this.getClass().getName());
         });
 
-        return bookList;
+        this.waitForResponse();
+
+        if (bookIds.size() > 0) {
+            BookDBManager bookDBManager = new BookDBManager(this.getContext());
+
+            for (int id : bookIds) {
+                bookList.getBooks().add(bookDBManager.loadMySQL(id));
+            }
+        }
+
+        if (bookList.getType() == null) {
+            bookList.setType(new BookListTypeDBManager(this.getContext()).loadMySQL(typeId[0]));
+        }
+
+        return (bookList.isEmpty()) ? null : bookList;
     }
 
     /**
@@ -92,6 +137,7 @@ public final class BookListDBManager extends DBManager {
      * @return The loaded book lists.
      */
     public Map<String, BookList> loadUserMySQL(int idUser) {
+        // TODO : See refactor here.
         BookList bookList;
         final Map<String, BookList> bookLists = new HashMap<>();
         BookListTypeDBManager bookListTypeDBManager = new BookListTypeDBManager(this.getContext());
@@ -99,10 +145,50 @@ public final class BookListDBManager extends DBManager {
         for (BookListType type : bookListTypeDBManager.queryAllSQLite()) {
             bookList = this.loadMySQL(idUser, type.getId());
 
-            bookLists.put(bookList.getType().getName(), bookList);
+            if (bookList != null) {
+                bookLists.put(bookList.getType().getName(), bookList);
+            }
         }
 
-        return bookLists;
+        if (bookLists.size() == 0) {
+            final List<Integer> typeIds = new ArrayList<>();
+            String url = this.baseUrl + APIManager.READ + USER + "=" + idUser;
+
+            super.requestJsonArray(Request.Method.GET, url, response -> {
+                int idType;
+                int previous = 0;
+
+                for (int i = 0; i < response.length(); i++) {
+                    try {
+                        idType = response.getJSONObject(i).getInt(BookListDBSchema.TYPE);
+                        if (idType != previous) {
+                            typeIds.add(idType);
+
+                            previous = idType;
+                        }
+                    } catch (JSONException e) {
+                        Log.e(JSON_TAG, e.getMessage());
+                    }
+                }
+
+                HTTPRequestQueueSingleton.getInstance(BookListDBManager.this.getContext()).finishRequest(this.getClass().getName());
+            });
+
+            this.waitForResponse();
+
+            BookListType type;
+
+            for (int id : typeIds) {
+                type = bookListTypeDBManager.loadMySQL(id);
+                bookList = BookListDBManager.this.loadMySQL(idUser, id);
+
+                if (type != null && bookList != null) {
+                    bookLists.put(type.getName(), bookList);
+                }
+            }
+        }
+
+        return (bookLists.size() > 0) ? bookLists : null;
     }
 
     /**
@@ -110,9 +196,12 @@ public final class BookListDBManager extends DBManager {
      * @param idUser The id of the user.
      */
     public void deleteUserMySQL(int idUser) {
-        String url = String.format(baseUrl + APIManager.DELETE + USER + "=%s", idUser);
+        String url = this.baseUrl + APIManager.DELETE;
+        Map<String, String> param = new HashMap<>();
 
-        super.requestString(Request.Method.PUT, url, null);
+        param.put(USER, String.valueOf(idUser));
+
+        super.requestString(Request.Method.PUT, url, null, param);
     }
 
     /**
@@ -122,12 +211,14 @@ public final class BookListDBManager extends DBManager {
      * @param idType The id of the book list type.
      */
     public void deleteMySQL(int idUser, int idBook, int idType) {
-        String url = String.format(baseUrl + APIManager.DELETE + USER + "=%s&" + BOOK + "=%s&" + TYPE + "=%s",
-                idUser,
-                idBook,
-                idType);
+        String url = this.baseUrl + APIManager.DELETE;
+        Map<String, String> param = new HashMap<>();
 
-        super.requestString(Request.Method.PUT, url, null);
+        param.put(USER, String.valueOf(idUser));
+        param.put(BOOK, String.valueOf(idBook));
+        param.put(TYPE, String.valueOf(idType));
+
+        super.requestString(Request.Method.PUT, url, null, param);
     }
 
     /**
@@ -135,9 +226,12 @@ public final class BookListDBManager extends DBManager {
      * @param idUser The id of the user.
      */
     public void restoreUserMySQL(int idUser) {
-        String url = String.format(baseUrl + APIManager.RESTORE + USER + "=%s", idUser);
+        String url = this.baseUrl + APIManager.RESTORE;
+        Map<String, String> param = new HashMap<>();
 
-        super.requestString(Request.Method.PUT, url, null);
+        param.put(USER, String.valueOf(idUser));
+
+        super.requestString(Request.Method.PUT, url, null, param);
     }
 
     /**
@@ -147,12 +241,14 @@ public final class BookListDBManager extends DBManager {
      * @param idType The id of the book list type.
      */
     public void restoreMySQL(int idUser, int idBook, int idType) {
-        String url = String.format(baseUrl + APIManager.RESTORE + USER + "=%s&" + BOOK + "=%s&" + TYPE + "=%s",
-                idUser,
-                idBook,
-                idType);
+        String url = this.baseUrl + APIManager.RESTORE;
+        Map<String, String> param = new HashMap<>();
 
-        super.requestString(Request.Method.PUT, url, null);
+        param.put(USER, String.valueOf(idUser));
+        param.put(BOOK, String.valueOf(idBook));
+        param.put(TYPE, String.valueOf(idType));
+
+        super.requestString(Request.Method.PUT, url, null, param);
     }
 
     @Override

@@ -30,9 +30,9 @@ public abstract class AuthorDBSchema {
      */
     public static final String AUTHOR_TABLE_STATEMENT = String.format("CREATE TABLE IF NOT EXISTS %s (%s INTEGER " +
                     "PRIMARY KEY, %s TEXT(%s) UNIQUE NOT NULL, %s DATETIME NOT NULL DEFAULT %s);",
-            AuthorDBSchema.TABLE,
-            AuthorDBSchema.ID,
-            AuthorDBSchema.NAME,
+            TABLE,
+            ID,
+            NAME,
             NAME_SIZE,
             CommonDBSchema.UPDATE,
             CommonDBSchema.UPDATE_DEFAULT);

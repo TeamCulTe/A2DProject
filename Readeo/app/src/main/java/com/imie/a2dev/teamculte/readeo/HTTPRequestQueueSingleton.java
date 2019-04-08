@@ -1,11 +1,15 @@
 package com.imie.a2dev.teamculte.readeo;
 
 import android.content.Context;
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * Class used to add HTTP request (to use the API). Using singleton pattern in order to have only one instance of
@@ -30,14 +34,14 @@ public final class HTTPRequestQueueSingleton {
     private RequestQueue requestQueue;
 
     /**
-     * Stores the number of requests.
+     * Stores the number of requests pending for each manager.
      */
-    private int requestNumber;
+    private Map<String, Integer> requestsPending = new LinkedHashMap<>();
 
     /**
-     * Stores the number of finished requests.
+     * Stores the url of the last request (used for debugging).
      */
-    private int requestFinished;
+    private String lastRequestUrl;
 
     /**
      * Stores the listener in order to notify it when the request from the queue have been passed.
@@ -54,18 +58,29 @@ public final class HTTPRequestQueueSingleton {
     }
 
     /**
-     * Called when a request is finished, simply increment the finished request attribute and check if all the
-     * requests have been passed (notify the listener and reinitializes the counters).
+     * Called when a request is finished, simply decrement the value of pending requests to the associated manager.
+     * Calls the listener method if set.
+     * @param sender The associated manager.
      */
-    public void finishRequest() {
-        this.requestFinished++;
+    public void finishRequest(String sender) {
+        if (this.requestsPending.containsKey(sender)) {
+            int requestNumber = (this.requestsPending.get(sender) - 1 > 0) ? this.requestsPending.get(sender) - 1 : 0 ;
 
-        if (this.requestFinished == this.requestNumber) {
-            this.listener.onRequestsFinished();
+            this.requestsPending.put(sender, requestNumber);
 
-            this.requestNumber = 0;
-            this.requestFinished = 0;
+            if (requestNumber == 0 && this.listener != null) {
+                this.listener.onRequestsFinished();
+            }
         }
+    }
+
+    /**
+     * Returns true if there are still request on the queue.
+     * @param sender The associated manager.
+     * @return True if still requests pending else false.
+     */
+    public boolean hasRequestPending(String sender) {
+        return (this.requestsPending.containsKey(sender) && this.requestsPending.get(sender) != 0);
     }
 
     /**
@@ -80,6 +95,10 @@ public final class HTTPRequestQueueSingleton {
         return HTTPRequestQueueSingleton.instance;
     }
 
+    /**
+     * Gets the request queue if exists else initializes it before.
+     * @return The request queue.
+     */
     public RequestQueue getRequestQueue() {
         if (this.requestQueue == null) {
             this.requestQueue = Volley.newRequestQueue(HTTPRequestQueueSingleton.context.getApplicationContext());
@@ -90,12 +109,21 @@ public final class HTTPRequestQueueSingleton {
 
     /**
      * Adds a request to the request queue.
+     * @param sender The manager who sends the request.
      * @param request The request to add.
      * @param <T> Used for type safety control.
      */
-    public <T> void addToRequestQueue(Request<T> request) {
+    public <T> void addToRequestQueue(String sender, Request<T> request) {
+        if (!this.requestsPending.containsKey(sender)) {
+            this.requestsPending.put(sender, 1);
+        } else {
+            this.requestsPending.put(sender, this.requestsPending.get(sender) + 1);
+        }
+
+        this.lastRequestUrl = request.getUrl();
+
+        request.setRetryPolicy(new DefaultRetryPolicy(5000, 5, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
         this.getRequestQueue().add(request);
-        this.requestNumber++;
     }
 
     /**

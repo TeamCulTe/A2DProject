@@ -54,7 +54,7 @@ public abstract class DBManager {
     /**
      * Defines the database file name.
      */
-    private final String DB_FILE_NAME = "readeo.db";
+    protected static String dbFileName = "readeo.db";
 
     // Log tags.
 
@@ -98,7 +98,7 @@ public abstract class DBManager {
     /**
      * Defines the default all fields database query with a simple where - like (from start) clause.
      */
-    protected final String SIMPLE_QUERY_ALL_LIKE_START = "SELECT * FROM %s WHERE %s LIKE '?%%'";
+    protected final String SIMPLE_QUERY_ALL_LIKE_START = "SELECT * FROM %s WHERE %s LIKE ?||'%%'";
 
     /**
      * Defines the default field database query with a simple where clause.
@@ -145,6 +145,11 @@ public abstract class DBManager {
     // Other attributes
 
     /**
+     * Stores the default id value for tests on MySQL database (as big as possible).
+     */
+    public static final int MYSQL_TEST_ID = -666;
+
+    /**
      * Defines the count param and json value from MySQL query alias.
      */
     private final String COUNT = "count";
@@ -189,10 +194,17 @@ public abstract class DBManager {
      * @param context The associated context.
      */
     protected DBManager(Context context) {
-        this.handler = new DBHandler(context, this.DB_FILE_NAME, null, this.VERSION);
+        this.handler = new DBHandler(context, dbFileName, null, this.VERSION);
         this.context = context;
 
         this.open();
+    }
+
+    @Override
+    protected void finalize() throws Throwable {
+        this.close();
+
+        super.finalize();
     }
 
     /**
@@ -236,6 +248,32 @@ public abstract class DBManager {
     }
 
     /**
+     * Returns the database file name.
+     * @return The name of the file.
+     */
+    public static String getDbFileName() {
+        return dbFileName;
+    }
+
+    /**
+     * Sets the database file name.
+     * @param newDbFileName The new name to set.
+     */
+    public static void setDbFileName(String newDbFileName) {
+        dbFileName = newDbFileName;
+    }
+
+    /**
+     * Loops while there are no response received from API (fix the asynchronous mechanism issue).
+     */
+    public void waitForResponse() {
+        HTTPRequestQueueSingleton httpRequestQueueSingleton = HTTPRequestQueueSingleton.getInstance(this.context);
+
+        while (httpRequestQueueSingleton.hasRequestPending(this.getClass().getName())) {
+        }
+    }
+
+    /**
      * Queries the value of a specific field from a specific id.
      * @param field The field to access.
      * @param id The id of the db entity to access.
@@ -261,75 +299,6 @@ public abstract class DBManager {
 
             return false;
         }
-    }
-
-    /**
-     * From a list of UpdateElement from local database and a distant one (SQLite - MySQL), checks the ids and date
-     * in order to return a map gathering the element to update, create and delete.
-     * @param local The local elements list.
-     * @param distant The distant elements list.
-     * @return The map of elements (create, update, delete).
-     */
-    public static Map<String, List<int[]>> getSyncData(List<UpdateDataElement> local, List<UpdateDataElement> distant) {
-        if (local.size() == 0 || distant.size() == 0 || local.get(0).size() != distant.get(0).size()) {
-            return null;
-        }
-
-        boolean same;
-        UpdateDataElement localElement;
-        UpdateDataElement distantElement;
-
-        int syncIdNb = distant.get(0).size();
-        Map<String, List<int[]>> syncDataMap = new HashMap<>();
-        ArrayList<int[]> toCreateData = new ArrayList<>();
-        ArrayList<int[]> toUpdateData = new ArrayList<>();
-        ArrayList<int[]> toDeleteData = new ArrayList<>();
-
-        //TODO: Factorize the method / see if better if defined in an update class.
-        for (int i = 0, j = 0; i < distant.size() && j < local.size(); i++, j++) {
-            same = true;
-            localElement = local.get(j);
-            distantElement = distant.get(i);
-
-            // Browsing all the ids indexes.
-            for (int k = 0; k < syncIdNb; k++) {
-                if (localElement.getId(k) != distantElement.getId(k)) {
-                    // If the id from distant is higher than the local one, element has to be deleted (unless we
-                    // reached the last local element, which means it should be created).
-                    if (distantElement.getId(k) > localElement.getId(k) && i < local.size() - 1) {
-                        toDeleteData.add(Arrays.copyOfRange(localElement.getIds(), 0, syncIdNb));
-
-                        i--;
-                    } else {
-                        toCreateData.add(Arrays.copyOfRange(distantElement.getIds(), 0, syncIdNb));
-
-                        j--;
-                    }
-
-                    same = false;
-                }
-            }
-
-            // If the ids are the same, checking the last update date to see if adding into update list.
-            if (same) {
-                if (localElement.getDateUpdated().before(distantElement.getDateUpdated())) {
-                    toUpdateData.add(Arrays.copyOfRange(distantElement.getIds(), 0, syncIdNb));
-                }
-            }
-
-            // Temporary prevents ArrayOutOfBoundsException or going out of the loop if a list is longer than the other.
-            if (i == distant.size() - 1 && j < local.size() - 2) {
-                i--;
-            } else if (j == local.size() - 1 && i < distant.size() - 2) {
-                j--;
-            }
-        }
-
-        syncDataMap.put(TO_CREATE_KEY, toCreateData);
-        syncDataMap.put(TO_UPDATE_KEY, toUpdateData);
-        syncDataMap.put(TO_DELETE_KEY, toDeleteData);
-
-        return syncDataMap;
     }
 
     /**
@@ -371,7 +340,7 @@ public abstract class DBManager {
                 }
             }
 
-            HTTPRequestQueueSingleton.getInstance(DBManager.this.context).finishRequest();
+            HTTPRequestQueueSingleton.getInstance(DBManager.this.context).finishRequest(this.getClass().getName());
         });
     }
 
@@ -397,7 +366,7 @@ public abstract class DBManager {
                 Log.e(JSON_TAG, e.getMessage());
             }
 
-            HTTPRequestQueueSingleton.getInstance(DBManager.this.context).finishRequest();
+            HTTPRequestQueueSingleton.getInstance(DBManager.this.context).finishRequest(this.getClass().getName());
         });
     }
 
@@ -418,13 +387,6 @@ public abstract class DBManager {
         new QuoteDBManager(context).importFromMySQL();
         new ReviewDBManager(context).importFromMySQL();
         new WriterDBManager(context).importFromMySQL();
-    }
-
-    /**
-     * Imports all new entries and updated entities from MySQL database into the SQLite one.
-     */
-    public static void updateDatabase() {
-        // TODO: Method body and see if needed.
     }
 
     /**
@@ -486,7 +448,7 @@ public abstract class DBManager {
     /**
      * Gets the list of MySQL ids and last update fields in order to check which entities needs to be updated.
      */
-    public void getUpdateFromMySQL() {
+    public final void getUpdateFromMySQL() {
         final List<UpdateDataElement> updateFieldsSQLite = this.getUpdateFieldsSQLite();
         this.requestJsonArray(Request.Method.POST, this.baseUrl + APIManager.READ_UPDATE,
                 response ->  {
@@ -495,6 +457,37 @@ public abstract class DBManager {
 
                     this.performDbUpdates(syncDataMap);
                 });
+    }
+
+    /**
+     * Deletes the test entity in MySQL database.
+     * @param id The id of the test entity to delete.
+     */
+    public void deleteTestEntityMySQL(int id) {
+        String url = this.baseUrl + APIManager.DELETE;
+        Map<String, String> param = new HashMap<>();
+
+        for (String elt : this.ids) {
+            param.put(elt, String.valueOf(id));
+        }
+
+        param.put(APIManager.TEST, "1");
+
+        this.requestString(Request.Method.PUT, url, null, param);
+        this.waitForResponse();
+    }
+
+    /**
+     * Deletes all the test entities in MySQL database.
+     */
+    public void deleteMySQLTestEntities() {
+        String url = this.baseUrl + APIManager.DELETE;
+        Map<String, String> param = new HashMap<>();
+
+        param.put(APIManager.TEST, "1");
+
+        this.requestString(Request.Method.PUT, url, null, param);
+        this.waitForResponse();
     }
 
     /**
@@ -538,7 +531,8 @@ public abstract class DBManager {
                 successListener,
                 new OnRequestError());
 
-        HTTPRequestQueueSingleton.getInstance(this.context).addToRequestQueue(jsonArrayRequest);
+        HTTPRequestQueueSingleton.getInstance(this.context).addToRequestQueue(this.getClass().getName(),
+                jsonArrayRequest);
     }
 
     /**
@@ -555,20 +549,36 @@ public abstract class DBManager {
                 successListener,
                 new OnRequestError());
 
-        HTTPRequestQueueSingleton.getInstance(this.context).addToRequestQueue(jsonObjectRequest);
+        HTTPRequestQueueSingleton.getInstance(this.context).addToRequestQueue(this.getClass().getName(),
+                jsonObjectRequest);
     }
 
     /**
      * Adds a String HTTP request to the queue.
      * @param method The method to use (POST, GET, PUT...).
      * @param url The url to request.
-     * @param successListener The instance implementing response listener in order to call the associated callback
-     * function.
+     * @param successListener The instance implementing response listener in order to call the associated callback.
+     * @param params The param to send (POST and PUT requests).
+     *
      */
-    protected final void requestString(int method, String url, Response.Listener<String> successListener) {
-        StringRequest stringRequest = new StringRequest(method, url, successListener, new OnRequestError());
+    protected final void requestString(int method,
+                                       String url,
+                                       Response.Listener<String> successListener,
+                                       final Map<String, String> params) {
+        if (successListener == null) {
+            successListener = response -> HTTPRequestQueueSingleton.getInstance(DBManager.this.context).finishRequest(this.getClass().getName());
+        }
 
-        HTTPRequestQueueSingleton.getInstance(this.context).addToRequestQueue(stringRequest);
+        StringRequest stringRequest = new StringRequest(method, url, successListener, new OnRequestError())
+        {
+            @Override
+            protected Map<String, String> getParams()
+            {
+                return params;
+            }
+        };
+
+        HTTPRequestQueueSingleton.getInstance(this.context).addToRequestQueue(this.getClass().getName(), stringRequest);
     }
 
     /**
@@ -725,6 +735,75 @@ public abstract class DBManager {
     }
 
     /**
+     * From a list of UpdateElement from local database and a distant one (SQLite - MySQL), checks the ids and date
+     * in order to return a map gathering the element to update, create and delete.
+     * @param local The local elements list.
+     * @param distant The distant elements list.
+     * @return The map of elements (create, update, delete).
+     */
+    private static Map<String, List<int[]>> getSyncData(List<UpdateDataElement> local, List<UpdateDataElement> distant) {
+        if (local.size() == 0 || distant.size() == 0 || local.get(0).size() != distant.get(0).size()) {
+            return null;
+        }
+
+        boolean same;
+        UpdateDataElement localElement;
+        UpdateDataElement distantElement;
+
+        int syncIdNb = distant.get(0).size();
+        Map<String, List<int[]>> syncDataMap = new HashMap<>();
+        ArrayList<int[]> toCreateData = new ArrayList<>();
+        ArrayList<int[]> toUpdateData = new ArrayList<>();
+        ArrayList<int[]> toDeleteData = new ArrayList<>();
+
+        //TODO: Factorize the method / see if better if defined in an update class.
+        for (int i = 0, j = 0; i < distant.size() && j < local.size(); i++, j++) {
+            same = true;
+            localElement = local.get(j);
+            distantElement = distant.get(i);
+
+            // Browsing all the ids indexes.
+            for (int k = 0; k < syncIdNb; k++) {
+                if (localElement.getId(k) != distantElement.getId(k)) {
+                    // If the id from distant is higher than the local one, element has to be deleted (unless we
+                    // reached the last local element, which means it should be created).
+                    if (distantElement.getId(k) > localElement.getId(k) && i < local.size() - 1) {
+                        toDeleteData.add(Arrays.copyOfRange(localElement.getIds(), 0, syncIdNb));
+
+                        i--;
+                    } else {
+                        toCreateData.add(Arrays.copyOfRange(distantElement.getIds(), 0, syncIdNb));
+
+                        j--;
+                    }
+
+                    same = false;
+                }
+            }
+
+            // If the ids are the same, checking the last update date to see if adding into update list.
+            if (same) {
+                if (localElement.getDateUpdated().before(distantElement.getDateUpdated())) {
+                    toUpdateData.add(Arrays.copyOfRange(distantElement.getIds(), 0, syncIdNb));
+                }
+            }
+
+            // Temporary prevents ArrayOutOfBoundsException or going out of the loop if a list is longer than the other.
+            if (i == distant.size() - 1 && j < local.size() - 2) {
+                i--;
+            } else if (j == local.size() - 1 && i < distant.size() - 2) {
+                j--;
+            }
+        }
+
+        syncDataMap.put(TO_CREATE_KEY, toCreateData);
+        syncDataMap.put(TO_UPDATE_KEY, toUpdateData);
+        syncDataMap.put(TO_DELETE_KEY, toDeleteData);
+
+        return syncDataMap;
+    }
+
+    /**
      * Closes the database.
      */
     private void close() {
@@ -737,7 +816,16 @@ public abstract class DBManager {
     protected final class OnRequestError implements Response.ErrorListener {
         @Override
         public void onErrorResponse(VolleyError error) {
-            Log.e(SERVER_TAG, error.getMessage());
+            HTTPRequestQueueSingleton requestQueueSingleton =
+                    HTTPRequestQueueSingleton.getInstance(DBManager.this.context);
+            requestQueueSingleton.finishRequest(DBManager.this.getClass().getName());
+
+            String statusCode = (error.networkResponse != null) ? String.valueOf(error.networkResponse.statusCode) :
+                    "unexpected";
+            String requested = requestQueueSingleton.getLastRequestUrl();
+            Log.e(SERVER_TAG,
+                    "Error " + statusCode + " while contacting the API at request : \n" + requested);
+
         }
     }
 }

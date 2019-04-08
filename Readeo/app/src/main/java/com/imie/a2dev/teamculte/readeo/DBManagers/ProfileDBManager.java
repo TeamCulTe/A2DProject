@@ -10,12 +10,15 @@ import com.android.volley.Request;
 import com.android.volley.Response;
 import com.imie.a2dev.teamculte.readeo.APIManager;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Profile;
+import com.imie.a2dev.teamculte.readeo.HTTPRequestQueueSingleton;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.CommonDBSchema.UPDATE;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.ProfileDBSchema.AVATAR;
@@ -95,6 +98,10 @@ public final class ProfileDBManager extends DBManager {
             String query = String.format(this.SIMPLE_QUERY_ALL, this.table, ID);
             Cursor result = this.database.rawQuery(query, selectArgs);
 
+            if (result.getCount() == 0) {
+                return null;
+            }
+
             return new Profile(result);
         } catch (SQLiteException e) {
             Log.e(SQLITE_TAG, e.getMessage());
@@ -140,11 +147,40 @@ public final class ProfileDBManager extends DBManager {
      * @param profile The profile to create.
      */
     public void createMySQL(Profile profile) {
-        String url = String.format(baseUrl + APIManager.CREATE + AVATAR + "=%s&" + DESCRIPTION + "=%s",
-                profile.getAvatar(),
-                profile.getDescription());
+        String url = this.baseUrl + APIManager.CREATE;
+        Map<String, String> param = new HashMap<>();
 
-        super.requestString(Request.Method.POST, url, null);
+        if (profile.getId() != 0) {
+            param.put(ID, String.valueOf(profile.getId()));
+        }
+
+        param.put(AVATAR, profile.getAvatar());
+        param.put(DESCRIPTION, profile.getDescription());
+
+        super.requestString(Request.Method.POST, url, null, param);
+    }
+
+    /**
+     * Loads a profile from MySQL database.
+     * @param idProfile The id of the profile.
+     * @return The loaded profile.
+     */
+    public Profile loadMySQL(int idProfile) {
+        final Profile profile = new Profile();
+        String url = this.baseUrl + APIManager.READ + ID + "=" + idProfile;
+
+        super.requestJsonArray(Request.Method.GET, url,  response -> {
+            try {
+                profile.init(response.getJSONObject(0));
+                HTTPRequestQueueSingleton.getInstance(ProfileDBManager.this.getContext()).finishRequest(this.getClass().getName());
+            } catch (JSONException e) {
+                Log.e(JSON_TAG, e.getMessage());
+            }
+        });
+
+        this.waitForResponse();
+
+        return (profile.isEmpty()) ? null : profile;
     }
 
     /**
@@ -152,12 +188,14 @@ public final class ProfileDBManager extends DBManager {
      * @param profile The profile to update.
      */
     public void updateMySQL(Profile profile) {
-        String url = String.format(baseUrl + APIManager.UPDATE + ID + "=%s&" + AVATAR + "=%s&" + DESCRIPTION + "=%s",
-                profile.getId(),
-                profile.getAvatar(),
-                profile.getDescription());
+        String url = this.baseUrl + APIManager.UPDATE;
+        Map<String, String> param = new HashMap<>();
 
-        super.requestString(Request.Method.PUT, url, null);
+        param.put(ID, String.valueOf(profile.getId()));
+        param.put(AVATAR, profile.getAvatar());
+        param.put(DESCRIPTION, profile.getDescription());
+
+        super.requestString(Request.Method.PUT, url, null, param);
     }
 
     /**
@@ -167,31 +205,13 @@ public final class ProfileDBManager extends DBManager {
      * @param value The the new value to set.
      */
     public void updateFieldMySQL(int id, String field, String value) {
-        String url = String.format(baseUrl + APIManager.UPDATE + ID + "=%s&" + field + "=%s",
-                id,
-                value);
+        String url = this.baseUrl + APIManager.UPDATE;
+        Map<String, String> param = new HashMap<>();
 
-        super.requestString(Request.Method.PUT, url, null);
-    }
+        param.put(ID, String.valueOf(id));
+        param.put(field, value);
 
-    /**
-     * Loads a profile from MySQL database.
-     * @param id The id of the profile to load.
-     * @return The loaded profile.
-     */
-    public Profile loadMySQL(int id) {
-        final Profile profile = new Profile();
-
-        String url = String.format(baseUrl + APIManager.READ + ID + "=%s", id);
-
-        super.requestJsonObject(Request.Method.GET, url, new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
-                profile.init(response);
-            }
-        });
-
-        return profile;
+        super.requestString(Request.Method.PUT, url, null, param);
     }
 
     /**
@@ -199,9 +219,12 @@ public final class ProfileDBManager extends DBManager {
      * @param id The id of the entity to delete.
      */
     public void deleteMySQL(int id) {
-        String url = String.format(baseUrl + APIManager.DELETE + ID + "=%s", id);
+        String url = this.baseUrl + APIManager.DELETE;
+        Map<String, String> param = new HashMap<>();
 
-        super.requestString(Request.Method.PUT, url, null);
+        param.put(ID, String.valueOf(id));
+
+        super.requestString(Request.Method.PUT, url, null, param);
     }
 
     /**
@@ -209,9 +232,12 @@ public final class ProfileDBManager extends DBManager {
      * @param id The id of the entity to restore.
      */
     public void restoreMySQL(int id) {
-        String url = String.format(baseUrl + APIManager.RESTORE + ID + "=%s", id);
+        String url = this.baseUrl + APIManager.RESTORE;
+        Map<String, String> param = new HashMap<>();
 
-        super.requestString(Request.Method.PUT, url, null);
+        param.put(ID, String.valueOf(id));
+
+        super.requestString(Request.Method.PUT, url, null, param);
     }
 
     /**

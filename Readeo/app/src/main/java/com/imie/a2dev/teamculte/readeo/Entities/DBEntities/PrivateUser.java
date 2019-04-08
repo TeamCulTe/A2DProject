@@ -8,6 +8,7 @@ import com.imie.a2dev.teamculte.readeo.DBManagers.BookListDBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.CityDBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.CountryDBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.DBManager;
+import com.imie.a2dev.teamculte.readeo.DBManagers.ProfileDBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.ReviewDBManager;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.UserDBSchema;
 import lombok.Getter;
@@ -135,21 +136,15 @@ public final class PrivateUser extends PublicUser {
     }
 
     /**
-     * Initializes the user from a JSON response object.
+     * Initializes the user from a JSON response object (except for the relation objects ones).
      * @param object The JSON response from the API.
      */
     public void init(@NonNull JSONObject object) {
         try {
-            Context context = App.getAppContext();
-
             this.id = object.getInt(UserDBSchema.ID);
             this.pseudo = object.getString(UserDBSchema.PSEUDO);
             this.password = object.getString(UserDBSchema.PASSWORD);
             this.email = object.getString(UserDBSchema.EMAIL);
-            this.city = new CityDBManager(context).loadSQLite(object.getInt(UserDBSchema.CITY));
-            this.country = new CountryDBManager(context).loadSQLite(object.getInt(UserDBSchema.COUNTRY));
-            this.reviews = new ReviewDBManager(context).loadUserSQLite(this.id);
-            this.bookLists = new BookListDBManager(context).loadUserMySQL(this.id);
         } catch (JSONException e) {
             Log.e(DBManager.JSON_TAG, e.getMessage());
         }

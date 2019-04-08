@@ -27,15 +27,15 @@ public abstract class WriterDBSchema {
                     "NOT NULL, %s INTEGER NOT NULL, %s DATETIME NOT NULL DEFAULT %s, CONSTRAINT Writer_PK PRIMARY KEY" +
                     " (%s, %s), CONSTRAINT Writer_Author_FK FOREIGN KEY (%s) REFERENCES Author(%s), " +
                     "CONSTRAINT Writer_Book_FK FOREIGN KEY (%s) REFERENCES Book(%s));",
-            WriterDBSchema.TABLE,
-            WriterDBSchema.AUTHOR,
-            WriterDBSchema.BOOK,
+            TABLE,
+            AUTHOR,
+            BOOK,
             CommonDBSchema.UPDATE,
             CommonDBSchema.UPDATE_DEFAULT,
-            WriterDBSchema.AUTHOR,
-            WriterDBSchema.BOOK,
-            WriterDBSchema.AUTHOR,
+            AUTHOR,
+            BOOK,
+            AUTHOR,
             AuthorDBSchema.ID,
-            WriterDBSchema.BOOK,
+            BOOK,
             BookDBSchema.ID);
 }

@@ -14,6 +14,8 @@ import com.imie.a2dev.teamculte.readeo.DBManagers.WriterDBManager;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.BookDBSchema;
 import lombok.Getter;
 import lombok.Setter;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -158,6 +160,22 @@ public final class Book extends DBEntity {
         this.init(result, close);
     }
 
+    /**
+     * Initializes the book from a JSON response object (except for relation objects attribute).
+     * @param object The JSON response from the API.
+     */
+    public void init(@NonNull JSONObject object) {
+        try {
+            this.id = object.getInt(BookDBSchema.ID);
+            this.title = object.getString(BookDBSchema.TITLE);
+            this.cover = object.getString(BookDBSchema.COVER);
+            this.summary = object.getString(BookDBSchema.SUMMARY);
+            this.datePublished = object.getInt(BookDBSchema.DATE);
+        } catch (JSONException e) {
+            Log.e(DBManager.JSON_TAG, e.getMessage());
+        }
+    }
+
     @Override
     protected void init(@NonNull Cursor result, boolean close) {
         try {
@@ -176,7 +194,7 @@ public final class Book extends DBEntity {
                     (BookDBSchema.CATEGORY)));
             this.reviews = new ReviewDBManager(context).loadBookSQLite(this.id);
             this.quotes = new QuoteDBManager(context).loadBookSQLite(this.id);
-            this.authors = new WriterDBManager(context).loadSQLiteAuthors(this.id);
+            this.authors = new WriterDBManager(context).loadAuthorsSQLite(this.id);
 
             if (close) {
                 result.close();

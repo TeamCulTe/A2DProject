@@ -113,6 +113,7 @@ public final class DBHandler extends SQLiteAssetHelper {
         db.execSQL(String.format(DROP_STATEMENT, ReviewDBSchema.TABLE));
         db.execSQL(String.format(DROP_STATEMENT, UserDBSchema.TABLE));
         db.execSQL(String.format(DROP_STATEMENT, WriterDBSchema.TABLE));
+
         this.onCreate(db);
     }
 }

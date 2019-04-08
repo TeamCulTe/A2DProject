@@ -6,14 +6,18 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import com.android.volley.Request;
 import com.imie.a2dev.teamculte.readeo.APIManager;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.BookListType;
+import com.imie.a2dev.teamculte.readeo.HTTPRequestQueueSingleton;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookListTypeDBSchema.ID;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookListTypeDBSchema.NAME;
@@ -25,7 +29,7 @@ import static com.imie.a2dev.teamculte.readeo.DBSchemas.CommonDBSchema.UPDATE;
  */
 public final class BookListTypeDBManager extends DBManager {
     /**
-     * CategoryDBManager's constructor.
+     * BookListTypeDBManager's constructor.
      * @param context The associated context.
      */
     public BookListTypeDBManager(Context context) {
@@ -90,6 +94,10 @@ public final class BookListTypeDBManager extends DBManager {
             String query = String.format(this.SIMPLE_QUERY_ALL, this.table, ID);
             Cursor result = this.database.rawQuery(query, selectArgs);
 
+            if (result.getCount() == 0) {
+                return null;
+            }
+
             return new BookListType(result);
         } catch (SQLiteException e) {
             Log.e(SQLITE_TAG, e.getMessage());
@@ -128,6 +136,46 @@ public final class BookListTypeDBManager extends DBManager {
      */
     public void importFromMySQL() {
         super.importFromMySQL(baseUrl + APIManager.READ);
+    }
+
+    /**
+     * Creates a book list type entity in MySQL database.
+     * @param type The book list type to create.
+     */
+    public void createMySQL(BookListType type) {
+        String url = this.baseUrl + APIManager.CREATE;
+        Map<String, String> param = new HashMap<>();
+
+        if (type.getId() != 0) {
+            param.put(ID, String.valueOf(type.getId()));
+        }
+
+        param.put(NAME, type.getName());
+
+        super.requestString(Request.Method.POST, url, null, param);
+    }
+
+    /**
+     * Loads a book list type from MySQL database.
+     * @param idType The id of the book list type.
+     * @return The loaded book list type.
+     */
+    public BookListType loadMySQL(int idType) {
+        final BookListType bookListType = new BookListType();
+        String url = this.baseUrl + APIManager.READ + ID + "=" + idType;
+
+        super.requestJsonArray(Request.Method.GET, url,  response -> {
+            try {
+                bookListType.init(response.getJSONObject(0));
+                HTTPRequestQueueSingleton.getInstance(BookListTypeDBManager.this.getContext()).finishRequest(this.getClass().getName());
+            } catch (JSONException e) {
+                Log.e(JSON_TAG, e.getMessage());
+            }
+        });
+
+        this.waitForResponse();
+
+        return (bookListType.isEmpty()) ? null : bookListType;
     }
 
     @Override

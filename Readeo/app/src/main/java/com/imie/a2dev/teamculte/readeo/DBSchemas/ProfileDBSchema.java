@@ -40,11 +40,11 @@ public abstract class ProfileDBSchema {
      */
     public static final String PROFILE_TABLE_STATEMENT = String.format("CREATE TABLE IF NOT EXISTS %s (%s INTEGER " +
                     "PRIMARY KEY, %s TEXT(%s) NOT NULL, %s TEXT(%s) NOT NULL, %s DATETIME NOT NULL DEFAULT %s);",
-            ProfileDBSchema.TABLE,
-            ProfileDBSchema.ID,
-            ProfileDBSchema.AVATAR,
+            TABLE,
+            ID,
+            AVATAR,
             AVATAR_SIZE,
-            ProfileDBSchema.DESCRIPTION,
+            DESCRIPTION,
             DESCRIPTION_SIZE,
             CommonDBSchema.UPDATE,
             CommonDBSchema.UPDATE_DEFAULT);

@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import com.android.volley.Request;
 import com.imie.a2dev.teamculte.readeo.APIManager;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Author;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Book;
@@ -13,9 +14,10 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
-import static com.imie.a2dev.teamculte.readeo.DBSchemas.CommonDBSchema.UPDATE;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.WriterDBSchema.AUTHOR;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.WriterDBSchema.BOOK;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.WriterDBSchema.TABLE;
@@ -25,7 +27,7 @@ import static com.imie.a2dev.teamculte.readeo.DBSchemas.WriterDBSchema.TABLE;
  */
 public final class WriterDBManager extends DBManager {
     /**
-     * UserDBManager's constructor.
+     * WriterDBManager's constructor.
      * @param context The associated context.
      */
     public WriterDBManager(Context context) {
@@ -68,7 +70,7 @@ public final class WriterDBManager extends DBManager {
      * @param idBook The id of the book.
      * @return The list of entities if exists else else an empty ArrayList.
      */
-    public List<Author> loadSQLiteAuthors(int idBook) {
+    public List<Author> loadAuthorsSQLite(int idBook) {
         try {
             ArrayList<Author> authors = new ArrayList<>();
             AuthorDBManager authorDBManager = new AuthorDBManager(this.getContext());
@@ -95,15 +97,16 @@ public final class WriterDBManager extends DBManager {
      * @param idAuthor The id of the author.
      * @return The list of entities if exists else an empty ArrayList.
      */
-    public List<Book> loadBookSQLites(int idAuthor) {
+    public List<Book> loadBooksSQLite(int idAuthor) {
         try {
+            BookDBManager bookDBManager = new BookDBManager(this.getContext());
             ArrayList<Book> books = new ArrayList<>();
             String[] selectArgs = {String.valueOf(idAuthor)};
             String query = String.format(this.SIMPLE_QUERY_ALL, this.table, AUTHOR);
             Cursor result = this.database.rawQuery(query, selectArgs);
 
             while (result.moveToNext()) {
-                books.add(new Book(result, false));
+                books.add(bookDBManager.loadMySQL(result.getInt(result.getColumnIndex(BOOK))));
             }
 
             result.close();
@@ -158,7 +161,7 @@ public final class WriterDBManager extends DBManager {
      * @param id The id of the author.
      * @return True if success else false.
      */
-    public boolean deleteSQLiteAuthor(int id) {
+    public boolean deleteAuthorSQLite(int id) {
         try {
             String whereClause = String.format("%s = ?", AUTHOR);
             String[] whereArgs = new String[]{String.valueOf(id)};
@@ -195,6 +198,38 @@ public final class WriterDBManager extends DBManager {
      */
     public void importFromMySQL() {
         super.importFromMySQL(baseUrl + APIManager.READ);
+    }
+
+    /**
+     * Creates a writer entity in MySQL database.
+     * @param idAuthor The id of the associated author.
+     * @param idBook The id of the book.
+     */
+    public void createMySQL(int idAuthor, int idBook) {
+        String url = this.baseUrl + APIManager.CREATE;
+        Map<String, String> param = new HashMap<>();
+
+        param.put(AUTHOR, String.valueOf(idAuthor));
+        param.put(BOOK, String.valueOf(idBook));
+
+        super.requestString(Request.Method.POST, url, null, param);
+    }
+
+    /**
+     * Deletes the test entity in MySQL database.
+     * @param idAuthor The id of the associated author to delete.
+     * @param idBook The id of the book.
+     */
+    public void deleteTestEntityMySQL(int idAuthor, int idBook) {
+        String url = this.baseUrl + APIManager.DELETE;
+        Map<String, String> param = new HashMap<>();
+
+        param.put(this.ids[0], String.valueOf(idAuthor));
+        param.put(this.ids[1], String.valueOf(idBook));
+
+        param.put(APIManager.TEST, "1");
+
+        this.requestString(Request.Method.DELETE, url, null, param);
     }
 
     @Override

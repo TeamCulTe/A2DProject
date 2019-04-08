@@ -30,9 +30,9 @@ public abstract class CountryDBSchema {
      */
     public static final String COUNTRY_TABLE_STATEMENT = String.format("CREATE TABLE IF NOT EXISTS %s (%s INTEGER " +
                     "PRIMARY KEY, %s TEXT(%s) UNIQUE NOT NULL, %s DATETIME NOT NULL DEFAULT %s);",
-            CountryDBSchema.TABLE,
-            CountryDBSchema.ID,
-            CountryDBSchema.NAME,
+            TABLE,
+            ID,
+            NAME,
             NAME_SIZE,
             CommonDBSchema.UPDATE,
             CommonDBSchema.UPDATE_DEFAULT);

@@ -6,8 +6,11 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 import com.imie.a2dev.teamculte.readeo.DBManagers.DBManager;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.AuthorDBSchema;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Final class representing an author from the application.
@@ -25,6 +28,16 @@ public final class Author extends DBEntity {
      */
     public Author() {
         super();
+    }
+
+    /**
+     * Author's nearly full filled constructor providing  its name.
+     * @param name The name to set.
+     */
+    public Author(String name) {
+        super();
+
+        this.name = name;
     }
 
     /**
@@ -54,6 +67,19 @@ public final class Author extends DBEntity {
      */
     public Author(Cursor result, boolean close) {
         this.init(result, close);
+    }
+
+    /**
+     * Initializes the author from a JSON response object.
+     * @param object The JSON response from the API.
+     */
+    public void init(@NonNull JSONObject object) {
+        try {
+            this.id = object.getInt(AuthorDBSchema.ID);
+            this.name = object.getString(AuthorDBSchema.NAME);
+        } catch (JSONException e) {
+            Log.e(DBManager.JSON_TAG, e.getMessage());
+        }
     }
 
     @Override

@@ -1,0 +1,15 @@
+City:
+  City1:
+    id_city: 1
+    name_city: city1
+    last_update: 2019-01-19 09:48:11
+
+  City2:
+    id_city: 2
+    name_city: city2
+    last_update: 2019-01-19 09:48:11
+
+  City3:
+    id_city: 3
+    name_city: city3
+    last_update: 2019-01-19 09:48:11

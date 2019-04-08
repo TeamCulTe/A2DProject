@@ -7,14 +7,15 @@ import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import com.android.volley.Request;
-import com.android.volley.Response;
 import com.imie.a2dev.teamculte.readeo.APIManager;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Review;
+import com.imie.a2dev.teamculte.readeo.HTTPRequestQueueSingleton;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -50,8 +51,10 @@ public final class ReviewDBManager extends DBManager {
         try {
             ContentValues data = new ContentValues();
 
-            data.put(USER, new UserDBManager(this.getContext()).SQLiteGetId(entity.getAuthor()));
+            data.put(USER, entity.getUserId());
             data.put(BOOK, entity.getId());
+            data.put(REVIEW, entity.getReview());
+
             this.database.insertOrThrow(this.table, null, data);
 
             return true;
@@ -98,8 +101,7 @@ public final class ReviewDBManager extends DBManager {
         try {
             ContentValues data = new ContentValues();
             String whereClause = String.format("%s = ? AND %s = ?", BOOK, USER);
-            String[] whereArgs = new String[]{String.valueOf(entity.getId()),
-                    String.valueOf(new UserDBManager(this.getContext()).SQLiteGetId(entity.getAuthor()))};
+            String[] whereArgs = new String[]{String.valueOf(entity.getId()), String.valueOf(entity.getUserId())};
 
             data.put(REVIEW, entity.getReview());
             data.put(UPDATE, new Date().toString());
@@ -123,6 +125,10 @@ public final class ReviewDBManager extends DBManager {
             String[] selectArgs = {String.valueOf(idUser), String.valueOf(idBook)};
             String query = String.format(this.DOUBLE_QUERY_ALL, this.table, USER, BOOK);
             Cursor result = this.database.rawQuery(query, selectArgs);
+
+            if (result.getCount() == 0) {
+                return null;
+            }
 
             return new Review(result);
         } catch (SQLiteException e) {
@@ -249,14 +255,65 @@ public final class ReviewDBManager extends DBManager {
      * @param review The review to create.
      */
     public void createMySQL(Review review) {
-        String url = String.format(baseUrl + APIManager.CREATE + USER + "=%s&" + BOOK + "=%s&" + REVIEW +
-                "=%s&" + SHARED + "=%s",
-                new UserDBManager(this.getContext()).SQLiteGetId(review.getAuthor()),
-                review.getId(),
-                review.getReview(),
-                review.isShared());
+        String url = this.baseUrl + APIManager.CREATE;
+        Map<String, String> param = new HashMap<>();
 
-        super.requestString(Request.Method.POST, url, null);
+        param.put(USER, String.valueOf(review.getUserId()));
+        param.put(BOOK, String.valueOf(review.getId()));
+        param.put(REVIEW, review.getReview());
+        param.put(SHARED, String.valueOf(review.isShared()));
+
+        super.requestString(Request.Method.POST, url, null, param);
+    }
+
+    /**
+     * Loads a review from MySQL database.
+     * @param idUser The id of the author.
+     * @param idBook The id of the book.
+     * @return The loaded review.
+     */
+    public Review loadMySQL(int idUser, int idBook) {
+        final Review review = new Review();
+        String url = this.baseUrl + APIManager.READ + USER + "=" + idUser + "&" + BOOK + "=" + idBook;
+
+        super.requestJsonArray(Request.Method.GET, url,  response -> {
+            try {
+                review.init(response.getJSONObject(0));
+                HTTPRequestQueueSingleton.getInstance(ReviewDBManager.this.getContext()).finishRequest(this.getClass().getName());
+            } catch (JSONException e) {
+                Log.e(JSON_TAG, e.getMessage());
+            }
+        });
+
+        this.waitForResponse();
+
+        return (review.isEmpty()) ? null : review;
+    }
+
+    /**
+     * Loads the reviews associated to a user from MySQL database.
+     * @param idUser The id of the author.
+     * @return The loaded reviews.
+     */
+    public List<Review> loadUserMySQL(int idUser) {
+        final List<Review> reviews = new ArrayList<>();
+        String url = this.baseUrl + APIManager.READ + USER + "=" + idUser;
+
+        super.requestJsonArray(Request.Method.GET, url, response -> {
+            for (int i = 0; i < response.length(); i++) {
+                try {
+                    reviews.add(new Review(response.getJSONObject(i)));
+                    HTTPRequestQueueSingleton.getInstance(ReviewDBManager.this.getContext()).finishRequest(this.getClass().getName());
+                } catch (JSONException e) {
+                    Log.e(DBManager.JSON_TAG, e.getMessage());
+                }
+            }
+
+        });
+
+        this.waitForResponse();
+
+        return reviews;
     }
 
     /**
@@ -264,74 +321,15 @@ public final class ReviewDBManager extends DBManager {
      * @param review The review to update.
      */
     public void updateMySQL(Review review) {
-        String url = String.format(baseUrl + APIManager.UPDATE + USER + "=%s&" + BOOK + "=%s&" + REVIEW + "=%s&" +
-                        SHARED + "=%s",
-                new UserDBManager(this.getContext()).SQLiteGetId(review.getAuthor()),
-                review.getId(),
-                review.getReview(),
-                review.isShared());
+        String url = this.baseUrl + APIManager.UPDATE;
+        Map<String, String> param = new HashMap<>();
 
-        super.requestString(Request.Method.PUT, url, null);
-    }
+        param.put(USER, String.valueOf(review.getUserId()));
+        param.put(BOOK, String.valueOf(review.getId()));
+        param.put(REVIEW, review.getReview());
+        param.put(SHARED, String.valueOf(review.isShared()));
 
-    /**
-     * Loads a review from MySQL database.
-     * @param idUser The id of the user.
-     * @param idBook The id of the book.
-     * @return The loaded review.
-     */
-    public Review loadMySQL(int idUser, int idBook) {
-        final Review review = new Review();
-
-        String url = String.format(baseUrl + APIManager.READ + USER + "=%s&" + BOOK + "=%s", idUser, idBook);
-
-        super.requestJsonObject(Request.Method.GET, url, new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
-                review.init(response);
-            }
-        });
-
-        return review;
-    }
-
-    /**
-     * Loads all reviews written by a specific user from MySQL database.
-     * @param idUser The id of the user.
-     * @return The loaded review.
-     */
-    public List<Review> loadUserMySQL(int idUser) {
-        final List<Review> reviews = new ArrayList<>();
-
-        String url = String.format(baseUrl + APIManager.READ + USER + "=%s", idUser);
-
-        super.requestJsonObject(Request.Method.GET, url, new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
-                reviews.add(new Review(response));
-            }
-        });
-
-        return reviews;
-    }
-
-    /**
-     * Loads all reviews written by a specific user from MySQL database.
-     * @param idBook The id of the book.
-     * @return The loaded review.
-     */
-    public List<Review> loadBookMySQL(int idBook) {
-        final List<Review> reviews = new ArrayList<>();
-        String url = String.format(baseUrl + APIManager.READ + BOOK + "=%s", idBook);
-
-        super.requestJsonObject(Request.Method.GET, url, new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
-                reviews.add(new Review(response));
-            }
-        });
-
-        return reviews;
+        super.requestString(Request.Method.PUT, url, null, param);
     }
 
     /**
@@ -340,9 +338,13 @@ public final class ReviewDBManager extends DBManager {
      * @param idBook The id of the book.
      */
     public void deleteMySQL(int idUser, int idBook) {
-        String url = String.format(baseUrl + APIManager.DELETE + USER + "=%s&" + BOOK + "=%s", idUser, idBook);
+        String url = this.baseUrl + APIManager.DELETE;
+        Map<String, String> param = new HashMap<>();
 
-        super.requestString(Request.Method.PUT, url, null);
+        param.put(USER, String.valueOf(idUser));
+        param.put(BOOK, String.valueOf(idBook));
+
+        super.requestString(Request.Method.PUT, url, null, param);
     }
 
     /**
@@ -350,9 +352,12 @@ public final class ReviewDBManager extends DBManager {
      * @param idUser The id of the user.
      */
     public void deleteUserMySQL(int idUser) {
-        String url = String.format(baseUrl + APIManager.DELETE + USER + "=%s", idUser);
+        String url = this.baseUrl + APIManager.DELETE;
+        Map<String, String> param = new HashMap<>();
 
-        super.requestString(Request.Method.PUT, url, null);
+        param.put(USER, String.valueOf(idUser));
+
+        super.requestString(Request.Method.PUT, url, null, param);
     }
 
     /**
@@ -361,9 +366,13 @@ public final class ReviewDBManager extends DBManager {
      * @param idBook The id of the book.
      */
     public void restoreMySQL(int idUser, int idBook) {
-        String url = String.format(baseUrl + APIManager.RESTORE + USER + "=%s&" + BOOK + "=%s", idUser, idBook);
+        String url = this.baseUrl + APIManager.RESTORE;
+        Map<String, String> param = new HashMap<>();
 
-        super.requestString(Request.Method.PUT, url, null);
+        param.put(USER, String.valueOf(idUser));
+        param.put(BOOK, String.valueOf(idBook));
+
+        super.requestString(Request.Method.PUT, url, null, param);
     }
 
     /**
@@ -371,9 +380,12 @@ public final class ReviewDBManager extends DBManager {
      * @param idUser The id of the user.
      */
     public void restoreUserMySQL(int idUser) {
-        String url = String.format(baseUrl + APIManager.RESTORE + USER + "=%s", idUser);
+        String url = this.baseUrl + APIManager.RESTORE;
+        Map<String, String> param = new HashMap<>();
 
-        super.requestString(Request.Method.PUT, url, null);
+        param.put(USER, String.valueOf(idUser));
+
+        super.requestString(Request.Method.PUT, url, null, param);
     }
 
     /**
@@ -381,7 +393,24 @@ public final class ReviewDBManager extends DBManager {
      * @param review The review to delete.
      */
     public void deleteMySQL(Review review) {
-        this.deleteMySQL(new UserDBManager(this.getContext()).SQLiteGetId(review.getAuthor()), review.getId());
+        this.deleteMySQL(review.getUserId(), review.getId());
+    }
+
+    /**
+     * Deletes the test entity in MySQL database.
+     * @param idUser The id of the user who wrote the test review to delete.
+     * @param idBook The id of the book.
+     */
+    public void deleteTestEntityMySQL(int idUser, int idBook) {
+        String url = this.baseUrl + APIManager.DELETE;
+        Map<String, String> param = new HashMap<>();
+
+        param.put(this.ids[0], String.valueOf(idUser));
+        param.put(this.ids[1], String.valueOf(idBook));
+
+        param.put(APIManager.TEST, "1");
+
+        this.requestString(Request.Method.DELETE, url, null, param);
     }
 
     @Override
@@ -397,6 +426,7 @@ public final class ReviewDBManager extends DBManager {
             String[] whereArgs = new String[]{entity.getString(USER), entity.getString(BOOK)};
 
             data.put(REVIEW, entity.getString(REVIEW));
+            data.put(UPDATE, new Date().toString());
 
             return this.database.update(this.table, data, whereClause, whereArgs) != 0;
         } catch (SQLiteException e) {
@@ -418,6 +448,7 @@ public final class ReviewDBManager extends DBManager {
             data.put(USER, entity.getInt(USER));
             data.put(BOOK, entity.getInt(BOOK));
             data.put(REVIEW, entity.getString(REVIEW));
+
             this.database.insertOrThrow(this.table, null, data);
         } catch (SQLiteException e) {
             Log.e(SQLITE_TAG, e.getMessage());

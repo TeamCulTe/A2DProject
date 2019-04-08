@@ -30,9 +30,9 @@ public abstract class CityDBSchema {
      */
     public static final String CITY_TABLE_STATEMENT = String.format("CREATE TABLE IF NOT EXISTS %s (%s INTEGER " +
                     "PRIMARY KEY, %s TEXT(%s) UNIQUE NOT NULL, %s DATETIME NOT NULL DEFAULT %s);",
-            CityDBSchema.TABLE,
-            CityDBSchema.ID,
-            CityDBSchema.NAME,
+            TABLE,
+            ID,
+            NAME,
             NAME_SIZE,
             CommonDBSchema.UPDATE,
             CommonDBSchema.UPDATE_DEFAULT);

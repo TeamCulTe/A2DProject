@@ -4,11 +4,8 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
 import android.util.Log;
-import com.imie.a2dev.teamculte.readeo.App;
 import com.imie.a2dev.teamculte.readeo.DBManagers.DBManager;
-import com.imie.a2dev.teamculte.readeo.DBManagers.UserDBManager;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.QuoteDBSchema;
-import com.imie.a2dev.teamculte.readeo.DBSchemas.UserDBSchema;
 import lombok.Getter;
 import lombok.Setter;
 import org.json.JSONException;
@@ -21,9 +18,9 @@ import org.json.JSONObject;
 @Setter
 public final class Quote extends DBEntity {
     /**
-     * Stores the pseudo of the user who wrote the quote.
+     * Stores the id of the user who wrote the quote.
      */
-    private String author;
+    private int userId;
 
     /**
      * Stores the id of the associated book.
@@ -44,14 +41,14 @@ public final class Quote extends DBEntity {
 
     /**
      * Quote's nearly full filled constructor, providing all attributes values except for the database's related ones.
-     * @param author The user's pseudo related to the quote.
+     * @param userId The user's id related to the quote.
      * @param bookId The id of the associated book.
      * @param quote The text of the quote to set.
      */
-    public Quote(String author, int bookId, String quote) {
+    public Quote(int userId, int bookId, String quote) {
         super();
 
-        this.author = author;
+        this.userId = userId;
         this.bookId = bookId;
         this.quote = quote;
     }
@@ -59,14 +56,14 @@ public final class Quote extends DBEntity {
     /**
      * Quote's full filled constructor, providing all attributes values.
      * @param id The id to set.
-     * @param author The user's pseudo related to the quote.
+     * @param userId The user's id related to the quote.
      * @param bookId The id of the associated book.
      * @param quote The text of the quote to set.
      */
-    public Quote(int id, int bookId, String author, String quote) {
+    public Quote(int id, int bookId, int userId, String quote) {
         super(id);
 
-        this.author = author;
+        this.userId = userId;
         this.bookId = bookId;
         this.quote = quote;
     }
@@ -104,8 +101,7 @@ public final class Quote extends DBEntity {
         try {
             this.id = object.getInt(QuoteDBSchema.ID);
             this.bookId = object.getInt(QuoteDBSchema.BOOK);
-            this.author = new UserDBManager(App.getAppContext()).getFieldSQLite(UserDBSchema.PSEUDO,
-                    object.getInt(QuoteDBSchema.USER));
+            this.userId = object.getInt(QuoteDBSchema.USER);
             this.quote = object.getString(QuoteDBSchema.QUOTE);
         } catch (JSONException e) {
             Log.e(DBManager.JSON_TAG, e.getMessage());
@@ -121,8 +117,7 @@ public final class Quote extends DBEntity {
 
             this.id = result.getInt(result.getColumnIndexOrThrow(QuoteDBSchema.ID));
             this.bookId = result.getInt(result.getColumnIndexOrThrow(QuoteDBSchema.BOOK));
-            this.author = new UserDBManager(App.getAppContext()).getFieldSQLite(UserDBSchema.PSEUDO,
-                    result.getInt(result.getColumnIndexOrThrow(QuoteDBSchema.USER)));
+            this.userId = result.getInt(result.getColumnIndexOrThrow(QuoteDBSchema.USER));
             this.quote = result.getString(result.getColumnIndexOrThrow(QuoteDBSchema.QUOTE));
 
             if (close) {
