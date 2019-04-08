@@ -30,9 +30,9 @@ public abstract class CategoryDBSchema {
      */
     public static final String CATEGORY_TABLE_STATEMENT = String.format("CREATE TABLE IF NOT EXISTS %s (%s INTEGER " +
                     "PRIMARY KEY, %s TEXT(%s) UNIQUE NOT NULL, %s DATETIME NOT NULL DEFAULT %s);",
-            CategoryDBSchema.TABLE,
-            CategoryDBSchema.ID,
-            CategoryDBSchema.NAME,
+            TABLE,
+            ID,
+            NAME,
             NAME_SIZE,
             CommonDBSchema.UPDATE,
             CommonDBSchema.UPDATE_DEFAULT);

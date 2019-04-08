@@ -9,14 +9,19 @@ import android.util.Log;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.imie.a2dev.teamculte.readeo.APIManager;
+import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Country;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.PrivateUser;
+import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Profile;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.PublicUser;
+import com.imie.a2dev.teamculte.readeo.HTTPRequestQueueSingleton;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.CommonDBSchema.UPDATE;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.UserDBSchema.CITY;
@@ -120,6 +125,10 @@ public final class UserDBManager extends DBManager {
             String query = String.format(this.SIMPLE_QUERY_ALL, this.table, ID);
             Cursor result = this.database.rawQuery(query, selectArgs);
 
+            if (result.getCount() == 0) {
+                return null;
+            }
+
             return new PublicUser(result);
         } catch (SQLiteException e) {
             Log.e(SQLITE_TAG, e.getMessage());
@@ -161,7 +170,7 @@ public final class UserDBManager extends DBManager {
             Cursor result = this.database.rawQuery(query, selectArgs);
 
             while (result.moveToNext()) {
-                users.add(new PublicUser(result));
+                users.add(new PublicUser(result, false));
             }
 
             return users;
@@ -209,16 +218,21 @@ public final class UserDBManager extends DBManager {
      * @param user The user to create.
      */
     public void createMySQL(PrivateUser user) {
-        String url = String.format(baseUrl + APIManager.CREATE + PSEUDO + "=%s&" + PASSWORD + "=%s&" + EMAIL +
-                        "=%s&" + PROFILE + "=%s&" + CITY + "=%s&" + COUNTRY + "=%s",
-                user.getPseudo(),
-                user.getPassword(),
-                user.getEmail(),
-                user.getProfile().getId(),
-                user.getCity().getId(),
-                user.getCountry().getId());
+        String url = this.baseUrl + APIManager.CREATE;
+        Map<String, String> param = new HashMap<>();
 
-        super.requestString(Request.Method.POST, url, null);
+        if (user.getId() != 0) {
+            param.put(ID, String.valueOf(user.getId()));
+        }
+
+        param.put(PSEUDO, user.getPseudo());
+        param.put(PASSWORD, user.getPassword());
+        param.put(EMAIL, user.getEmail());
+        param.put(PROFILE, String.valueOf(user.getProfile().getId()));
+        param.put(CITY, String.valueOf(user.getCity().getId()));
+        param.put(COUNTRY, String.valueOf(user.getCountry().getId()));
+
+        super.requestString(Request.Method.POST, url, null, param);
     }
 
     /**
@@ -226,17 +240,18 @@ public final class UserDBManager extends DBManager {
      * @param user The user to update.
      */
     public void updateMySQL(PrivateUser user) {
-        String url = String.format(baseUrl + APIManager.UPDATE + ID + "=%s&" + PSEUDO + "=%s&" + PASSWORD + "=%s&" +
-                        EMAIL + "=%s&" + PROFILE + "=%s&" + CITY + "=%s&" + COUNTRY + "=%s",
-                user.getId(),
-                user.getPseudo(),
-                user.getPassword(),
-                user.getEmail(),
-                user.getProfile().getId(),
-                user.getCity().getId(),
-                user.getCountry().getId());
+        String url = this.baseUrl + APIManager.UPDATE;
+        Map<String, String> param = new HashMap<>();
 
-        super.requestString(Request.Method.PUT, url, null);
+        param.put(ID, String.valueOf(user.getId()));
+        param.put(PSEUDO, user.getPseudo());
+        param.put(PASSWORD, user.getPassword());
+        param.put(EMAIL, user.getEmail());
+        param.put(PROFILE, String.valueOf(user.getProfile().getId()));
+        param.put(CITY, String.valueOf(user.getCity().getId()));
+        param.put(COUNTRY, String.valueOf(user.getCountry().getId()));
+
+        super.requestString(Request.Method.PUT, url, null, param);
     }
 
     /**
@@ -246,52 +261,87 @@ public final class UserDBManager extends DBManager {
      * @param value The the new value to set.
      */
     public void updateFieldMySQL(int id, String field, String value) {
-        String url = String.format(baseUrl + APIManager.UPDATE + ID + "=%s&" + field + "=%s",
-                id,
-                value);
+        String url = this.baseUrl + APIManager.UPDATE;
+        Map<String, String> param = new HashMap<>();
 
-        super.requestString(Request.Method.PUT, url, null);
+        param.put(ID, String.valueOf(id));
+        param.put(field, value);
+
+        super.requestString(Request.Method.PUT, url, null, param);
     }
 
     /**
      * Loads a user from MySQL database.
      * @param idUser The id of the user.
-     * @return The loaded review.
+     * @return The loaded user.
      */
     public PrivateUser loadMySQL(int idUser) {
         final PrivateUser user = new PrivateUser();
+        final int idProfile[] = new int[1];
+        final int idCity[] = new int[1];
+        final int idCountry[] = new int[1];
 
-        String url = String.format(baseUrl + APIManager.READ + ID + "=%s", idUser);
+        String url = this.baseUrl + APIManager.READ + ID + "=" + idUser;
 
-        super.requestJsonObject(Request.Method.GET, url, new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
-                user.init(response);
+        super.requestJsonArray(Request.Method.GET, url,  response -> {
+            try {
+                JSONObject object = response.getJSONObject(0);
+                idProfile[0] = object.getInt(PROFILE);
+                idCity[0] = object.getInt(CITY);
+                idCountry[0] = object.getInt(COUNTRY);
+
+                user.init(object);
+                HTTPRequestQueueSingleton.getInstance(UserDBManager.this.getContext()).finishRequest(this.getClass().getName());
+            } catch (JSONException e) {
+                Log.e(JSON_TAG, e.getMessage());
             }
         });
 
-        return user;
+        this.waitForResponse();
+        user.setProfile(new ProfileDBManager(this.getContext()).loadMySQL(idProfile[0]));
+        user.setCountry(new CountryDBManager(this.getContext()).loadMySQL(idCountry[0]));
+        user.setCity(new CityDBManager(this.getContext()).loadMySQL(idCity[0]));
+        user.setReviews(new ReviewDBManager(this.getContext()).loadUserMySQL(user.getId()));
+        user.setBookLists(new BookListDBManager(this.getContext()).loadUserMySQL(user.getId()));
+
+        return (user.isEmpty()) ? null : user;
     }
 
     /**
      * Loads a user from MySQL database.
      * @param email The email of the user.
      * @param password The password of the user.
-     * @return The loaded review.
+     * @return The loaded user.
      */
     public PrivateUser loadMySQL(String email, String password) {
         final PrivateUser user = new PrivateUser();
+        String url = this.baseUrl + APIManager.READ + EMAIL + "=" + email + "&" + PASSWORD + "=" + password;
+        final int idProfile[] = new int[1];
+        final int idCity[] = new int[1];
+        final int idCountry[] = new int[1];
 
-        String url = String.format(baseUrl + APIManager.READ + EMAIL + "=%s&" + PASSWORD + "=%s", email, password);
+        super.requestJsonArray(Request.Method.GET, url, response -> {
+            try {
+                JSONObject object = response.getJSONObject(0);
+                idProfile[0] = object.getInt(PROFILE);
+                idCity[0] = object.getInt(CITY);
+                idCountry[0] = object.getInt(COUNTRY);
 
-        super.requestJsonObject(Request.Method.GET, url, new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
-                user.init(response);
+                user.init(object);
+                HTTPRequestQueueSingleton.getInstance(UserDBManager.this.getContext()).finishRequest(this.getClass().getName());
+            } catch (JSONException e) {
+                Log.e(JSON_TAG, e.getMessage());
             }
         });
 
-        return user;
+        this.waitForResponse();
+        user.setProfile(new ProfileDBManager(this.getContext()).loadMySQL(idProfile[0]));
+        user.setCountry(new CountryDBManager(this.getContext()).loadMySQL(idCountry[0]));
+        user.setCity(new CityDBManager(this.getContext()).loadMySQL(idCity[0]));
+        user.setReviews(new ReviewDBManager(this.getContext()).loadUserMySQL(user.getId()));
+        user.setBookLists(new BookListDBManager(this.getContext()).loadUserMySQL(user.getId()));
+
+        return (user.isEmpty()) ? null : user;
     }
 
     /**
@@ -300,20 +350,28 @@ public final class UserDBManager extends DBManager {
      * @param password The password of the user to delete.
      */
     public void deleteMySQL(String email, String password) {
-        String url = String.format(baseUrl + APIManager.DELETE + EMAIL + "=%s&" + PASSWORD + "=%s", email, password);
+        String url = this.baseUrl + APIManager.DELETE;
+        Map<String, String> param = new HashMap<>();
 
-        super.requestString(Request.Method.PUT, url, null);
+        param.put(PASSWORD, password);
+        param.put(EMAIL, email);
+
+        super.requestString(Request.Method.PUT, url, null, param);
     }
 
     /**
      * Restores a user entity in MySQL database.
      * @param email The email of the user to restore.
-     * @param password The password of the user to derestorelete.
+     * @param password The password of the user to restore.
      */
     public void restoreMySQL(String email, String password) {
-        String url = String.format(baseUrl + APIManager.RESTORE + EMAIL + "=%s&" + PASSWORD + "=%s", email, password);
+        String url = this.baseUrl + APIManager.RESTORE;
+        Map<String, String> param = new HashMap<>();
 
-        super.requestString(Request.Method.PUT, url, null);
+        param.put(PASSWORD, password);
+        param.put(EMAIL, email);
+
+        super.requestString(Request.Method.PUT, url, null, param);
     }
 
     /**
@@ -321,9 +379,12 @@ public final class UserDBManager extends DBManager {
      * @param idUser The id of the user to restore.
      */
     public void restoreMySQL(int idUser) {
-        String url = String.format(baseUrl + APIManager.RESTORE + ID + "=%s", idUser);
+        String url = this.baseUrl + APIManager.RESTORE;
+        Map<String, String> param = new HashMap<>();
 
-        super.requestString(Request.Method.PUT, url, null);
+        param.put(ID, String.valueOf(idUser));
+
+        super.requestString(Request.Method.PUT, url, null, param);
     }
 
     /**
@@ -358,7 +419,6 @@ public final class UserDBManager extends DBManager {
             String[] whereArgs = new String[]{entity.getString(ID)};
 
             data.put(PSEUDO, entity.getString(PSEUDO));
-            data.put(PROFILE, entity.getInt(PROFILE));
 
             return this.database.update(this.table, data, whereClause, whereArgs) != 0;
         } catch (SQLiteException e) {

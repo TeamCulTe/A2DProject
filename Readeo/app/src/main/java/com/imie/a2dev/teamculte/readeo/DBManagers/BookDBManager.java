@@ -6,17 +6,21 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import com.android.volley.Request;
 import com.imie.a2dev.teamculte.readeo.APIManager;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.AuthorDBSchema;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.CategoryDBSchema;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.WriterDBSchema;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Book;
+import com.imie.a2dev.teamculte.readeo.HTTPRequestQueueSingleton;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookDBSchema.ID;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookDBSchema.TABLE;
@@ -106,6 +110,10 @@ public final class BookDBManager extends DBManager {
             String query = String.format(this.SIMPLE_QUERY_ALL, this.table, ID);
             Cursor result = this.database.rawQuery(query, selectArgs);
 
+            if (result.getCount() == 0) {
+                return null;
+            }
+
             return new Book(result);
         } catch (SQLiteException e) {
             Log.e(SQLITE_TAG, e.getMessage());
@@ -128,8 +136,10 @@ public final class BookDBManager extends DBManager {
             Cursor result = this.database.rawQuery(query, selectArgs);
 
             while (result.moveToNext()) {
-                books.add(new Book(result));
+                books.add(new Book(result, false));
             }
+
+            result.close();
 
             return books;
         } catch (SQLiteException e) {
@@ -148,20 +158,22 @@ public final class BookDBManager extends DBManager {
         try {
             List<Book> books = new ArrayList<>();
             String[] selectArgs = {filter};
-            String query = String.format("SELECT %s.* FROM %s INNER JOIN %s ON %s.%s = %s.%s WHERE %s LIKE '?%%')",
+            String query = String.format("SELECT %s.* FROM %s INNER JOIN %s ON %s.%s = %s.%s WHERE %s LIKE ?||'%%'",
                     this.table,
                     this.table,
                     CategoryDBSchema.TABLE,
                     this.table,
                     CATEGORY,
                     CategoryDBSchema.TABLE,
-                    ID,
+                    CategoryDBSchema.ID,
                     CategoryDBSchema.NAME);
             Cursor result = this.database.rawQuery(query, selectArgs);
 
             while (result.moveToNext()) {
-                books.add(new Book(result));
+                books.add(new Book(result, false));
             }
+
+            result.close();
 
             return books;
         } catch (SQLiteException e) {
@@ -181,7 +193,7 @@ public final class BookDBManager extends DBManager {
             List<Book> books = new ArrayList<>();
             String[] selectArgs = {filter};
             String query = String.format("SELECT %s.* FROM %s INNER JOIN %s ON %s.%s = %s.%s " +
-                            "INNER JOIN %s ON %s.%s = %s.%s WHERE %s.%s LIKE '?%%'",
+                            "INNER JOIN %s ON %s.%s = %s.%s WHERE %s.%s LIKE ?||'%%'",
                     this.table,
                     this.table,
                     WriterDBSchema.TABLE,
@@ -199,8 +211,10 @@ public final class BookDBManager extends DBManager {
             Cursor result = this.database.rawQuery(query, selectArgs);
 
             while (result.moveToNext()) {
-                books.add(new Book(result));
+                books.add(new Book(result, false));
             }
+
+            result.close();
 
             return books;
         } catch (SQLiteException e) {
@@ -241,7 +255,7 @@ public final class BookDBManager extends DBManager {
             Cursor result = this.database.rawQuery(query, selectArgs);
 
             while (result.moveToNext()) {
-                books.add(new Book(result));
+                books.add(new Book(result, false));
             }
 
             result.close();
@@ -287,6 +301,56 @@ public final class BookDBManager extends DBManager {
         super.importFromMySQL(baseUrl + APIManager.READ);
     }
 
+    /**
+     * Creates a book entity in MySQL database.
+     * @param book The book to create.
+     */
+    public void createMySQL(Book book) {
+        String url = this.baseUrl + APIManager.CREATE;
+        Map<String, String> param = new HashMap<>();
+
+        if (book.getId() != 0) {
+            param.put(ID, String.valueOf(book.getId()));
+        }
+
+        param.put(TITLE, book.getTitle());
+        param.put(CATEGORY, String.valueOf(book.getCategory().getId()));
+        param.put(COVER, book.getCover());
+        param.put(SUMMARY, book.getSummary());
+        param.put(DATE, String.valueOf(book.getDatePublished()));
+
+        super.requestString(Request.Method.POST, url, null, param);
+    }
+
+    /**
+     * Loads a book from MySQL database.
+     * @param idBook The id of the book.
+     * @return The loaded book.
+     */
+    public Book loadMySQL(int idBook) {
+        final Book book = new Book();
+        final int idCategory[] = new int[1];
+
+        String url = this.baseUrl + APIManager.READ + ID + "=" + idBook;
+
+        super.requestJsonArray(Request.Method.GET, url,  response -> {
+            try {
+                JSONObject object = response.getJSONObject(0);
+                idCategory[0] = object.getInt(CATEGORY);
+
+                book.init(object);
+                HTTPRequestQueueSingleton.getInstance(BookDBManager.this.getContext()).finishRequest(this.getClass().getName());
+            } catch (JSONException e) {
+                Log.e(JSON_TAG, e.getMessage());
+            }
+        });
+
+        this.waitForResponse();
+        book.setCategory(new CategoryDBManager(this.getContext()).loadMySQL(idCategory[0]));
+
+        return (book.isEmpty()) ? null : book;
+    }
+
     @Override
     protected void createSQLite(@NonNull JSONObject entity) {
         try {
@@ -298,6 +362,7 @@ public final class BookDBManager extends DBManager {
             data.put(COVER, entity.getString(COVER));
             data.put(SUMMARY, entity.getString(SUMMARY));
             data.put(DATE, entity.getInt(DATE));
+
             this.database.insertOrThrow(this.table, null, data);
         } catch (SQLiteException e) {
             Log.e(SQLITE_TAG, e.getMessage());

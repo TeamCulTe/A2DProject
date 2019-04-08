@@ -37,4 +37,12 @@ public abstract class DBEntity {
      * @param close Defines if the cursor should be closed or not.
      */
     protected abstract void init(Cursor result, boolean close);
+
+    /**
+     * Defines if the entity is empty (used to check on loading).
+     * @return true if the id is equal to 0 else false.
+     */
+    public boolean isEmpty() {
+        return this.id == 0;
+    }
 }

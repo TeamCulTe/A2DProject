@@ -8,6 +8,8 @@ import com.imie.a2dev.teamculte.readeo.DBManagers.DBManager;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.BookListTypeDBSchema;
 import lombok.Getter;
 import lombok.Setter;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Final class representing a book list type from the application.
@@ -25,6 +27,16 @@ public final class BookListType extends DBEntity {
      */
     public BookListType() {
         super();
+    }
+
+    /**
+     * Book list type's nearly full filled constructor.
+     * @param name The name to set.
+     */
+    public BookListType(String name) {
+        super();
+
+        this.name = name;
     }
 
     /**
@@ -54,6 +66,19 @@ public final class BookListType extends DBEntity {
      */
     public BookListType(Cursor result, boolean close) {
         this.init(result, false);
+    }
+
+    /**
+     * Initializes the book list type from a JSON response object.
+     * @param object The JSON response from the API.
+     */
+    public void init(@NonNull JSONObject object) {
+        try {
+            this.id = object.getInt(BookListTypeDBSchema.ID);
+            this.name = object.getString(BookListTypeDBSchema.NAME);
+        } catch (JSONException e) {
+            Log.e(DBManager.JSON_TAG, e.getMessage());
+        }
     }
 
     @Override

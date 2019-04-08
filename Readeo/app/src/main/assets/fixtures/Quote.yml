@@ -1,0 +1,35 @@
+Quote:
+  Quote1:
+    id_quote: 1
+    id_user: 1
+    id_book: 1
+    quote: quote1
+    last_update: 2019-01-19 09:48:11
+
+  Quote2:
+    id_quote: 2
+    id_user: 1
+    id_book: 2
+    quote: quote2
+    last_update: 2019-01-19 09:48:11
+
+  Quote3:
+    id_quote: 3
+    id_user: 2
+    id_book: 1
+    quote: quote3
+    last_update: 2019-01-19 09:48:11
+
+  Quote4:
+    id_quote: 4
+    id_user: 3
+    id_book: 3
+    quote: quote4
+    last_update: 2019-01-19 09:48:11
+
+  Quote5:
+    id_quote: 5
+    id_user: 4
+    id_book: 2
+    quote: quote5
+    last_update: 2019-01-19 09:48:11

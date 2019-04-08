@@ -7,15 +7,17 @@ import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import com.android.volley.Request;
-import com.android.volley.Response;
 import com.imie.a2dev.teamculte.readeo.APIManager;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Quote;
+import com.imie.a2dev.teamculte.readeo.HTTPRequestQueueSingleton;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.CommonDBSchema.UPDATE;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.QuoteDBSchema.BOOK;
@@ -50,8 +52,9 @@ public final class QuoteDBManager extends DBManager {
             ContentValues data = new ContentValues();
 
             data.put(ID, entity.getId());
-            data.put(USER, new UserDBManager(this.getContext()).SQLiteGetId(entity.getAuthor()));
+            data.put(USER, entity.getUserId());
             data.put(BOOK, entity.getBookId());
+            data.put(QUOTE, entity.getQuote());
             this.database.insertOrThrow(this.table, null, data);
 
             return true;
@@ -94,6 +97,10 @@ public final class QuoteDBManager extends DBManager {
             String[] selectArgs = {String.valueOf(id)};
             String query = String.format(this.SIMPLE_QUERY_ALL, this.table, ID);
             Cursor result = this.database.rawQuery(query, selectArgs);
+
+            if (result.getCount() == 0) {
+                return null;
+            }
 
             return new Quote(result);
         } catch (SQLiteException e) {
@@ -239,12 +246,45 @@ public final class QuoteDBManager extends DBManager {
      * @param quote The quote to create.
      */
     public void createMySQL(Quote quote) {
-        String url = String.format(baseUrl + APIManager.CREATE + USER + "=%s&" + BOOK + "=%s&" + QUOTE + "=%s",
-                new UserDBManager(this.getContext()).SQLiteGetId(quote.getAuthor()),
-                quote.getBookId(),
-                quote.getQuote());
+        String url = this.baseUrl + APIManager.CREATE;
+        Map<String, String> param = new HashMap<>();
 
-        super.requestString(Request.Method.POST, url, null);
+        if (quote.getId() != 0) {
+            param.put(ID, String.valueOf(quote.getId()));
+        }
+
+        // TODO : Fix here, User id SQLite instead of MySQL.
+        param.put(USER, String.valueOf(quote.getUserId()));
+        param.put(BOOK, String.valueOf(quote.getBookId()));
+        param.put(QUOTE, quote.getQuote());
+
+        super.requestString(Request.Method.POST, url, null, param);
+    }
+
+    /**
+     * Loads a quote from MySQL database.
+     * @param idQuote The id of the quote.
+     * @return The loaded quote.
+     */
+    public Quote loadMySQL(int idQuote) {
+        final Quote quote = new Quote();
+        final int idUser[] = new int[1];
+        final int idBook[] = new int[1];
+
+        String url = this.baseUrl + APIManager.READ + ID + "=" + idQuote;
+
+        super.requestJsonArray(Request.Method.GET, url,  response -> {
+            try {
+                quote.init(response.getJSONObject(0));
+                HTTPRequestQueueSingleton.getInstance(QuoteDBManager.this.getContext()).finishRequest(this.getClass().getName());
+            } catch (JSONException e) {
+                Log.e(JSON_TAG, e.getMessage());
+            }
+        });
+
+        this.waitForResponse();
+
+        return (quote.isEmpty()) ? null : quote;
     }
 
     /**
@@ -252,31 +292,13 @@ public final class QuoteDBManager extends DBManager {
      * @param quote The quote to update.
      */
     public void updateMySQL(Quote quote) {
-        String url = String.format(baseUrl + APIManager.UPDATE + ID + "=%s&" + QUOTE + "=%s",
-                quote.getId(),
-                quote.getQuote());
+        String url = this.baseUrl + APIManager.UPDATE;
+        Map<String, String> param = new HashMap<>();
 
-        super.requestString(Request.Method.PUT, url, null);
-    }
+        param.put(ID, String.valueOf(quote.getId()));
+        param.put(QUOTE, quote.getQuote());
 
-    /**
-     * Loads a quote from MySQL database.
-     * @param id The id of the quote to load.
-     * @return The loaded quote.
-     */
-    public Quote loadMySQL(int id) {
-        final Quote quote = new Quote();
-
-        String url = String.format(baseUrl + APIManager.READ + ID + "=%s", id);
-
-        super.requestJsonObject(Request.Method.GET, url, new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
-                quote.init(response);
-            }
-        });
-
-        return quote;
+        super.requestString(Request.Method.PUT, url, null, param);
     }
 
     /**
@@ -284,9 +306,12 @@ public final class QuoteDBManager extends DBManager {
      * @param id The id of the entity to delete.
      */
     public void deleteMySQL(int id) {
-        String url = String.format(baseUrl + APIManager.DELETE + ID + "=%s", id);
+        String url = this.baseUrl + APIManager.DELETE;
+        Map<String, String> param = new HashMap<>();
 
-        super.requestString(Request.Method.PUT, url, null);
+        param.put(ID, String.valueOf(id));
+
+        super.requestString(Request.Method.PUT, url, null, param);
     }
 
     /**
@@ -294,9 +319,11 @@ public final class QuoteDBManager extends DBManager {
      * @param idUser The id of the user.
      */
     public void deleteUserMySQL(int idUser) {
-        String url = String.format(baseUrl + APIManager.DELETE + USER + "=%s", idUser);
+        String url = this.baseUrl + APIManager.DELETE;
+        Map<String, String> param = new HashMap<>();
 
-        super.requestString(Request.Method.PUT, url, null);
+        param.put(USER, String.valueOf(idUser));
+        super.requestString(Request.Method.PUT, url, null, param);
     }
 
     /**
@@ -304,9 +331,11 @@ public final class QuoteDBManager extends DBManager {
      * @param id The id of the entity to delete.
      */
     public void restoreMySQL(int id) {
-        String url = String.format(baseUrl + APIManager.RESTORE + ID + "=%s", id);
+        String url = this.baseUrl + APIManager.RESTORE;
+        Map<String, String> param = new HashMap<>();
 
-        super.requestString(Request.Method.PUT, url, null);
+        param.put(ID, String.valueOf(id));
+        super.requestString(Request.Method.PUT, url, null, param);
     }
 
     /**
@@ -314,9 +343,11 @@ public final class QuoteDBManager extends DBManager {
      * @param idUser The id of the user.
      */
     public void restoreUserMySQL(int idUser) {
-        String url = String.format(baseUrl + APIManager.RESTORE + USER + "=%s", idUser);
+        String url = this.baseUrl + APIManager.RESTORE;
+        Map<String, String> param = new HashMap<>();
 
-        super.requestString(Request.Method.PUT, url, null);
+        param.put(USER, String.valueOf(idUser));
+        super.requestString(Request.Method.PUT, url, null, param);
     }
 
     /**
@@ -351,9 +382,8 @@ public final class QuoteDBManager extends DBManager {
             String whereClause = String.format("%s = ?", ID);
             String[] whereArgs = new String[]{entity.getString(ID)};
 
-            data.put(USER, entity.getInt(USER));
-            data.put(BOOK, entity.getInt(BOOK));
             data.put(QUOTE, entity.getString(QUOTE));
+            data.put(UPDATE, new Date().toString());
 
             return this.database.update(this.table, data, whereClause, whereArgs) != 0;
         } catch (SQLiteException e) {

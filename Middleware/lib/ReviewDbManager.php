@@ -21,7 +21,7 @@ class ReviewDbManager extends DbManager
     /**
      * Stores the placeholders for prepared queries.
      */
-    public const PLACEHOLDERS = [":idU", ":idB", ":review", ":shared"];
+    public const PLACEHOLDERS = [":idU", ":idB", ":review", ":shared", ":update"];
 
     /**
      * Stores the associated table name.
@@ -531,5 +531,14 @@ class ReviewDbManager extends DbManager
         $response = $req->fetchAll(PDO::FETCH_ASSOC);
 
         return (!empty($response)) ? json_encode($response) : null;
+    }
+
+    /**
+     * Deletes all the test entities (id inferior to 0).
+     */
+    public function deleteTestEntities() {
+        $statement = sprintf("DELETE FROM %s WHERE %s < 0 AND %s < 0", static::TABLE, static::FIELDS[0], static::FIELDS[1]);
+
+        $this->db->exec($statement);
     }
 }

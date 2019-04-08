@@ -54,17 +54,17 @@ public abstract class BookDBSchema {
                     "PRIMARY KEY, %s INTEGER NOT NULL, %s TEXT(%s) UNIQUE NOT NULL, %s TEXT(%s), %s TEXT, %s " +
                     "INTEGER(4) NOT NULL, %s DATETIME NOT NULL DEFAULT %s, CONSTRAINT Book_Category_FK FOREIGN KEY " +
                     "(%s) REFERENCES Category(%s));",
-            BookDBSchema.TABLE,
-            BookDBSchema.ID,
-            BookDBSchema.CATEGORY,
-            BookDBSchema.TITLE,
+            TABLE,
+            ID,
+            CATEGORY,
+            TITLE,
             TEXT_SIZE,
-            BookDBSchema.COVER,
+            COVER,
             TEXT_SIZE,
-            BookDBSchema.SUMMARY,
-            BookDBSchema.DATE,
+            SUMMARY,
+            DATE,
             CommonDBSchema.UPDATE,
             CommonDBSchema.UPDATE_DEFAULT,
-            BookDBSchema.CATEGORY,
+            CATEGORY,
             CategoryDBSchema.ID);
 }

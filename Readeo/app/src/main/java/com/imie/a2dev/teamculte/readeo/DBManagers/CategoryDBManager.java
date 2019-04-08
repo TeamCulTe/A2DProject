@@ -6,14 +6,18 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import com.android.volley.Request;
 import com.imie.a2dev.teamculte.readeo.APIManager;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Category;
+import com.imie.a2dev.teamculte.readeo.HTTPRequestQueueSingleton;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.CategoryDBSchema.ID;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.CategoryDBSchema.NAME;
@@ -90,6 +94,10 @@ public final class CategoryDBManager extends DBManager {
             String query = String.format(this.SIMPLE_QUERY_ALL, this.table, ID);
             Cursor result = this.database.rawQuery(query, selectArgs);
 
+            if (result.getCount() == 0) {
+                return null;
+            }
+
             return new Category(result);
         } catch (SQLiteException e) {
             Log.e(SQLITE_TAG, e.getMessage());
@@ -128,6 +136,46 @@ public final class CategoryDBManager extends DBManager {
      */
     public void importFromMySQL() {
         super.importFromMySQL(baseUrl + APIManager.READ);
+    }
+
+    /**
+     * Creates a category entity in MySQL database.
+     * @param category The category to create.
+     */
+    public void createMySQL(Category category) {
+        String url = this.baseUrl + APIManager.CREATE;
+        Map<String, String> param = new HashMap<>();
+
+        if (category.getId() != 0) {
+            param.put(ID, String.valueOf(category.getId()));
+        }
+
+        param.put(NAME, category.getName());
+
+        super.requestString(Request.Method.POST, url, null, param);
+    }
+
+    /**
+     * Loads a category from MySQL database.
+     * @param idCategory The id of the category.
+     * @return The loaded category.
+     */
+    public Category loadMySQL(int idCategory) {
+        final Category category = new Category();
+        String url = this.baseUrl + APIManager.READ + ID + "=" + idCategory;
+
+        super.requestJsonArray(Request.Method.GET, url,  response -> {
+            try {
+                category.init(response.getJSONObject(0));
+                HTTPRequestQueueSingleton.getInstance(CategoryDBManager.this.getContext()).finishRequest(this.getClass().getName());
+            } catch (JSONException e) {
+                Log.e(JSON_TAG, e.getMessage());
+            }
+        });
+
+        this.waitForResponse();
+
+        return (category.isEmpty()) ? null : category;
     }
 
     @Override

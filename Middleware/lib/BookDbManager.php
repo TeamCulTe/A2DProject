@@ -21,7 +21,7 @@ class BookDbManager extends DbManager
     /**
      * Stores the placeholders for prepared queries.
      */
-    public const PLACEHOLDERS = [":idB", ":idC", ":title", ":cover", ":summary", ":date", "update"];
+    public const PLACEHOLDERS = [":idB", ":idC", ":title", ":cover", ":summary", ":date", ":update"];
 
     /**
      * Stores the associated table name.
@@ -35,7 +35,7 @@ class BookDbManager extends DbManager
      * @param string $cover The url of the cover.
      * @param string $summary The book's summary text.
      * @param string $date The book's written date.
-     * @return true|false True if success else false.
+     * @return string the id of the created entity.
      */
     public function create(int $idCategory, string $title, string $cover, string $summary, string $date)
     {
@@ -45,6 +45,38 @@ class BookDbManager extends DbManager
             static::PLACEHOLDERS[4], static::PLACEHOLDERS[5]);
         $req = $this->db->prepare($statement);
 
+        $req->bindValue(static::PLACEHOLDERS[1], $idCategory, PDO::PARAM_INT);
+        $req->bindValue(static::PLACEHOLDERS[2], $title, PDO::PARAM_STR);
+        $req->bindValue(static::PLACEHOLDERS[3], $cover, PDO::PARAM_STR);
+        $req->bindValue(static::PLACEHOLDERS[4], $summary, PDO::PARAM_STR);
+        $req->bindValue(static::PLACEHOLDERS[5], $date, PDO::PARAM_STR);
+
+        if ($req->execute()) {
+            return $this->db->lastInsertId();
+        } else {
+            return "";
+        }
+    }
+
+    /**
+     * Creates a book into the database.
+     * @param int $id The id of the book.
+     * @param int $idCategory The associated category id.
+     * @param string $title The title of the book.
+     * @param string $cover The url of the cover.
+     * @param string $summary The book's summary text.
+     * @param string $date The book's written date.
+     * @return string the id of the created entity.
+     */
+    public function fullCreate(int $id, int $idCategory, string $title, string $cover, string $summary, string $date)
+    {
+        $statement = sprintf("INSERT INTO %s(%s, %s, %s, %s, %s, %s) VALUES (%s, %s, %s, %s, %s, %s)",
+            static::TABLE, static::FIELDS[0], static::FIELDS[1], static::FIELDS[2], static::FIELDS[3],
+            static::FIELDS[4], static::FIELDS[5], static::PLACEHOLDERS[0], static::PLACEHOLDERS[1],
+            static::PLACEHOLDERS[2], static::PLACEHOLDERS[3], static::PLACEHOLDERS[4], static::PLACEHOLDERS[5]);
+        $req = $this->db->prepare($statement);
+
+        $req->bindValue(static::PLACEHOLDERS[0], $id, PDO::PARAM_INT);
         $req->bindValue(static::PLACEHOLDERS[1], $idCategory, PDO::PARAM_INT);
         $req->bindValue(static::PLACEHOLDERS[2], $title, PDO::PARAM_STR);
         $req->bindValue(static::PLACEHOLDERS[3], $cover, PDO::PARAM_STR);
@@ -293,5 +325,14 @@ class BookDbManager extends DbManager
         $response = $req->fetchAll(PDO::FETCH_ASSOC);
 
         return (!empty($response)) ? json_encode($response) : null;
+    }
+
+    /**
+     * Deletes all the test entities (id inferior to 0).
+     */
+    public function deleteTestEntities() {
+        $statement = sprintf("DELETE FROM %s WHERE %s < 0", static::TABLE, static::FIELDS[0]);
+
+        $this->db->exec($statement);
     }
 }

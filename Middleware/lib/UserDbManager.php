@@ -21,7 +21,7 @@ class UserDbManager extends DbManager
     /**
      * Stores the placeholders for prepared queries.
      */
-    public const PLACEHOLDERS = [":idU", ":pseudo", ":password", ":email", ":idP", ":idCi", ":idCo", "update"];
+    public const PLACEHOLDERS = [":idU", ":pseudo", ":password", ":email", ":idP", ":idCi", ":idCo", ":update"];
 
     /**
      * Stores the associated table name.
@@ -36,7 +36,7 @@ class UserDbManager extends DbManager
      * @param int $idProfile The id of user's profile.
      * @param int $idCity The id of user's city.
      * @param int $idCountry The id of user's country.
-     * @return true|false True if success else false.
+     * @return string the id of the created entity.
      */
     public function create(string $pseudo, string $password, string $email, int $idProfile, int $idCity, int $idCountry)
     {
@@ -46,7 +46,42 @@ class UserDbManager extends DbManager
             static::PLACEHOLDERS[3], static::PLACEHOLDERS[4], static::PLACEHOLDERS[5], static::PLACEHOLDERS[6]);
         $req = $this->db->prepare($statement);
 
-        $req->bindValue(static::PLACEHOLDERS[1], $pseudo, PDO::PARAM_INT);
+        $req->bindValue(static::PLACEHOLDERS[1], $pseudo, PDO::PARAM_STR);
+        $req->bindValue(static::PLACEHOLDERS[2], $password, PDO::PARAM_STR);
+        $req->bindValue(static::PLACEHOLDERS[3], $email, PDO::PARAM_STR);
+        $req->bindValue(static::PLACEHOLDERS[4], $idProfile, PDO::PARAM_INT);
+        $req->bindValue(static::PLACEHOLDERS[5], $idCity, PDO::PARAM_INT);
+        $req->bindValue(static::PLACEHOLDERS[6], $idCountry, PDO::PARAM_INT);
+
+        if ($req->execute()) {
+            return $this->db->lastInsertId();
+        } else {
+            return "";
+        }
+    }
+
+    /**
+     * Creates a user into the database.
+     * @param int $id The id of the user to create.
+     * @param string $pseudo The pseudo of the user.
+     * @param string $password The password of the user.
+     * @param string $email The user's email address.
+     * @param int $idProfile The id of user's profile.
+     * @param int $idCity The id of user's city.
+     * @param int $idCountry The id of user's country.
+     * @return string the id of the created entity.
+     */
+    public function fullCreate(int $id, string $pseudo, string $password, string $email, int $idProfile, int $idCity, int $idCountry)
+    {
+        $statement = sprintf("INSERT INTO %s(%s, %s, %s, %s, %s, %s, %s) VALUES (%s, %s, %s, %s, %s, %s, %s)",
+            static::TABLE, static::FIELDS[0], static::FIELDS[1], static::FIELDS[2], static::FIELDS[3],
+            static::FIELDS[4], static::FIELDS[5], static::FIELDS[6], static::PLACEHOLDERS[0], static::PLACEHOLDERS[1],
+            static::PLACEHOLDERS[2], static::PLACEHOLDERS[3], static::PLACEHOLDERS[4], static::PLACEHOLDERS[5],
+            static::PLACEHOLDERS[6]);
+        $req = $this->db->prepare($statement);
+
+        $req->bindValue(static::PLACEHOLDERS[0], $id, PDO::PARAM_INT);
+        $req->bindValue(static::PLACEHOLDERS[1], $pseudo, PDO::PARAM_STR);
         $req->bindValue(static::PLACEHOLDERS[2], $password, PDO::PARAM_STR);
         $req->bindValue(static::PLACEHOLDERS[3], $email, PDO::PARAM_STR);
         $req->bindValue(static::PLACEHOLDERS[4], $idProfile, PDO::PARAM_INT);
@@ -63,7 +98,7 @@ class UserDbManager extends DbManager
      */
     public function getUser(int $id)
     {
-        $statement = sprintf("SELECT %s, %s, %s, %s, %s, %s, %s FROM %s WHERE %s = %s AND deleted = 0",
+        $statement = sprintf("SELECT %s, %s, %s, %s, %s, %s, %s, %s FROM %s WHERE %s = %s AND deleted = 0",
             static::FIELDS[0], static::FIELDS[1], static::FIELDS[2], static::FIELDS[3], static::FIELDS[4],
             static::FIELDS[5], static::FIELDS[6], static::FIELDS[7], static::TABLE, static::FIELDS[0],
             static::PLACEHOLDERS[0]);
@@ -165,10 +200,10 @@ class UserDbManager extends DbManager
      */
     public function getUserFromAuth(string $email, string $password)
     {
-        $statement = sprintf("SELECT %s, %s, %s, %s, %s, %s FROM %s WHERE %s = %s AND %s =%s AND deleted = 0",
-            static::FIELDS[0], static::FIELDS[3], static::FIELDS[4], static::FIELDS[5], static::FIELDS[6],
-            static::FIELDS[7], static::TABLE, static::FIELDS[3], static::PLACEHOLDERS[3], static::FIELDS[2],
-            static::PLACEHOLDERS[2]);
+        $statement = sprintf("SELECT %s, %s, %s, %s, %s, %s, %s, %s FROM %s WHERE %s = %s AND %s =%s AND deleted = 0",
+            static::FIELDS[0], static::FIELDS[1], static::FIELDS[2], static::FIELDS[3], static::FIELDS[4],
+            static::FIELDS[5], static::FIELDS[6], static::FIELDS[7], static::TABLE, static::FIELDS[3],
+            static::PLACEHOLDERS[3], static::FIELDS[2], static::PLACEHOLDERS[2]);
         $req = $this->db->prepare($statement);
 
         $req->bindValue(static::PLACEHOLDERS[3], $email, PDO::PARAM_STR);
@@ -568,5 +603,14 @@ class UserDbManager extends DbManager
         $response = $req->fetchAll(PDO::FETCH_ASSOC);
 
         return (!empty($response)) ? json_encode($response) : null;
+    }
+
+    /**
+     * Deletes all the test entities (id inferior to 0).
+     */
+    public function deleteTestEntities() {
+        $statement = sprintf("DELETE FROM %s WHERE %s < 0", static::TABLE, static::FIELDS[0]);
+
+        $this->db->exec($statement);
     }
 }

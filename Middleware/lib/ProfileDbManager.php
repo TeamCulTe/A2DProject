@@ -21,7 +21,7 @@ class ProfileDbManager extends DbManager
     /**
      * Stores the placeholders for prepared queries.
      */
-    public const PLACEHOLDERS = [":idP", ":avatar", ":description", "update"];
+    public const PLACEHOLDERS = [":idP", ":avatar", ":description", ":update"];
 
     /**
      * Stores the associated table name.
@@ -32,7 +32,7 @@ class ProfileDbManager extends DbManager
      * Creates a profile in the database.
      * @param string $avatar The string representing the user's avatar.
      * @param string $description The profile's description.
-     * @return true|false True if success else false.
+     * @return string the id of the created entity.
      */
     public function create(string $avatar, string $description)
     {
@@ -40,6 +40,31 @@ class ProfileDbManager extends DbManager
             static::TABLE, static::FIELDS[1], static::FIELDS[2], static::PLACEHOLDERS[1], static::PLACEHOLDERS[2]);
         $req = $this->db->prepare($statement);
 
+        $req->bindValue(static::PLACEHOLDERS[1], $avatar, PDO::PARAM_STR);
+        $req->bindValue(static::PLACEHOLDERS[2], $description, PDO::PARAM_STR);
+
+        if ($req->execute()) {
+            return $this->db->lastInsertId();
+        } else {
+            return "";
+        }
+    }
+
+    /**
+     * Creates a profile in the database.
+     * @param int $id The id of the profile to create.
+     * @param string $avatar The string representing the user's avatar.
+     * @param string $description The profile's description.
+     * @return string the id of the created entity.
+     */
+    public function fullCreate(int $id, string $avatar, string $description)
+    {
+        $statement = sprintf("INSERT INTO %s(%s, %s, %s) VALUES(%s, %s, %s)",
+            static::TABLE, static::FIELDS[0], static::FIELDS[1], static::FIELDS[2], static::PLACEHOLDERS[0],
+            static::PLACEHOLDERS[1], static::PLACEHOLDERS[2]);
+        $req = $this->db->prepare($statement);
+
+        $req->bindValue(static::PLACEHOLDERS[0], $id, PDO::PARAM_INT);
         $req->bindValue(static::PLACEHOLDERS[1], $avatar, PDO::PARAM_STR);
         $req->bindValue(static::PLACEHOLDERS[2], $description, PDO::PARAM_STR);
 
@@ -271,5 +296,14 @@ class ProfileDbManager extends DbManager
         $response = $req->fetchAll(PDO::FETCH_ASSOC);
 
         return (!empty($response)) ? json_encode($response) : null;
+    }
+
+    /**
+     * Deletes all the test entities (id inferior to 0).
+     */
+    public function deleteTestEntities() {
+        $statement = sprintf("DELETE FROM %s WHERE %s < 0", static::TABLE, static::FIELDS[0]);
+
+        $this->db->exec($statement);
     }
 }

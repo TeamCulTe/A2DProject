@@ -37,15 +37,15 @@ public abstract class QuoteDBSchema {
                     "PRIMARY KEY, %s INTEGER NOT NULL, %s INTEGER NOT NULL, %s TEXT NOT NULL, %s DATETIME NOT NULL " +
                     "DEFAULT %s, CONSTRAINT Quote_User_FK FOREIGN KEY (%s) REFERENCES User(%s), " +
                     "CONSTRAINT Quote_Book_FK FOREIGN KEY (%s) REFERENCES Book(%s));",
-            QuoteDBSchema.TABLE,
-            QuoteDBSchema.ID,
-            QuoteDBSchema.USER,
-            QuoteDBSchema.BOOK,
-            QuoteDBSchema.QUOTE,
+            TABLE,
+            ID,
+            USER,
+            BOOK,
+            QUOTE,
             CommonDBSchema.UPDATE,
             CommonDBSchema.UPDATE_DEFAULT,
-            QuoteDBSchema.USER,
+            USER,
             UserDBSchema.ID,
-            QuoteDBSchema.BOOK,
+            BOOK,
             BookDBSchema.ID);
 }

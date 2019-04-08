@@ -8,6 +8,8 @@ import com.imie.a2dev.teamculte.readeo.DBManagers.DBManager;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.CityDBSchema;
 import lombok.Getter;
 import lombok.Setter;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Final class representing a city from the application.
@@ -25,6 +27,16 @@ public final class City extends DBEntity {
      */
     public City() {
         super();
+    }
+
+    /**
+     * City's nearly full filled constructor.
+     * @param name The name to set.
+     */
+    public City(String name) {
+        super();
+
+        this.name = name;
     }
 
     /**
@@ -54,6 +66,19 @@ public final class City extends DBEntity {
      */
     public City(Cursor result, boolean close) {
         this.init(result, false);
+    }
+
+    /**
+     * Initializes the city from a JSON response object.
+     * @param object The JSON response from the API.
+     */
+    public void init(@NonNull JSONObject object) {
+        try {
+            this.id = object.getInt(CityDBSchema.ID);
+            this.name = object.getString(CityDBSchema.NAME);
+        } catch (JSONException e) {
+            Log.e(DBManager.JSON_TAG, e.getMessage());
+        }
     }
 
     @Override

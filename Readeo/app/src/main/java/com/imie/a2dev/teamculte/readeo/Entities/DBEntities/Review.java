@@ -3,11 +3,8 @@ package com.imie.a2dev.teamculte.readeo.Entities.DBEntities;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.util.Log;
-import com.imie.a2dev.teamculte.readeo.App;
 import com.imie.a2dev.teamculte.readeo.DBManagers.DBManager;
-import com.imie.a2dev.teamculte.readeo.DBManagers.UserDBManager;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.ReviewDBSchema;
-import com.imie.a2dev.teamculte.readeo.DBSchemas.UserDBSchema;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
@@ -21,9 +18,9 @@ import org.json.JSONObject;
 @Setter
 public final class Review extends DBEntity {
     /**
-     * Stores the author's pseudo.
+     * Stores the userId's id.
      */
-    private String author;
+    private int userId;
 
     /**
      * Stores the review's text.
@@ -44,29 +41,15 @@ public final class Review extends DBEntity {
     }
 
     /**
-     * Review's nearly full filled constructor, providing all attributes values, except for database related ones.
-     * @param author The name of the author to set.
-     * @param review The review to set.
-     * @param shared The value defining if the review is shared or not.
-     */
-    public Review(String author, String review, boolean shared) {
-        super();
-
-        this.author = author;
-        this.review = review;
-        this.shared = shared;
-    }
-
-    /**
      * Review's full filled constructor, providing all attributes values.
-     * @param author The name of the author to set.
+     * @param userId The id of the user to set.
      * @param review The review to set.
      * @param shared The value defining if the review is shared or not.
      */
-    public Review(int id, String review, String author, boolean shared) {
+    public Review(int id, int userId, String review, boolean shared) {
         super(id);
 
-        this.author = author;
+        this.userId = userId;
         this.review = review;
         this.shared = shared;
     }
@@ -103,9 +86,9 @@ public final class Review extends DBEntity {
     public void init(@NonNull JSONObject object) {
         try {
             this.id = object.getInt(ReviewDBSchema.BOOK);
-            this.author = new UserDBManager(App.getAppContext()).getFieldSQLite(UserDBSchema.PSEUDO,
-                    object.getInt(ReviewDBSchema.USER));
+            this.userId = object.getInt(ReviewDBSchema.USER);
             this.review = object.getString(ReviewDBSchema.REVIEW);
+            this.shared = (object.getInt(ReviewDBSchema.SHARED) == 1);
         } catch (JSONException e) {
             Log.e(DBManager.JSON_TAG, e.getMessage());
         }
@@ -119,8 +102,7 @@ public final class Review extends DBEntity {
             }
 
             this.id = result.getInt(result.getColumnIndexOrThrow(ReviewDBSchema.BOOK));
-            this.author = new UserDBManager(App.getAppContext()).getFieldSQLite(UserDBSchema.PSEUDO,
-                    result.getInt(result.getColumnIndexOrThrow(ReviewDBSchema.USER)));
+            this.userId = result.getInt(result.getColumnIndexOrThrow(ReviewDBSchema.USER));
             this.review = result.getString(result.getColumnIndexOrThrow(ReviewDBSchema.REVIEW));
             this.shared = true;
 

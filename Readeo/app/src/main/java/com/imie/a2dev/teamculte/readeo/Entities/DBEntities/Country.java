@@ -6,8 +6,11 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 import com.imie.a2dev.teamculte.readeo.DBManagers.DBManager;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.CountryDBSchema;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Final class representing a country from the application.
@@ -25,6 +28,16 @@ public final class Country extends DBEntity {
      */
     public Country() {
         super();
+    }
+
+    /**
+     * Country's nearly full filled constructor.
+     * @param name The name to set.
+     */
+    public Country(String name) {
+        super();
+
+        this.name = name;
     }
 
     /**
@@ -54,6 +67,20 @@ public final class Country extends DBEntity {
      */
     public Country(Cursor result, boolean close) {
         this.init(result, false);
+    }
+
+
+    /**
+     * Initializes the country from a JSON response object.
+     * @param object The JSON response from the API.
+     */
+    public void init(@NonNull JSONObject object) {
+        try {
+            this.id = object.getInt(CountryDBSchema.ID);
+            this.name = object.getString(CountryDBSchema.NAME);
+        } catch (JSONException e) {
+            Log.e(DBManager.JSON_TAG, e.getMessage());
+        }
     }
 
     @Override

@@ -9,11 +9,14 @@ import android.util.Log;
 import com.android.volley.Request;
 import com.imie.a2dev.teamculte.readeo.APIManager;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.City;
+import com.imie.a2dev.teamculte.readeo.HTTPRequestQueueSingleton;
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.CityDBSchema.ID;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.CityDBSchema.NAME;
@@ -25,7 +28,7 @@ import static com.imie.a2dev.teamculte.readeo.DBSchemas.CommonDBSchema.UPDATE;
  */
 public final class CityDBManager extends DBManager {
     /**
-     * CategoryDBManager's constructor.
+     * CityDBManager's constructor.
      * @param context The associated context.
      */
     public CityDBManager(Context context) {
@@ -35,7 +38,6 @@ public final class CityDBManager extends DBManager {
         this.ids = new String[]{ID};
         this.baseUrl = APIManager.API_URL + APIManager.CITIES;
     }
-
     /**
      * From a java entity creates the associated entity into the database.
      * @param entity The model to store into the database.
@@ -90,6 +92,10 @@ public final class CityDBManager extends DBManager {
             String query = String.format(this.SIMPLE_QUERY_ALL, this.table, ID);
             Cursor result = this.database.rawQuery(query, selectArgs);
 
+            if (result.getCount() == 0) {
+                return null;
+            }
+
             return new City(result);
         } catch (SQLiteException e) {
             Log.e(SQLITE_TAG, e.getMessage());
@@ -132,12 +138,39 @@ public final class CityDBManager extends DBManager {
 
     /**
      * Creates a city entity in MySQL database.
-     * @param name The name of the city to create.
+     * @param city The city to create.
      */
-    public void createMySQL(String name) {
-        String url = String.format(baseUrl + APIManager.CREATE + NAME + "=%s", name);
+    public void createMySQL(City city) {
+        String url = this.baseUrl + APIManager.CREATE;
+        Map<String, String> param = new HashMap<>();
 
-        super.requestString(Request.Method.POST, url, null);
+        param.put(ID, String.valueOf(city.getId()));
+        param.put(NAME, city.getName());
+
+        super.requestString(Request.Method.POST, url, null, param);
+    }
+
+    /**
+     * Loads a city from MySQL database.
+     * @param idCity The id of the city.
+     * @return The loaded city.
+     */
+    public City loadMySQL(int idCity) {
+        final City city = new City();
+        String url = this.baseUrl + APIManager.READ + ID + "=" + idCity;
+
+        super.requestJsonArray(Request.Method.GET, url,  response -> {
+            try {
+                city.init(response.getJSONObject(0));
+                HTTPRequestQueueSingleton.getInstance(CityDBManager.this.getContext()).finishRequest(this.getClass().getName());
+            } catch (JSONException e) {
+                Log.e(JSON_TAG, e.getMessage());
+            }
+        });
+
+        this.waitForResponse();
+
+        return (city.isEmpty()) ? null : city;
     }
 
     @Override

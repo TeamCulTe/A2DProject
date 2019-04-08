@@ -1,0 +1,15 @@
+BookListType:
+  BookListType1:
+    id_book_list_type: 1
+    name_book_list_type: booklisttype1
+    last_update: 2019-01-19 09:48:11
+
+  BookListType2:
+    id_book_list_type: 2
+    name_book_list_type: booklisttype2
+    last_update: 2019-01-19 09:48:11
+
+  BookListType3:
+    id_book_list_type: 3
+    name_book_list_type: booklisttype3
+    last_update: 2019-01-19 09:48:11

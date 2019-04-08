@@ -1,6 +1,5 @@
 package com.imie.a2dev.teamculte.readeo.Entities.DBEntities;
 
-import android.content.Context;
 import android.database.Cursor;
 import android.support.annotation.NonNull;
 import android.util.Log;
@@ -87,11 +86,16 @@ public final class BookList extends DBEntity {
      */
     public void init(@NonNull JSONArray array) {
         try {
+            Book book;
             BookDBManager bookDBManager = new BookDBManager(App.getAppContext());
             JSONObject first = array.getJSONObject(0);
 
             for (int i = 0; i < array.length(); i++) {
-                this.books.add(bookDBManager.loadSQLite(array.getJSONObject(i).getInt(BookListDBSchema.BOOK)));
+                book = bookDBManager.loadSQLite(array.getJSONObject(i).getInt(BookListDBSchema.BOOK));
+
+                if (book != null) {
+                    this.books.add(book);
+                }
             }
 
             this.id = first.getInt(BookListDBSchema.USER);

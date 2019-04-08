@@ -6,14 +6,18 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import com.android.volley.Request;
 import com.imie.a2dev.teamculte.readeo.APIManager;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Country;
+import com.imie.a2dev.teamculte.readeo.HTTPRequestQueueSingleton;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.CommonDBSchema.UPDATE;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.CountryDBSchema.ID;
@@ -25,7 +29,7 @@ import static com.imie.a2dev.teamculte.readeo.DBSchemas.CountryDBSchema.TABLE;
  */
 public final class CountryDBManager extends DBManager {
     /**
-     * CategoryDBManager's constructor.
+     * CountryDBManager's constructor.
      * @param context The associated context.
      */
     public CountryDBManager(Context context) {
@@ -90,6 +94,10 @@ public final class CountryDBManager extends DBManager {
             String query = String.format(this.SIMPLE_QUERY_ALL, this.table, ID);
             Cursor result = this.database.rawQuery(query, selectArgs);
 
+            if (result.getCount() == 0) {
+                return null;
+            }
+
             return new Country(result);
         } catch (SQLiteException e) {
             Log.e(SQLITE_TAG, e.getMessage());
@@ -130,6 +138,19 @@ public final class CountryDBManager extends DBManager {
         super.importFromMySQL(baseUrl + APIManager.READ);
     }
 
+    /**
+     * Creates a country entity in MySQL database.
+     * @param country The country to create.
+     */
+    public void createMySQL(Country country) {
+        String url = this.baseUrl + APIManager.CREATE;
+        Map<String, String> param = new HashMap<>();
+
+        param.put(ID, String.valueOf(country.getId()));
+        param.put(NAME, country.getName());
+        super.requestString(Request.Method.POST, url, null, param);
+    }
+
     @Override
     protected void createSQLite(@NonNull JSONObject entity) {
         try {
@@ -143,6 +164,29 @@ public final class CountryDBManager extends DBManager {
         } catch (JSONException e) {
             Log.e(SQLITE_TAG, e.getMessage());
         }
+    }
+
+    /**
+     * Loads a country from MySQL database.
+     * @param idCountry The id of the country.
+     * @return The loaded country.
+     */
+    public Country loadMySQL(int idCountry) {
+        final Country country = new Country();
+        String url = this.baseUrl + APIManager.READ + ID + "=" + idCountry;
+
+        super.requestJsonArray(Request.Method.GET, url,  response -> {
+            try {
+                country.init(response.getJSONObject(0));
+                HTTPRequestQueueSingleton.getInstance(CountryDBManager.this.getContext()).finishRequest(this.getClass().getName());
+            } catch (JSONException e) {
+                Log.e(JSON_TAG, e.getMessage());
+            }
+        });
+
+        this.waitForResponse();
+
+        return (country.isEmpty()) ? null : country;
     }
 
     @Override

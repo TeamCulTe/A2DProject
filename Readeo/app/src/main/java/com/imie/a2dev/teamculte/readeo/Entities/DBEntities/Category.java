@@ -8,6 +8,8 @@ import com.imie.a2dev.teamculte.readeo.DBManagers.DBManager;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.CategoryDBSchema;
 import lombok.Getter;
 import lombok.Setter;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 /**
  * Final class representing a category from the application.
@@ -25,6 +27,16 @@ public final class Category extends DBEntity {
      */
     public Category() {
         super();
+    }
+
+    /**
+     * Category's nearly full filled constructor.
+     * @param name The name to set.
+     */
+    public Category(String name) {
+        super();
+
+        this.name = name;
     }
 
     /**
@@ -54,6 +66,19 @@ public final class Category extends DBEntity {
      */
     public Category(Cursor result, boolean close) {
         this.init(result, false);
+    }
+
+    /**
+     * Initializes the category from a JSON response object.
+     * @param object The JSON response from the API.
+     */
+    public void init(@NonNull JSONObject object) {
+        try {
+            this.id = object.getInt(CategoryDBSchema.ID);
+            this.name = object.getString(CategoryDBSchema.NAME);
+        } catch (JSONException e) {
+            Log.e(DBManager.JSON_TAG, e.getMessage());
+        }
     }
 
     @Override

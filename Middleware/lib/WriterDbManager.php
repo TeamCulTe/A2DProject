@@ -48,6 +48,28 @@ class WriterDbManager extends DbManager
 
     /**
      * Gets the writers for a specific book.
+     * @param int $idAuthor The id of the author.
+     * @param int $idBook The id of the book.
+     * @return null|string The json response if exists else null.
+     */
+    public function getWriter(int $idAuthor, int $idBook)
+    {
+        $statement = sprintf("SELECT %s, %s, %s FROM %s WHERE %s = %s AND %s = %s AND deleted = 0",
+            static::FIELDS[0], static::FIELDS[1], static::FIELDS[2], static::TABLE, static::FIELDS[0],
+            static::PLACEHOLDERS[0], static::FIELDS[1], static::PLACEHOLDERS[1]);
+        $req = $this->db->prepare($statement);
+
+        $req->bindValue(static::PLACEHOLDERS[0], $idAuthor, PDO::PARAM_INT);
+        $req->bindValue(static::PLACEHOLDERS[1], $idBook, PDO::PARAM_INT);
+        $req->execute();
+
+        $response = $req->fetchAll(PDO::FETCH_ASSOC);
+
+        return (!empty($response)) ? json_encode($response) : null;
+    }
+
+    /**
+     * Gets the writers for a specific book.
      * @param int $idBook The id of the book.
      * @return null|string The json response if exists else null.
      */
@@ -297,5 +319,14 @@ class WriterDbManager extends DbManager
         $response = $req->fetchAll(PDO::FETCH_ASSOC);
 
         return (!empty($response)) ? json_encode($response) : null;
+    }
+
+    /**
+     * Deletes all the test entities (id inferior to 0).
+     */
+    public function deleteTestEntities() {
+        $statement = sprintf("DELETE FROM %s WHERE %s < 0 AND %s < 0", static::TABLE, static::FIELDS[0], static::FIELDS[1]);
+
+        $this->db->exec($statement);
     }
 }
