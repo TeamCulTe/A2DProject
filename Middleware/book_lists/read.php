@@ -13,7 +13,7 @@ if (isset($_GET[$updateQuery])) {
 } elseif (isset($_GET[$idUser]) && isset($_GET[$idBookListType])) {
     $response = $dbManager->getBookList($_GET[$idUser], $_GET[$idBookListType]);
 } elseif (isset($_GET[$idUser])) {
-    $response = $dbManager->getBookListTypeId($_GET[$idUser]);
+    $response = $dbManager->getUserBookLists($_GET[$idUser]);
 } elseif (isset($_GET[$count])) {
     $response = $dbManager->count();
 } elseif (isset($_GET[$start]) && isset($_GET[$end])) {

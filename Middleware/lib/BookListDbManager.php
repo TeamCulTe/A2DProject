@@ -57,9 +57,9 @@ class BookListDbManager extends DbManager
      */
     public function getBookList(int $idUser, int $idBookListType)
     {
-        $statement = sprintf("SELECT %s FROM %s WHERE %s = %s AND %s = %s AND deleted = 0",
-            static::FIELDS[2], static::TABLE, static::FIELDS[0], static::PLACEHOLDERS[0],
-            static::FIELDS[1], static::PLACEHOLDERS[1]);
+        $statement = sprintf("SELECT %s, %s, %s, %s FROM %s WHERE %s = %s AND %s = %s AND deleted = 0",
+            static::FIELDS[0], static::FIELDS[1], static::FIELDS[2], static::FIELDS[3], static::TABLE,
+            static::FIELDS[0], static::PLACEHOLDERS[0], static::FIELDS[1], static::PLACEHOLDERS[1]);
         $req = $this->db->prepare($statement);
 
         $req->bindValue(static::PLACEHOLDERS[0], $idUser, PDO::PARAM_INT);
@@ -78,8 +78,9 @@ class BookListDbManager extends DbManager
      */
     public function getUserBookLists(int $idUser)
     {
-        $statement = sprintf("SELECT %s, %s FROM %s WHERE %s = %s AND deleted = 0",
-            static::FIELDS[1], static::FIELDS[2], static::TABLE, static::FIELDS[0], static::PLACEHOLDERS[0]);
+        $statement = sprintf("SELECT %s, %s, %s, %s FROM %s WHERE %s = %s AND deleted = 0",
+            static::FIELDS[0], static::FIELDS[1], static::FIELDS[2], static::FIELDS[3], static::TABLE,
+            static::FIELDS[0], static::PLACEHOLDERS[0]);
         $req = $this->db->prepare($statement);
 
         $req->bindValue(static::PLACEHOLDERS[0], $idUser, PDO::PARAM_INT);
@@ -431,5 +432,15 @@ class BookListDbManager extends DbManager
         $response = $req->fetchAll(PDO::FETCH_ASSOC);
 
         return (!empty($response)) ? json_encode($response) : null;
+    }
+
+    /**
+     * Deletes all the test entities (id inferior to 0).
+     */
+    public function deleteTestEntities() {
+        $statement = sprintf("DELETE FROM %s WHERE %s < 0 AND %s < 0 AND %s < 0", static::TABLE, static::FIELDS[0],
+            static::FIELDS[1], static::FIELDS[2]);
+
+        $this->db->exec($statement);
     }
 }

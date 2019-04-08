@@ -21,7 +21,7 @@ class QuoteDbManager extends DbManager
     /**
      * Stores the placeholders for prepared queries.
      */
-    public const PLACEHOLDERS = [":idQ", ":idU", ":idB", ":quote", "update"];
+    public const PLACEHOLDERS = [":idQ", ":idU", ":idB", ":quote", ":update"];
 
     /**
      * Stores the associated table name.
@@ -33,7 +33,7 @@ class QuoteDbManager extends DbManager
      * @param int $idUser The id of the user who owns the quote list.
      * @param int $idBook The id of the book.
      * @param string $quote The quote to set.
-     * @return true|false True if success else false.
+     * @return string the id of the created entity.
      */
     public function create(int $idUser, int $idBook, string $quote)
     {
@@ -42,6 +42,33 @@ class QuoteDbManager extends DbManager
             static::PLACEHOLDERS[2], static::PLACEHOLDERS[3]);
         $req = $this->db->prepare($statement);
 
+        $req->bindValue(static::PLACEHOLDERS[1], $idUser, PDO::PARAM_INT);
+        $req->bindValue(static::PLACEHOLDERS[2], $idBook, PDO::PARAM_INT);
+        $req->bindValue(static::PLACEHOLDERS[3], $quote, PDO::PARAM_STR);
+
+        if ($req->execute()) {
+            return $this->db->lastInsertId();
+        } else {
+            return "";
+        }
+    }
+
+    /**
+     * Creates a quote into the database.
+     * @param int $id The id of the quote to create.
+     * @param int $idUser The id of the user who owns the quote list.
+     * @param int $idBook The id of the book.
+     * @param string $quote The quote to set.
+     * @return string the id of the created entity.
+     */
+    public function fullCreate(int $id, int $idUser, int $idBook, string $quote)
+    {
+        $statement = sprintf("INSERT INTO %s(%s, %s, %s, %s) VALUES(%s, %s, %s, %s)",
+            static::TABLE, static::FIELDS[0], static::FIELDS[1], static::FIELDS[2], static::FIELDS[3],
+            static::PLACEHOLDERS[0], static::PLACEHOLDERS[1], static::PLACEHOLDERS[2], static::PLACEHOLDERS[3]);
+        $req = $this->db->prepare($statement);
+
+        $req->bindValue(static::PLACEHOLDERS[0], $id, PDO::PARAM_INT);
         $req->bindValue(static::PLACEHOLDERS[1], $idUser, PDO::PARAM_INT);
         $req->bindValue(static::PLACEHOLDERS[2], $idBook, PDO::PARAM_INT);
         $req->bindValue(static::PLACEHOLDERS[3], $quote, PDO::PARAM_STR);
@@ -393,5 +420,14 @@ class QuoteDbManager extends DbManager
         $response = $req->fetchAll(PDO::FETCH_ASSOC);
 
         return (!empty($response)) ? json_encode($response) : null;
+    }
+
+    /**
+     * Deletes all the test entities (id inferior to 0).
+     */
+    public function deleteTestEntities() {
+        $statement = sprintf("DELETE FROM %s WHERE %s < 0", static::TABLE, static::FIELDS[0]);
+
+        $this->db->exec($statement);
     }
 }

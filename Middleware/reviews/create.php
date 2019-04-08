@@ -8,10 +8,10 @@
 
 require_once "common_header.php";
 
-if (isset($_POST[$idUser]) && isset($_POST[$idBook]) && isset($_POST[$quote]) && isset($_POST[$shared])) {
-    $response_code = ($dbManager->create($_POST[$idUser], $_POST[$idBook], $_POST[$quote], $_POST[$shared])) ? 201 : 404;
-} else if (isset($_POST[$idUser]) && isset($_POST[$idBook]) && isset($_POST[$quote])) {
-    $response_code = ($dbManager->create($_POST[$idUser], $_POST[$idBook], $_POST[$quote])) ? 201 : 404;
+if (isset($_POST[$idUser]) && isset($_POST[$idBook]) && isset($_POST[$review]) && isset($_POST[$shared])) {
+    $response_code = ($dbManager->create($_POST[$idUser], $_POST[$idBook], $_POST[$review], $_POST[$shared])) ? 201 : 404;
+} else if (isset($_POST[$idUser]) && isset($_POST[$idBook]) && isset($_POST[$review])) {
+    $response_code = ($dbManager->create($_POST[$idUser], $_POST[$idBook], $_POST[$review])) ? 201 : 404;
 } else {
     $response_code = 400;
 }

@@ -21,7 +21,7 @@ class CountryDbManager extends DbManager
     /**
      * Stores the placeholders for prepared queries.
      */
-    public const PLACEHOLDERS = [":idCo", ":nameCo", "update"];
+    public const PLACEHOLDERS = [":idCo", ":nameCo", ":update"];
 
     /**
      * Stores the associated table name.
@@ -31,7 +31,7 @@ class CountryDbManager extends DbManager
     /**
      * Creates a country in the database.
      * @param string $name The name of the country.
-     * @return true|false True if success else false.
+     * @return string the id of the created entity.
      */
     public function create(string $name)
     {
@@ -39,6 +39,28 @@ class CountryDbManager extends DbManager
             static::TABLE, static::FIELDS[1], static::PLACEHOLDERS[1]);
         $req = $this->db->prepare($statement);
 
+        $req->bindValue(static::PLACEHOLDERS[1], $name, PDO::PARAM_STR);
+
+        if ($req->execute()) {
+            return $this->db->lastInsertId();
+        } else {
+            return "";
+        }
+    }
+
+    /**
+     * Creates a country in the database from a name given in parameter.
+     * @param int $id The id of the country to create.
+     * @param string $name The name of the country to create.
+     * @return True if success else false.
+     */
+    public function fullCreate(int $id, string $name)
+    {
+        $statement = sprintf("INSERT INTO %s(%s, %s) VALUE(%s, %s)",
+            static::TABLE, static::FIELDS[0], static::FIELDS[1], static::PLACEHOLDERS[0], static::PLACEHOLDERS[1]);
+        $req = $this->db->prepare($statement);
+
+        $req->bindValue(static::PLACEHOLDERS[0], $id, PDO::PARAM_INT);
         $req->bindValue(static::PLACEHOLDERS[1], $name, PDO::PARAM_STR);
 
         return $req->execute();
@@ -247,5 +269,14 @@ class CountryDbManager extends DbManager
         $response = $req->fetchAll(PDO::FETCH_ASSOC);
 
         return (!empty($response)) ? json_encode($response) : null;
+    }
+
+    /**
+     * Deletes all the test entities (id inferior to 0).
+     */
+    public function deleteTestEntities() {
+        $statement = sprintf("DELETE FROM %s WHERE %s < 0", static::TABLE, static::FIELDS[0]);
+
+        $this->db->exec($statement);
     }
 }
