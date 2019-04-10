@@ -102,15 +102,21 @@ public class AuthorDBManagerTest extends CommonDBManagerTest {
 
     @Test
     public void testImportFromMySQL() {
-        String parametersValue = String.valueOf(ENTITY_NB);
+        Author author = this.initTestEntityMySQL();
 
         this.manager.importFromMySQL(APIManager.API_URL + APIManager.AUTHORS + APIManager.READ + APIManager.START +
-                "=" + parametersValue + "&" + APIManager.END + "=" + parametersValue);
+                "=" + TEST_START + "&" + APIManager.END + "=" + TEST_END);
 
         this.manager.waitForResponse();
 
-        assertEquals(ENTITY_NB * 2, this.manager.countSQLite());
+        Author imported = this.manager.loadSQLite(author.getId());
+
+        assertEquals(ENTITY_NB + 1, this.manager.countSQLite());
+        assertNotNull(imported);
+        assertEquals(author.getId(), imported.getId());
+        assertEquals(author.getName(), imported.getName());
     }
+
     @Test
     public void testCreateMySQL() {
         Author created = this.initTestEntityMySQL();

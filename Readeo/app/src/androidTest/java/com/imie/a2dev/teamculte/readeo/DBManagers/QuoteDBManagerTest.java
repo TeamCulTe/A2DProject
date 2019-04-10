@@ -180,7 +180,7 @@ public class QuoteDBManagerTest extends CommonDBManagerTest {
 
     @Test
     public void testImportFromMySQL() {
-        this.initTestEntityMySQL();
+        Quote quote = this.initTestEntityMySQL();
 
         CategoryDBManager categoryDBManager = new CategoryDBManager(this.context);
         BookDBManager bookDBManager = new BookDBManager(this.context);
@@ -194,7 +194,7 @@ public class QuoteDBManagerTest extends CommonDBManagerTest {
         categoryDBManager.waitForResponse();
 
         bookDBManager.importFromMySQL(APIManager.API_URL + APIManager.BOOKS +
-                APIManager.READ + BookDBSchema.ID + "=" + MYSQL_TEST_ID);
+                APIManager.READ + BookDBSchema.ID + "=" + quote.getBookId());
         bookDBManager.waitForResponse();
 
         countryDBManager.importFromMySQL(APIManager.API_URL + APIManager.COUNTRIES +
@@ -210,20 +210,21 @@ public class QuoteDBManagerTest extends CommonDBManagerTest {
         profileDBManager.waitForResponse();
 
         userDBManager.importFromMySQL(APIManager.API_URL + APIManager.USERS +
-                APIManager.READ + UserDBSchema.ID + "=" + MYSQL_TEST_ID);
+                APIManager.READ + UserDBSchema.ID + "=" + quote.getUserId());
         userDBManager.waitForResponse();
 
         this.manager.importFromMySQL(APIManager.API_URL + APIManager.QUOTES + APIManager.READ + ID + "=" +
-                MYSQL_TEST_ID);
+                quote.getId());
         this.manager.waitForResponse();
 
-        Quote created = this.manager.loadSQLite(MYSQL_TEST_ID);
+        Quote imported = this.manager.loadSQLite(MYSQL_TEST_ID);
 
-        assertNotNull(created);
-        assertEquals(MYSQL_TEST_ID, created.getId());
-        assertEquals(MYSQL_TEST_ID, created.getBookId());
-        assertEquals(MYSQL_TEST_ID, created.getUserId());
-        assertEquals(TEST_QUOTE, created.getQuote());
+        assertEquals(ENTITY_NB + 1, this.manager.countSQLite());
+        assertNotNull(imported);
+        assertEquals(quote.getId(), imported.getId());
+        assertEquals(quote.getBookId(), imported.getBookId());
+        assertEquals(quote.getUserId(), imported.getUserId());
+        assertEquals(quote.getQuote(), imported.getQuote());
     }
 
     @Test

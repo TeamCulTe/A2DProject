@@ -236,27 +236,28 @@ public class BookDBManagerTest extends CommonDBManagerTest {
 
     @Test
     public void testImportFromMySQL() {
-        this.initTestEntityMySQL();
+        Book book = this.initTestEntityMySQL();
 
         CategoryDBManager categoryDBManager = new CategoryDBManager(this.context);
 
         categoryDBManager.importFromMySQL(APIManager.API_URL + APIManager.CATEGORIES +
-                APIManager.READ + CategoryDBSchema.ID + "=" + MYSQL_TEST_ID);
+                APIManager.READ + CategoryDBSchema.ID + "=" + book.getCategory().getId());
         categoryDBManager.waitForResponse();
 
         this.manager.importFromMySQL(APIManager.API_URL + APIManager.BOOKS + APIManager.READ + ID + "=" +
                 MYSQL_TEST_ID);
         this.manager.waitForResponse();
 
-        Book created = this.manager.loadSQLite(MYSQL_TEST_ID);
+        Book imported = this.manager.loadSQLite(MYSQL_TEST_ID);
 
-        assertNotNull(created);
-        assertEquals(MYSQL_TEST_ID, created.getId());
-        assertEquals(TEST_TITLE, created.getTitle());
-        assertEquals(TEST_COVER, created.getCover());
-        assertEquals(TEST_SUMMARY, created.getSummary());
-        assertEquals(TEST_DATE, created.getDatePublished());
-        assertEquals(MYSQL_TEST_ID, created.getCategory().getId());
+        assertEquals(ENTITY_NB + 1, this.manager.countSQLite());
+        assertNotNull(imported);
+        assertEquals(book.getId(), imported.getId());
+        assertEquals(book.getTitle(), imported.getTitle());
+        assertEquals(book.getCover(), imported.getCover());
+        assertEquals(book.getSummary(), imported.getSummary());
+        assertEquals(book.getDatePublished(), imported.getDatePublished());
+        assertEquals(book.getCategory().getId(), imported.getCategory().getId());
     }
 
     @Test

@@ -46,8 +46,8 @@ class DbConnector
      */
     public function __construct()
     {
-        $this->socket = "/Applications/MAMP/tmp/mysql/mysql.sock";
-        //$this->host = "localhost";
+        //$this->socket = "/Applications/MAMP/tmp/mysql/mysql.sock";
+        $this->host = "localhost";
         $this->userName = "root";
         $this->password = "root";
         $this->dbName = "Readeo";

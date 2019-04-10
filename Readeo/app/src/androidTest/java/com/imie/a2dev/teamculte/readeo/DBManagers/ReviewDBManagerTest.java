@@ -189,7 +189,7 @@ public class ReviewDBManagerTest extends CommonDBManagerTest {
 
     @Test
     public void testImportFromMySQL() {
-        this.initTestEntityMySQL();
+        Review review = this.initTestEntityMySQL();
 
         CategoryDBManager categoryDBManager = new CategoryDBManager(this.context);
         BookDBManager bookDBManager = new BookDBManager(this.context);
@@ -203,7 +203,7 @@ public class ReviewDBManagerTest extends CommonDBManagerTest {
         categoryDBManager.waitForResponse();
 
         bookDBManager.importFromMySQL(APIManager.API_URL + APIManager.BOOKS +
-                APIManager.READ + BookDBSchema.ID + "=" + MYSQL_TEST_ID);
+                APIManager.READ + BookDBSchema.ID + "=" + review.getId());
         bookDBManager.waitForResponse();
 
         countryDBManager.importFromMySQL(APIManager.API_URL + APIManager.COUNTRIES +
@@ -219,20 +219,21 @@ public class ReviewDBManagerTest extends CommonDBManagerTest {
         profileDBManager.waitForResponse();
 
         userDBManager.importFromMySQL(APIManager.API_URL + APIManager.USERS +
-                APIManager.READ + UserDBSchema.ID + "=" + MYSQL_TEST_ID);
+                APIManager.READ + UserDBSchema.ID + "=" + review.getUserId());
         userDBManager.waitForResponse();
 
         this.manager.importFromMySQL(APIManager.API_URL + APIManager.REVIEWS + APIManager.READ + BOOK + "=" +
-                MYSQL_TEST_ID + "&" + USER + "=" + MYSQL_TEST_ID);
+                review.getId() + "&" + USER + "=" + review.getUserId());
         this.manager.waitForResponse();
 
-        Review created = this.manager.loadSQLite(MYSQL_TEST_ID, MYSQL_TEST_ID);
+        Review imported = this.manager.loadSQLite(MYSQL_TEST_ID, MYSQL_TEST_ID);
 
-        assertNotNull(created);
-        assertEquals(MYSQL_TEST_ID, created.getId());
-        assertEquals(MYSQL_TEST_ID, created.getUserId());
-        assertEquals(TEST_REVIEW, created.getReview());
-        assertEquals(TEST_SHARED, created.isShared());
+        assertEquals(ENTITY_NB + 1, this.manager.countSQLite());
+        assertNotNull(imported);
+        assertEquals(review.getId(), imported.getId());
+        assertEquals(review.getUserId(), imported.getUserId());
+        assertEquals(review.getReview(), imported.getReview());
+        assertEquals(review.isShared(), imported.isShared());
     }
 
     @Test

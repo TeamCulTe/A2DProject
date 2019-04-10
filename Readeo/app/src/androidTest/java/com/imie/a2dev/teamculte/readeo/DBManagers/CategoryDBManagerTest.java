@@ -102,14 +102,19 @@ public class CategoryDBManagerTest extends CommonDBManagerTest {
 
     @Test
     public void testImportFromMySQL() {
-        String  parametersValue = String.valueOf(ENTITY_NB);
+        Category category = this.initTestEntityMySQL();
 
         this.manager.importFromMySQL(APIManager.API_URL + APIManager.CATEGORIES + APIManager.READ + APIManager.START
-                + "=" + parametersValue + "&" + APIManager.END + "=" + parametersValue);
+                + "=" + TEST_START + "&" + APIManager.END + "=" + TEST_END);
 
         this.manager.waitForResponse();
 
-        assertEquals(ENTITY_NB * 2, this.manager.countSQLite());
+        Category imported = this.manager.loadSQLite(category.getId());
+
+        assertEquals(ENTITY_NB + 1, this.manager.countSQLite());
+        assertNotNull(imported);
+        assertEquals(category.getId(), imported.getId());
+        assertEquals(category.getName(), imported.getName());
     }
 
     @Test

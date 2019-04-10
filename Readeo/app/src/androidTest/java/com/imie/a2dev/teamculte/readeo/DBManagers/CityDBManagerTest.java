@@ -101,14 +101,19 @@ public class CityDBManagerTest extends CommonDBManagerTest {
 
     @Test
     public void testImportFromMySQL() {
-        String  parametersValue = String.valueOf(ENTITY_NB);
+        City city = this.initTestEntityMySQL();
 
         this.manager.importFromMySQL(APIManager.API_URL + APIManager.CITIES + APIManager.READ + APIManager.START +
-                "=" + parametersValue + "&" + APIManager.END + "=" + parametersValue);
+                "=" + TEST_START + "&" + APIManager.END + "=" + TEST_END);
 
         this.manager.waitForResponse();
 
-        assertEquals(ENTITY_NB * 2, this.manager.countSQLite());
+        City imported = this.manager.loadSQLite(city.getId());
+
+        assertEquals(ENTITY_NB + 1, this.manager.countSQLite());
+        assertNotNull(imported);
+        assertEquals(city.getId(), imported.getId());
+        assertEquals(city.getName(), imported.getName());
     }
 
     @Test

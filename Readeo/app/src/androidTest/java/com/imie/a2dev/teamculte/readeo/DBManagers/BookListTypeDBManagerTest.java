@@ -107,14 +107,19 @@ public class BookListTypeDBManagerTest extends CommonDBManagerTest {
 
     @Test
     public void testImportFromMySQL() {
-        int defaultTypeNumber = 3;
+        BookListType bookListType = this.initTestEntityMySQL();
 
         this.manager.importFromMySQL(APIManager.API_URL + APIManager.BOOK_LIST_TYPES + APIManager.READ +
-                APIManager.START + "=0&" + APIManager.END + "=" + String.valueOf(defaultTypeNumber));
+                APIManager.START + "=" + TEST_START + "&" + APIManager.END + "=" + TEST_END);
 
         this.manager.waitForResponse();
 
-        assertEquals(ENTITY_NB + defaultTypeNumber, this.manager.countSQLite());
+        BookListType imported = this.manager.loadSQLite(bookListType.getId());
+
+        assertEquals(ENTITY_NB + 1, this.manager.countSQLite());
+        assertNotNull(imported);
+        assertEquals(bookListType.getId(), imported.getId());
+        assertEquals(bookListType.getName(), imported.getName());
     }
 
     @Test

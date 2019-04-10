@@ -125,14 +125,20 @@ public class ProfileDBManagerTest extends CommonDBManagerTest {
 
     @Test
     public void testImportFromMySQL() {
-        String parametersValue = String.valueOf(ENTITY_NB);
+        Profile profile = this.initTestEntityMySQL();
 
         this.manager.importFromMySQL(APIManager.API_URL + APIManager.PROFILES + APIManager.READ + APIManager.START +
-                "=" + parametersValue + "&" + APIManager.END + "=" + parametersValue);
+                "=" + TEST_START + "&" + APIManager.END + "=" + TEST_END);
 
         this.manager.waitForResponse();
 
-        assertEquals(ENTITY_NB * 2, this.manager.countSQLite());
+        Profile imported = this.manager.loadMySQL(profile.getId());
+
+        assertEquals(ENTITY_NB + 1, this.manager.countSQLite());
+        assertNotNull(imported);
+        assertEquals(profile.getId(), imported.getId());
+        assertEquals(profile.getAvatar(), imported.getAvatar());
+        assertEquals(profile.getDescription(), imported.getDescription());
     }
 
     @Test

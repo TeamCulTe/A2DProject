@@ -159,24 +159,25 @@ public class UserDBManagerTest extends CommonDBManagerTest {
 
     @Test
     public void testImportFromMySQL() {
-        this.initTestEntityMySQL();
+        PrivateUser user = this.initTestEntityMySQL();
 
         ProfileDBManager profileDBManager = new ProfileDBManager(this.context);
 
         profileDBManager.importFromMySQL(APIManager.API_URL + APIManager.PROFILES +
-                APIManager.READ + ProfileDBSchema.ID + "=" + MYSQL_TEST_ID);
+                APIManager.READ + ProfileDBSchema.ID + "=" + user.getProfile().getId());
         profileDBManager.waitForResponse();
 
         this.manager.importFromMySQL(APIManager.API_URL + APIManager.USERS + APIManager.READ + ID + "=" +
-                MYSQL_TEST_ID);
+                user.getId());
         this.manager.waitForResponse();
 
-        PublicUser created = this.manager.loadMySQL(MYSQL_TEST_ID);
+        PublicUser imported = this.manager.loadMySQL(MYSQL_TEST_ID);
 
-        assertNotNull(created);
-        assertEquals(MYSQL_TEST_ID, created.getId());
-        assertEquals(TEST_PSEUDO, created.getPseudo());
-        assertEquals(MYSQL_TEST_ID, created.getProfile().getId());
+        assertEquals(ENTITY_NB + 1, this.manager.countSQLite());
+        assertNotNull(imported);
+        assertEquals(user.getId(), imported.getId());
+        assertEquals(user.getPseudo(), imported.getPseudo());
+        assertEquals(user.getProfile().getId(), imported.getProfile().getId());
     }
 
     @Test
