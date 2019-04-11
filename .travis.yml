@@ -30,8 +30,8 @@ before_script:
 
 # Actions to perform
 script:
-  - gradle build connectedCheck
-  - gradle assembleDebug
-  - gradle -Pci --console=plain :app:testDebug
-  - gradle lint
-  - gradle connectedAndroidDevice
+  - ./gradlew build connectedCheck
+  - ./gradlew assembleDebug
+  - ./gradlew -Pci --console=plain :app:testDebug
+  - ./gradlew lint
+	- ./gradlew connectedAndroidDevice
