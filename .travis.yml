@@ -30,6 +30,7 @@ before_script:
 
 # Actions to perform
 script:
+  - ./gradlew build connectedCheck
   - ./gradlew assembleDebug
   - ./gradlew -Pci --console=plain :app:testDebug
   - ./gradlew lint
