@@ -23,7 +23,6 @@ android:
 # Emulator Management: Create, Start and Wait
 before_script:
   - export ANDROID_SDK_ROOT=/usr/local/android-sdk
-  - chmod +x gradlew
   - echo no | android create avd --force -n test -t android-22 --abi armeabi-v7a
   - emulator -avd test -no-audio -no-window &
   - android-wait-for-emulator
