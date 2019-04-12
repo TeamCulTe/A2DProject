@@ -23,7 +23,7 @@ android:
 
 # Emulator Management: Create, Start and Wait
 before_script:
-  - apt-get install -qq --force-yes libgd2-xpm ia32-libs ia32-libs-multiarch
+  - sudo apt-get install -qq --force-yes libgd2-xpm ia32-libs ia32-libs-multiarch
   - echo no | android create avd --force -n test -t android-26 --abi x86
   - export ANDROID_SDK_ROOT=/usr/local/android-sdk
   - emulator -avd test -no-audio -no-window &
