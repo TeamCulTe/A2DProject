@@ -24,7 +24,7 @@ android:
 
 # Emulator Management: Create, Start and Wait
 before_script:
-  - ls -la
+  - ls -la 
   - export ANDROID_SDK_ROOT=./
   - export ANDROID_NDK_HOME=$ANDROID_HOME/ndk-bundle
   - echo no | android create avd --force -n test -t android-27 --abi x86
