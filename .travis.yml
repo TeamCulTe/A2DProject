@@ -20,13 +20,13 @@ android:
 
     # Specify at least one system image,
     # if you need to run emulator(s) during your tests
-    - sys-img-arm64-v8a-android-25
+    - sys-img-armeabi-v7a-android-25
     - sys-img-x86-android-26
 
 # Emulator Management: Create, Start and Wait
 before_script:
   - cd Readeo && chmod +x gradlew
-  - echo no | android create avd --force -n test -t android-25 --abi arm64-v8a -c 100M
+  - echo no | android create avd --force -n test -t android-25 --abi armeabi-v7a -c 100M
   - export ANDROID_SDK_ROOT=/usr/local/android-sdk
   - emulator -avd test -no-accel -no-audio -no-window &
   - android-wait-for-emulator
