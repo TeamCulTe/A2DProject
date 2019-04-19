@@ -50,7 +50,7 @@ before_install:
 - sudo mysql_upgrade -u root -proot
 - sudo service mysql restart
 - mysql -u root -proot -e 'CREATE DATABASE Readeo;'
-- mysql -u root -proot -e Readeo < Middleware/docs/ReadeoMySQLDbStructure.sql
+- mysql -u root -proot Readeo < Middleware/docs/ReadeoMySQLDbStructure.sql
 - sudo mv Middleware/* /var/www/html/
 
 # Emulator Management: Create, Start and Wait
