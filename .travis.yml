@@ -22,11 +22,11 @@ android:
   - extra-google-google_play_services
   - extra-google-m2repository
   - extra-android-m2repository
-  - addon-google_apis-google-24
+  - addon-google_apis-google-25
 
   # Specify at least one system image,
   # if you need to run emulator(s) during your tests
-  - sys-img-armeabi-v7a-android-24
+  - sys-img-armeabi-v7a-android-25
 
   licenses:
   - 'android-sdk-preview-license-52d11cd2'
@@ -39,7 +39,7 @@ before_install:
 - sudo apt-get -y install apache2 mysql-server
 - /etc/init.d/apache2 start
 - mysql -u root -e 'CREATE DATABASE Readeo;'
-- mysql Readeo < Middleware/docs/ReadeoMySQLDbStructure.sql
+- mysql -u root Readeo < Middleware/docs/ReadeoMySQLDbStructure.sql
 - sudo rm /var/www/html/index.php && mv Middleware/* /var/www/html/
 
 # Emulator Management: Create, Start and Wait
