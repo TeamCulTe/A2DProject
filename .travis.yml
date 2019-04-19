@@ -36,7 +36,7 @@ android:
 # Installing all the required elements (php, mysql...)
 before_install:
 - sudo apt-get update
-- sudo apt-get -y install apache2 mysql-server
+- sudo apt-get -y install apache2 mariadb-server mariadb-client
 - /etc/init.d/apache2 start
 - mysql -u root -e 'CREATE DATABASE Readeo;'
 - mysql -u root Readeo < Middleware/docs/ReadeoMySQLDbStructure.sql
