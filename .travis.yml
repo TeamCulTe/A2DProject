@@ -3,54 +3,54 @@ language: android
 jdk: oraclejdk8
 android:
   components:
-    - tools
-    - platform-tools
-    - extra
+  - tools
+  - platform-tools
+  - extra
 
-    # The BuildTools version used by your project
-    - build-tools-25.0.2
+  # The BuildTools version used by your project
+  - build-tools-25.0.2
 
-    # The SDK version used to compile your project
-    - android-25
+  # The SDK version used to compile your project
+  - android-25
 
-    # Additional components
-    - extra-google-google_play_services
-    - extra-google-m2repository
-    - extra-android-m2repository
-    - addon-google_apis-google-24
+  # Additional components
+  - extra-google-google_play_services
+  - extra-google-m2repository
+  - extra-android-m2repository
+  - addon-google_apis-google-24
 
-    # Specify at least one system image,
-    # if you need to run emulator(s) during your tests
-    - sys-img-armeabi-v7a-android-24
+  # Specify at least one system image,
+  # if you need to run emulator(s) during your tests
+  - sys-img-armeabi-v7a-android-24
 
   licenses:
-    - 'android-sdk-preview-license-52d11cd2'
-    - 'android-sdk-license-.+'
-    - 'google-gdk-license-.+'
+  - 'android-sdk-preview-license-52d11cd2'
+  - 'android-sdk-license-.+'
+  - 'google-gdk-license-.+'
 
 # Installing all the required elements (php, mysql...)
 before_install:
-  - sudo apt-get update
-  - sudo apt-get -y install php apache2 mysql
-  - /etc/init.d/apache2 start
-  - /etc/init.d/mysql start
-  - mysql -e 'CREATE DATABASE Readeo;'
-  - mysql Readeo < Middleware/docs/ReadeoMySQLDbStructure.sql
-  - sudo rm /var/www/html/index.php && mv Middleware/* /var/www/html/
+- sudo apt-get update
+- sudo apt-get -y install php apache2 mysql
+- /etc/init.d/apache2 start
+- /etc/init.d/mysql start
+- mysql -e 'CREATE DATABASE Readeo;'
+- mysql Readeo < Middleware/docs/ReadeoMySQLDbStructure.sql
+- sudo rm /var/www/html/index.php && mv Middleware/* /var/www/html/
 
 # Emulator Management: Create, Start and Wait
 before_script:
-  - cd Readeo && chmod +x gradlew
-  - echo no | android create avd --force -n test -t android-25 --abi armeabi-v7a
-  - export ANDROID_SDK_ROOT=/usr/local/android-sdk
-  - emulator -avd test -no-accel -no-window &
-  - android-wait-for-emulator
-  - adb shell input keyevent 82 &
+- cd Readeo && chmod +x gradlew
+- echo no | android create avd --force -n test -t android-25 --abi armeabi-v7a
+- export ANDROID_SDK_ROOT=/usr/local/android-sdk
+- emulator -avd test -no-accel -no-window &
+- android-wait-for-emulator
+- adb shell input keyevent 82 &
 
 # Actions to perform
 script:
-  - ./gradlew build connectedCheck
-  - ./gradlew assembleDebug
-  - ./gradlew -Pci --console=plain :app:testDebug
-  - ./gradlew lint
-  - ./gradlew cAT
+- ./gradlew build connectedCheck
+- ./gradlew assembleDebug
+- ./gradlew -Pci --console=plain :app:testDebug
+- ./gradlew lint
+- ./gradlew cAT
