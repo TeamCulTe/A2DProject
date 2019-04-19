@@ -46,12 +46,12 @@ addons:
 before_install:
 - sudo apt-get update
 - sudo apt-get -y install apache2
-- mysql -e 'CREATE DATABASE Readeo;'
-- mysql Readeo < Middleware/docs/ReadeoMySQLDbStructure.sql
 - sudo rm /var/www/html/index.php && mv Middleware/* /var/www/html/
 - sudo mysql -u root -e "use mysql; update user set authentication_string=PASSWORD('root') where User='root'; update user set plugin='mysql_native_password';FLUSH PRIVILEGES;"
 - sudo mysql_upgrade -u root -proot
 - sudo service mysql restart
+- mysql -u root -proot -e 'CREATE DATABASE Readeo;'
+- mysql -u root -proot -e Readeo < Middleware/docs/ReadeoMySQLDbStructure.sql
 
 # Emulator Management: Create, Start and Wait
 before_script:
