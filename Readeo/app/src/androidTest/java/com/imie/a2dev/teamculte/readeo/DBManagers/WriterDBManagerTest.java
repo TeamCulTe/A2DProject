@@ -105,7 +105,7 @@ public class WriterDBManagerTest extends CommonDBManagerTest {
     }
 
     @Test
-    public void testLoadBooksSQLites() {
+    public void testLoadBooksSQLite() {
         List<Book> books = this.manager.loadBooksSQLite(TEST_LOAD_AUTHOR);
 
         assertNotNull(books);
