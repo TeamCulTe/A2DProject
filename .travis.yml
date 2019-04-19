@@ -33,14 +33,26 @@ android:
   - 'android-sdk-license-.+'
   - 'google-gdk-license-.+'
 
+# Getting mysql v 5.7
+addons:
+  apt:
+    sources:
+      - mysql-5.7-trusty
+    packages:
+      - mysql-server
+      - mysql-client
+      
 # Installing all the required elements (php, mysql...)
 before_install:
 - sudo apt-get update
-- sudo apt-get -y install apache2 mariadb-server mariadb-client
+- sudo apt-get -y install apache2
 - /etc/init.d/apache2 start
 - mysql -u root -e 'CREATE DATABASE Readeo;'
 - mysql -u root Readeo < Middleware/docs/ReadeoMySQLDbStructure.sql
 - sudo rm /var/www/html/index.php && mv Middleware/* /var/www/html/
+- sudo mysql -u root -e "use mysql; update user set authentication_string=PASSWORD('root') where User='root'; update user set plugin='mysql_native_password';FLUSH PRIVILEGES;"
+- sudo mysql_upgrade -u root -proot
+- sudo service mysql restart
 
 # Emulator Management: Create, Start and Wait
 before_script:
