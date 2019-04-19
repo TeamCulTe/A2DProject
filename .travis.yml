@@ -11,28 +11,28 @@ php:
   - '7.0'
   
 language: android
-android:
-  components:
-  - tools
-  - platform-tools
-  - tools
-  - extra
+# android:
+  # components:
+  # - tools
+  # - platform-tools
+  # - tools
+  # - extra
 
   # The BuildTools version used by your project
-  - build-tools-25.0.2
+  # - build-tools-25.0.2
 
   # The SDK version used to compile your project
-  - android-25
+  # - android-25
 
   # Additional components
-  - extra-google-google_play_services
-  - extra-google-m2repository
-  - extra-android-m2repository
-  - addon-google_apis-google-25
+  # - extra-google-google_play_services
+  # - extra-google-m2repository
+  # - extra-android-m2repository
+  # - addon-google_apis-google-25
 
   # Specify at least one system image,
   # if you need to run emulator(s) during your tests
-  - sys-img-armeabi-v7a-android-25
+  # - sys-img-armeabi-v7a-android-25
 
 # Getting mysql v 5.7
 addons:
@@ -56,7 +56,7 @@ before_install:
 
 - export ANDROID_HOME=~/android-sdk-linux 
 - if [ $TRAVIS_OS_NAME == "osx" ]; then wget -q "https://dl.google.com/android/repository/sdk-tools-darwin-4333796.zip" -O android-sdk-tools.zip; else wget -q "https://dl.google.com/android/repository/sdk-tools-linux-4333796.zip" -O android-sdk-tools.zip; fi
-- wget -q "https://dl.google.com/android/repository/sdk-tools-${OS}-4333796.zip" -O android-sdk-tools.zip
+# - wget -q "https://dl.google.com/android/repository/sdk-tools-${OS}-4333796.zip" -O android-sdk-tools.zip
 - unzip -q android-sdk-tools.zip -d ${ANDROID_HOME}
 - rm android-sdk-tools.zip
 - PATH=${PATH}:${ANDROID_HOME}/tools:${ANDROID_HOME}/tools/bin:${ANDROID_HOME}/platform-tools
