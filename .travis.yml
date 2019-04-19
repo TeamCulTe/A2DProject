@@ -1,6 +1,11 @@
 sudo: required
-language: android
 jdk: oraclejdk8
+
+language: php
+php:
+  - '7.0'
+  
+language: android
 android:
   components:
   - tools
@@ -31,7 +36,7 @@ android:
 # Installing all the required elements (php, mysql...)
 before_install:
 - sudo apt-get update
-- sudo apt-get -y install apache2 php7 mysql-server
+- sudo apt-get -y install apache2 mysql-server
 - /etc/init.d/apache2 start
 - /etc/init.d/mysql start
 - mysql -e 'CREATE DATABASE Readeo;'
