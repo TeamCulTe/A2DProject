@@ -37,8 +37,8 @@ android:
 before_install:
 - sudo apt-get update
 - sudo apt-get -y install apache2 mysql-server
-- /etc/init.d/apache2 start
-- /etc/init.d/mysql start
+- sudo /etc/init.d/apache2 start
+- sudo /etc/init.d/mysql start
 - mysql -e 'CREATE DATABASE Readeo;'
 - mysql Readeo < Middleware/docs/ReadeoMySQLDbStructure.sql
 - sudo rm /var/www/html/index.php && mv Middleware/* /var/www/html/
