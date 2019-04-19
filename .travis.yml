@@ -65,8 +65,6 @@ before_install:
 - touch ~/.android/repositories.cfg
 - HOMEBREW_NO_AUTO_UPDATE=1
 - if [ $TRAVIS_OS_NAME == "osx" ]; then brew cask uninstall java; brew tap caskroom/versions; brew cask install java8; fi
-# Accept licenses before installing components, no need to echo y for each component
-- yes | sdkmanager --licenses
 # Platform tools
 - sdkmanager "emulator" "tools" "platform-tools" > /dev/null
 - sdkmanager --list | head -15
