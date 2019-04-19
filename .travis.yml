@@ -9,6 +9,7 @@ language: android
 android:
   components:
   - tools
+  - tools
   - platform-tools
   - extra
 
@@ -56,7 +57,7 @@ before_install:
 # Emulator Management: Create, Start and Wait
 before_script:
 - cd Readeo && chmod +x gradlew
-- echo no | android create avd --force -n test -t android-25 --abi armeabi-v7a
+- echo no | android create avd --force -n test -t android-25 --abi google_apis/armeabi-v7a
 - export ANDROID_SDK_ROOT=/usr/local/android-sdk
 - emulator -avd test -no-accel -no-window &
 - android-wait-for-emulator
