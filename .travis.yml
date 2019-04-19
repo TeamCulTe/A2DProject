@@ -31,7 +31,7 @@ android:
 # Installing all the required elements (php, mysql...)
 before_install:
 - sudo apt-get update
-- sudo apt-get -y install php apache2 mysql
+- sudo apt-get -y install apache2 php libapache2-mod-php mysql-server php-mysql
 - /etc/init.d/apache2 start
 - /etc/init.d/mysql start
 - mysql -e 'CREATE DATABASE Readeo;'
