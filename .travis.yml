@@ -7,27 +7,27 @@ android:
     - platform-tools
 
     # The BuildTools version used by your project
-    - build-tools-28.0.3
+    - build-tools-25.0.1
 
     # The SDK version used to compile your project
-    - android-24
+    - android-25
 
     # Additional components
     - extra-google-google_play_services
     - extra-google-m2repository
     - extra-android-m2repository
-    - addon-google_apis-google-24
+    - addon-google_apis-google-25
 
     # Specify at least one system image,
     # if you need to run emulator(s) during your tests
-    - sys-img-armeabi-v7a-android-24
+    - sys-img-armeabi-v7a-android-25
 
 # Emulator Management: Create, Start and Wait
 before_script:
   - cd Readeo && chmod +x gradlew
-  - echo no | android create avd --force -n test -t android-24 --abi armeabi-v7a -c 100M
+  - echo no | android create avd --force -n test -t android-25 --abi armeabi-v7a -c 100M
   - export ANDROID_SDK_ROOT=/usr/local/android-sdk
-  - emulator -avd test -no-accel -no-audio -no-window &
+  - emulator -avd test -no-accel -no-window &
   - android-wait-for-emulator
   - adb shell input keyevent 82 &
 
