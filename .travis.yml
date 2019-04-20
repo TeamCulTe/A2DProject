@@ -72,7 +72,7 @@ before_install:
 - echo no | avdmanager create avd --force -n test -k "system-images;android-$SYS;$ABI"
 # fix timezone warning
 # use the absolute emulator path in case older version installed (on default path)
-- $ANDROID_HOME/emulator/emulator -avd test -no-audio -no-accel -no-window &
+- emulator -avd test -no-audio -no-accel -no-window &
 
 # Emulator Management: Create, Start and Wait
 before_script:
