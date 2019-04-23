@@ -70,9 +70,10 @@ before_install:
 - echo y | sdkmanager "system-images;android-$SYS;$ABI"
 - sdkmanager --list | head -15
 - echo no | avdmanager create avd --force -n test -k "system-images;android-$SYS;$ABI"
-# fix timezone warning
 # use the absolute emulator path in case older version installed (on default path)
 - ls -larth
+- ls -larth $ANDROID_HOME
+- ls $ANDROID_HOME/emulator/
 - for file in *; do if [ -d file ]; then ls -larth file; fi; done
 - emulator/emulator -avd test -no-audio -no-accel -no-window &
 
