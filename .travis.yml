@@ -54,7 +54,7 @@ before_install:
 - sudo mv Middleware/* /var/www/html/
 
 - export ANDROID_HOME=~/android-sdk-linux
-- export ANDROID_SDK_ROOT=~/android-sdk-linux/tools
+# - export ANDROID_SDK_ROOT=~/android-sdk-linux/tools
 - if [ $TRAVIS_OS_NAME == "osx" ]; then wget -q "https://dl.google.com/android/repository/sdk-tools-darwin-4333796.zip" -O android-sdk-tools.zip; else wget -q "https://dl.google.com/android/repository/sdk-tools-linux-4333796.zip" -O android-sdk-tools.zip; fi
 - unzip -q android-sdk-tools.zip -d ${ANDROID_HOME}
 - rm android-sdk-tools.zip
@@ -72,6 +72,8 @@ before_install:
 - sdkmanager --list | head -15
 - echo no | avdmanager create avd --force -n test -k "system-images;android-$SYS;$ABI"
 # use the absolute emulator path in case older version installed (on default path)
+- ls -larth ~/
+- ls -larth $ANDROID_HOME/tools/
 - $ANDROID_HOME/tools/emulator -avd test -no-audio -no-accel -no-window &
 
 # Emulator Management: Create, Start and Wait
