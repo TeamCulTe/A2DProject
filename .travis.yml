@@ -73,9 +73,8 @@ before_install:
 - sdkmanager --list | head -15
 - echo no | avdmanager create avd --force -n test -k "system-images;android-$SYS;$ABI"
 # use the absolute emulator path in case older version installed (on default path)
-- ls -larth ~/
+- ls -larth ~/.android/
 - ls -larth $ANDROID_HOME/tools/
-- $ANDROID_HOME/tools/emulator list avd
 - $ANDROID_HOME/tools/emulator -avd test -no-audio -no-accel -no-window &
 
 # Emulator Management: Create, Start and Wait
