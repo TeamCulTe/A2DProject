@@ -60,7 +60,7 @@ before_install:
   # install older packages (for emulator)
   - echo y | sdkmanager "build-tools;25.0.2" "platforms;android-25" > /dev/null
   # Create and start emulator.
-  - echo y |sdkmanager "system-images;android-$SYS;$ABI" > /dev/null
+  - echo y | sdkmanager "system-images;android-$SYS;$ABI" > /dev/null
   - sdkmanager --list | head -15
   - echo no | avdmanager create avd --force -n test -k "system-images;android-$SYS;$ABI"
   # fix timezone warning
