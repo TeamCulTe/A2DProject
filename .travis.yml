@@ -55,12 +55,12 @@ before_install:
   # Accept licenses before installing components, no need to echo y for each component
   - yes | sdkmanager --licenses
   # Platform tools
-  - sdkmanager "emulator" "tools" "platform-tools" > /dev/null
+  - echo y | sdkmanager "emulator" "tools" "platform-tools"
   - sdkmanager --list | head -15
   # install older packages (for emulator)
-  - sdkmanager "build-tools;25.0.2" "platforms;android-25" > /dev/null
+  - echo y | sdkmanager "build-tools;25.0.2" "platforms;android-25"
   # Create and start emulator.
-  - sdkmanager "system-images;android-$SYS;$ABI" > /dev/null
+  - echo y |sdkmanager "system-images;android-$SYS;$ABI"
   - sdkmanager --list | head -15
   - echo no | avdmanager create avd --force -n test -k "system-images;android-$SYS;$ABI"
   # fix timezone warning
