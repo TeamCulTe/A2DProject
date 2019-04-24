@@ -63,17 +63,15 @@ before_install:
 - touch ~/.android/repositories.cfg
 # Platform tools
 # - echo y | sdkmanager "emulator" "tools" "platform-tools"
-- sdkmanager --list | head -15
+# - sdkmanager --list | head -15
 # install older packages (for emulator) 
-- sdkmanager "build-tools;25.0.2" "platforms;android-25" > /dev/null
+# - sdkmanager "build-tools;25.0.2" "platforms;android-25" > /dev/null
 # Create and start emulator.
 - echo y | sdkmanager "system-images;android-$SYS;$ABI"
-- sdkmanager --list | head -15
+# - sdkmanager --list | head -15
 - echo no | avdmanager create avd --force -n test -k "system-images;android-$SYS;$ABI"
 # use the absolute emulator path in case older version installed (on default path)
-- ls -larth ~/.android/
-- ls -larth $ANDROID_HOME/tools/
-- $ANDROID_HOME/tools/emulator -avd test -no-audio -no-accel -no-window &
+- emulator -avd test -no-audio -no-accel -no-window &
 
 # Emulator Management: Create, Start and Wait
 before_script:
