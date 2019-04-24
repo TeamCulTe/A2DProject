@@ -53,10 +53,7 @@ before_install:
 - mysql -u root -proot Readeo < Middleware/docs/ReadeoMySQLDbStructure.sql
 - sudo mv Middleware/* /var/www/html/
 
-- echo $ANDROID_HOME
-- ls -larth $ANDROID_HOME
-- export ANDROID_HOME=~/android-sdk-linux
-# - export ANDROID_SDK_ROOT=~/android-sdk-linux/tools
+- export ANDROID_SDK_ROOT=$ANDROID_HOME
 - if [ $TRAVIS_OS_NAME == "osx" ]; then wget -q "https://dl.google.com/android/repository/sdk-tools-darwin-4333796.zip" -O android-sdk-tools.zip; else wget -q "https://dl.google.com/android/repository/sdk-tools-linux-4333796.zip" -O android-sdk-tools.zip; fi
 - unzip -q android-sdk-tools.zip -d ${ANDROID_HOME}
 - rm android-sdk-tools.zip
