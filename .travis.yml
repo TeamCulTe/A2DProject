@@ -4,10 +4,6 @@ os:
   - linux
   - osx
   
-language: php
-php:
-  - '7.0'
-  
 # Getting mysql v 5.7
 addons:
   apt:
@@ -29,7 +25,11 @@ matrix:
     - env: SYS=22 ABI="google_apis;x86_64"
     - env: SYS=20 ABI="default;armeabi-v7a"
     - env: SYS=14 ABI="default;armeabi-v7a"
-
+    
+language: php
+php:
+  - '7.0'
+  
 language: generic
 before_install:
   - sudo apt-get update
@@ -69,7 +69,9 @@ before_install:
   - $ANDROID_HOME/emulator/emulator -avd test -no-accel -no-audio -no-window -gpu swiftshader &
 before_script:
   # Wait for emulator to startup.
-  - android-wait-for-emulator
+  - ls -larth
+  - ls -larth scripts
+  - ./scripts/android-wait-for-emulator.sh
   - adb shell input keyevent 82
   - cd Readeo && chmod +x gradlew
 
