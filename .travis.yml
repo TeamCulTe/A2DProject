@@ -62,7 +62,7 @@ before_install:
 - mkdir -p ~/.android
 - touch ~/.android/repositories.cfg
 # Platform tools
-- echo y | sdkmanager "emulator" "tools" "platform-tools"
+# - echo y | sdkmanager "emulator" "tools" "platform-tools"
 - sdkmanager --list | head -15
 # install older packages (for emulator) 
 - sdkmanager "build-tools;25.0.2" "platforms;android-25" > /dev/null
