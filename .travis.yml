@@ -31,7 +31,8 @@ android:
 
   # Specify at least one system image,
   # if you need to run emulator(s) during your tests
-  # - sys-img-armeabi-v7a-android-25
+  - sys-img-armeabi-v7a-android-25
+  - sys-img-arm64-v8a-android25
 
 # Getting mysql v 5.7
 addons:
@@ -57,7 +58,7 @@ before_install:
 - if [ $TRAVIS_OS_NAME == "osx" ]; then wget -q "https://dl.google.com/android/repository/sdk-tools-darwin-4333796.zip" -O android-sdk-tools.zip; else wget -q "https://dl.google.com/android/repository/sdk-tools-linux-4333796.zip" -O android-sdk-tools.zip; fi
 - echo A | unzip -q android-sdk-tools.zip -d ${ANDROID_HOME}
 - rm android-sdk-tools.zip
-- PATH=${PATH}:${ANDROID_HOME}/tools:${ANDROID_HOME}/tools/bin:${ANDROID_HOME}/platform-tools
+- PATH=${PATH}:${ANDROID_HOME}:${ANDROID_HOME}/tools:${ANDROID_HOME}/tools/bin:${ANDROID_HOME}/platform-tools
 # Silence warning.
 - mkdir -p ~/.android
 - touch ~/.android/repositories.cfg
@@ -67,7 +68,7 @@ before_install:
 # install older packages (for emulator) 
 # - sdkmanager "build-tools;25.0.2" "platforms;android-25" > /dev/null
 # Create and start emulator.
-- echo y | sdkmanager "system-images;android-$SYS;$ABI"
+# - echo y | sdkmanager "system-images;android-$SYS;$ABI"
 # - sdkmanager --list | head -15
 - echo no | avdmanager create avd --force -n test -k "system-images;android-$SYS;$ABI"
 # use the absolute emulator path in case older version installed (on default path)
