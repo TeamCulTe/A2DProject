@@ -19,6 +19,7 @@ addons:
       
 env:
   - SYS=25 ABI="google_apis;arm64-v8a"
+  - SYS=25 ABI="google_apis;armeabi-v7a"
 
 matrix:
   allow_failures:
