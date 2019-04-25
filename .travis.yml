@@ -77,4 +77,4 @@ script:
 - ./gradlew assembleDebug
 - ./gradlew -Pci --console=plain :app:testDebug
 - ./gradlew lint
-- ./gradlew cAT --stack-trace
+- ./gradlew cAT --stacktrace
