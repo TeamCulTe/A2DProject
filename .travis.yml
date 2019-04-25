@@ -75,4 +75,4 @@ script:
 # - ./gradlew assembleDebug
 # - ./gradlew -Pci --console=plain :app:testDebug
 # - ./gradlew lint
-- ./gradlew cAT --debug --stacktrace
+- ./gradlew cAT --stacktrace
