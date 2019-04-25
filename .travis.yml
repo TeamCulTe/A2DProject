@@ -18,6 +18,7 @@ addons:
       
 env:
 - SYS=25 ABI="google_apis;armeabi-v7a"
+- SYS=25 ABI="google_apis;x86"
  
 language: php
 php:
@@ -60,7 +61,8 @@ before_install:
   - sdkmanager --list | head -15
   - echo no | avdmanager create avd --force -n test -k "system-images;android-$SYS;$ABI"
   # use the absolute emulator path in case older version installed (on default path)
-  - $ANDROID_HOME/emulator/emulator -avd test -no-accel -no-audio -no-window &
+  # - $ANDROID_HOME/emulator/emulator -avd test -no-accel -no-audio -no-window &
+  - $ANDROID_HOME/emulator/emulator -avd test -no-audio -no-window -gpu swiftshader_indirect &
   
 before_script:
   # Wait for emulator to startup.
