@@ -1,8 +1,5 @@
 package com.imie.a2dev.teamculte.readeo;
 
-import com.microsoft.appcenter.AppCenter;
-import com.microsoft.appcenter.analytics.Analytics;
-import com.microsoft.appcenter.crashes.Crashes
 import android.net.wifi.SupplicantState;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -42,9 +39,6 @@ public class MainActivity extends AppCompatActivity implements HTTPRequestQueueS
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        
-        AppCenter.start(getApplication(), "569f4e70-b923-4997-9104-4558a21b3376",
-                Analytics.class, Crashes.class);
         
         this.test();
     }
