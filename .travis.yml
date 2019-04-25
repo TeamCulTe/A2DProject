@@ -1,51 +1,82 @@
 sudo: required
+dist: trusty
+
+jdk:
+  - oraclejdk8
+  
+os:
+  - linux
+  
+# Getting mysql v 5.7
+addons:
+  apt:
+    sources:
+      - mysql-5.7-trusty
+    packages:
+      - mysql-server
+      - mysql-client
+      
+env:
+- SYS=25 ABI="google_apis;armeabi-v7a"
+
+matrix:
+  allow_failures:
+    - env: SYS=22 ABI="default;x86"
+    - env: SYS=22 ABI="default;x86_64"
+    - env: SYS=22 ABI="google_apis;x86"
+    - env: SYS=22 ABI="google_apis;x86_64"
+    - env: SYS=20 ABI="default;armeabi-v7a"
+    - env: SYS=14 ABI="default;armeabi-v7a"
+    
+language: php
+php:
+  - '7.0'
 language: android
-jdk: oraclejdk8
 android:
   components:
-  - tools
-  - platform-tools
-  - extra
+   - platform-tools
+   - tools
 
-  # The BuildTools version used by your project
-  - build-tools-25.0.2
-
-  # The SDK version used to compile your project
-  - android-25
-
-  # Additional components
-  - extra-google-google_play_services
-  - extra-google-m2repository
-  - extra-android-m2repository
-  - addon-google_apis-google-24
-
-  # Specify at least one system image,
-  # if you need to run emulator(s) during your tests
-  - sys-img-armeabi-v7a-android-24
-
-  licenses:
-  - 'android-sdk-preview-license-52d11cd2'
-  - 'android-sdk-license-.+'
-  - 'google-gdk-license-.+'
-
-# Installing all the required elements (php, mysql...)
+language: generic
 before_install:
-- sudo apt-get update
-- sudo apt-get -y install php apache2 mysql
-- /etc/init.d/apache2 start
-- /etc/init.d/mysql start
-- mysql -e 'CREATE DATABASE Readeo;'
-- mysql Readeo < Middleware/docs/ReadeoMySQLDbStructure.sql
-- sudo rm /var/www/html/index.php && mv Middleware/* /var/www/html/
-
-# Emulator Management: Create, Start and Wait
+  - sudo apt-get update
+  - sudo apt-get -y install apache2
+  - sudo mysql -u root -e "use mysql; update user set authentication_string=PASSWORD('root') where User='root'; update user set plugin='mysql_native_password';FLUSH PRIVILEGES;"
+  - sudo mysql_upgrade -u root -proot
+  - sudo service mysql restart
+  - mysql -u root -proot -e 'CREATE DATABASE Readeo;'
+  - mysql -u root -proot Readeo < Middleware/docs/ReadeoMySQLDbStructure.sql
+  - sudo mv Middleware/* /var/www/html/
+  # Install the Android SDK Dependency.
+  - export ANDROID_HOME=~/android-sdk-linux
+  - wget -q "https://dl.google.com/android/repository/sdk-tools-linux-4333796.zip" -O android-sdk-tools.zip
+  - unzip -q android-sdk-tools.zip -d ${ANDROID_HOME}
+  - rm android-sdk-tools.zip
+  - PATH=${PATH}:${ANDROID_HOME}/tools:${ANDROID_HOME}/tools/bin:${ANDROID_HOME}/platform-tools
+  # Silence warning.
+  - mkdir -p ~/.android
+  - touch ~/.android/repositories.cfg
+  - HOMEBREW_NO_AUTO_UPDATE=1
+  # Accept licenses before installing components, no need to echo y for each component
+  - yes | sdkmanager --licenses
+  # Platform tools
+  - echo y | sdkmanager "emulator" "tools" "platform-tools" > /dev/null
+  - sdkmanager --list | head -15
+  # install older packages (for emulator)
+  - echo y | sdkmanager "build-tools;25.0.2" "platforms;android-25" > /dev/null
+  # Create and start emulator.
+  - echo y | sdkmanager "system-images;android-$SYS;$ABI" > /dev/null
+  - sdkmanager --list | head -15
+  - echo no | avdmanager create avd --force -n test -k "system-images;android-$SYS;$ABI"
+  # use the absolute emulator path in case older version installed (on default path)
+  - $ANDROID_HOME/emulator/emulator -avd test -no-accel -no-audio -no-window &
+  
 before_script:
-- cd Readeo && chmod +x gradlew
-- echo no | android create avd --force -n test -t android-25 --abi armeabi-v7a
-- export ANDROID_SDK_ROOT=/usr/local/android-sdk
-- emulator -avd test -no-accel -no-window &
-- android-wait-for-emulator
-- adb shell input keyevent 82 &
+  # Wait for emulator to startup.
+  - chmod +x android-wait-for-emulator
+  - ./android-wait-for-emulator
+  - adb shell input keyevent 82
+  - cd Readeo && chmod +x gradlew
 
 # Actions to perform
 script:
