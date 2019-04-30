@@ -1,3 +1,27 @@
 <resources>
     <string name="app_name">Readeo</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="mail_address">Mail address</string>
+    <string name="password">Password</string>
+    <string name="password_forgotten">Password forgotten ?</string>
+    <string name="city">City</string>
+    <string name="sign_in">Sign in</string>
+    <string name="confirm_password">Confirm password</string>
+    <string name="pseudo">Pseudo</string>
+    <string name="search_for_a_book">Search for a book</string>
+    <string name="read">Read</string>
+    <string name="to_read">To read</string>
+    <string name="reading">Reading</string>
+    <string name="title">Title</string>
+    <string name="author">Author</string>
+    <string name="date">Date</string>
+    <string name="summary">Summary</string>
+    <string name="quotes_number_replacement">Quotes (%s)</string>
+    <string name="review">Review</string>
+    <string name="review_s_content">Review\'s content</string>
+    <string name="edit_a_review">Edit a review</string>
+    <string name="edit_a_quote">Edit a quote</string>
+    <string name="profile_s_description">Profile\'s description</string>
 </resources>

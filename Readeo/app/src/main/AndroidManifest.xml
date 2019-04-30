@@ -3,6 +3,7 @@
     package="com.imie.a2dev.teamculte.readeo">
 
     <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:name=".App"
         android:allowBackup="true"
@@ -12,9 +13,14 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".MainActivity">
+        <activity android:name=".Views.ReadingListActivity"></activity>
+        <activity android:name=".Views.AccountActivity" />
+        <activity android:name=".Views.IndexActivity" />
+        <activity android:name=".Views.SplashScreenActivity" />
+        <activity android:name=".Views.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
+
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
