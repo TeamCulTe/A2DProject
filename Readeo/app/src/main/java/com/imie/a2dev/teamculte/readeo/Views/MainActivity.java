@@ -1,9 +1,7 @@
-package com.imie.a2dev.teamculte.readeo;
+package com.imie.a2dev.teamculte.readeo.Views;
 
-import android.net.wifi.SupplicantState;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import com.android.volley.RequestQueue;
 import com.imie.a2dev.teamculte.readeo.DBManagers.AuthorDBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.BookDBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.BookListDBManager;
@@ -11,7 +9,6 @@ import com.imie.a2dev.teamculte.readeo.DBManagers.BookListTypeDBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.CategoryDBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.CityDBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.CountryDBManager;
-import com.imie.a2dev.teamculte.readeo.DBManagers.DBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.ProfileDBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.QuoteDBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.ReviewDBManager;
@@ -29,12 +26,12 @@ import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Profile;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.PublicUser;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Quote;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Review;
+import com.imie.a2dev.teamculte.readeo.HTTPRequestQueueSingleton;
+import com.imie.a2dev.teamculte.readeo.R;
 
-import java.util.Date;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements HTTPRequestQueueSingleton.HTTPRequestQueueListener {
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
