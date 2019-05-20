@@ -6,8 +6,10 @@
     android:layout_height="match_parent"
     tools:context=".Views.IndexActivity">
     
-    <fragment
+    <LinearLayout
         android:id="@+id/content_fragment"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        tools:layout="@layout/fragment_log_in"
+        android:orientation="vertical" />
 </android.support.constraint.ConstraintLayout>

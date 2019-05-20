@@ -1,4 +1,4 @@
-package com.imie.a2dev.teamculte.readeo;
+package com.imie.a2dev.teamculte.readeo.Utils;
 
 import android.content.Context;
 import com.android.volley.DefaultRetryPolicy;
@@ -121,9 +121,13 @@ public final class HTTPRequestQueueSingleton {
         }
 
         this.lastRequestUrl = request.getUrl();
+        
+        request.setRetryPolicy(new DefaultRetryPolicy(
+                0,
+                DefaultRetryPolicy.DEFAULT_MAX_RETRIES,
+                DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
 
-        request.setRetryPolicy(new DefaultRetryPolicy(5000, 5, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT));
-        this.getRequestQueue().add(request);
+        this.requestQueue.add(request);
     }
 
     /**

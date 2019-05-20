@@ -19,7 +19,7 @@ import static com.imie.a2dev.teamculte.readeo.DBSchemas.WriterDBSchema.AUTHOR;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.WriterDBSchema.BOOK;
 import static org.junit.Assert.*;
 
-public class WriterDBManagerTest extends CommonDBManagerTest {
+public final class WriterDBManagerTest extends CommonDBManagerTest {
     /**
      * Stores the default associated book id given for create tests.
      */

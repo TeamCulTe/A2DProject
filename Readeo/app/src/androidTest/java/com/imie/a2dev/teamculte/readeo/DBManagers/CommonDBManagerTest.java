@@ -12,7 +12,7 @@ public abstract class CommonDBManagerTest {
     /**
      * Defines the test database name.
      */
-    protected final String TEST_DB = "readeo.test.db";
+    public static final String TEST_DB = "readeo.test.db";
 
     /**
      * Defines the default number of entity in each table.

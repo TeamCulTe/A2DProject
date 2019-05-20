@@ -4,14 +4,12 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import com.android.volley.Request;
-import com.android.volley.Response;
 import com.imie.a2dev.teamculte.readeo.APIManager;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.BookListDBSchema;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Book;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.BookList;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.BookListType;
-import com.imie.a2dev.teamculte.readeo.HTTPRequestQueueSingleton;
-import org.json.JSONArray;
+import com.imie.a2dev.teamculte.readeo.Utils.HTTPRequestQueueSingleton;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -24,11 +22,12 @@ import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookListDBSchema.BOOK;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookListDBSchema.TABLE;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookListDBSchema.TYPE;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookListDBSchema.USER;
+import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.JSON_TAG;
 
 /**
  * Manager class used to manage the book list entities from databases.
  */
-public final class BookListDBManager extends DBManager {
+public final class BookListDBManager extends RelationDBManager {
     /**
      * BookListDBManager's constructor.
      * @param context The associated context.
@@ -111,7 +110,7 @@ public final class BookListDBManager extends DBManager {
                 }
             }
 
-            HTTPRequestQueueSingleton.getInstance(BookListDBManager.this.getContext()).finishRequest(this.getClass().getName());
+            HTTPRequestQueueSingleton.getInstance(this.getContext()).finishRequest(this.getClass().getName());
         });
 
         this.waitForResponse();
@@ -171,7 +170,7 @@ public final class BookListDBManager extends DBManager {
                     }
                 }
 
-                HTTPRequestQueueSingleton.getInstance(BookListDBManager.this.getContext()).finishRequest(this.getClass().getName());
+                HTTPRequestQueueSingleton.getInstance(this.getContext()).finishRequest(this.getClass().getName());
             });
 
             this.waitForResponse();
@@ -252,12 +251,7 @@ public final class BookListDBManager extends DBManager {
     }
 
     @Override
-    public boolean deleteSQLite(int id) {
-        return false;
-    }
-
-    @Override
-    protected void createSQLite(@NonNull JSONObject entity) {
+    public void createSQLite(@NonNull JSONObject entity) {
         // Nothing to do as the entity is not a SQLite one.
     }
 

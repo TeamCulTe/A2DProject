@@ -6,7 +6,9 @@
     tools:context=".Views.MainActivity">
 
     <fragment
+        android:name="com.imie.a2dev.teamculte.readeo.Views.LibraryFragment"
         android:id="@+id/content_fragment"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        tools:layout="@layout/fragment_library"/>
 </android.support.constraint.ConstraintLayout>

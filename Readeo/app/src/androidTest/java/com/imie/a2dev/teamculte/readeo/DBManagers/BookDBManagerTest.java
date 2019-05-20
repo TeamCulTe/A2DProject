@@ -13,17 +13,12 @@ import org.junit.Test;
 import java.util.List;
 
 import static com.imie.a2dev.teamculte.readeo.DBManagers.DBManager.MYSQL_TEST_ID;
-import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookDBSchema.DATE;
-import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookDBSchema.ID;
-import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookDBSchema.TITLE;
-import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookDBSchema.CATEGORY;
-import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookDBSchema.COVER;
-import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookDBSchema.SUMMARY;
+import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookDBSchema.*;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-public class BookDBManagerTest extends CommonDBManagerTest {
+public final class BookDBManagerTest extends CommonDBManagerTest {
     /**
      * Stores the default title given for tests.
      */
@@ -164,7 +159,7 @@ public class BookDBManagerTest extends CommonDBManagerTest {
     }
 
     @Test
-    public void loadFieldFilteredSQLite() {
+    public void testLoadFieldFilteredSQLite() {
         // TODO : Refactor to avoid code duplication.
         String categoryFilter = "1";
         int categoryFilterResults = 2;
@@ -201,7 +196,7 @@ public class BookDBManagerTest extends CommonDBManagerTest {
     }
 
     @Test
-    public void loadCategoryNameFilteredSQLite() {
+    public void testLoadCategoryNameFilteredSQLite() {
         String categoryNameFilter = "category";
         List<Book> results = this.manager.loadCategoryNameFilteredSQLite(categoryNameFilter);
 
@@ -210,7 +205,7 @@ public class BookDBManagerTest extends CommonDBManagerTest {
     }
 
     @Test
-    public void loadAuthorNameFilteredSQLite() {
+    public void testLoadAuthorNameFilteredSQLite() {
         String authorNameFilter = "author";
         List<Book> results = this.manager.loadAuthorNameFilteredSQLite(authorNameFilter);
 
@@ -219,7 +214,7 @@ public class BookDBManagerTest extends CommonDBManagerTest {
     }
 
     @Test
-    public void loadCategorySQLite() {
+    public void testLoadCategorySQLite() {
         int categoryId = 1;
         int categoryFilterResults = 2;
 
@@ -352,7 +347,6 @@ public class BookDBManagerTest extends CommonDBManagerTest {
         this.testedMySQL = true;
 
         this.manager.createMySQL(new Book(id, title, null, cover, summary, datePublished, category, null, null));
-        this.manager.waitForResponse();
 
         return this.manager.loadMySQL(id);
     }

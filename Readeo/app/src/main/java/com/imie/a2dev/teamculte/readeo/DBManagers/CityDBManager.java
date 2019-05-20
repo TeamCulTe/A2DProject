@@ -9,7 +9,7 @@ import android.util.Log;
 import com.android.volley.Request;
 import com.imie.a2dev.teamculte.readeo.APIManager;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.City;
-import com.imie.a2dev.teamculte.readeo.HTTPRequestQueueSingleton;
+import com.imie.a2dev.teamculte.readeo.Utils.HTTPRequestQueueSingleton;
 import org.json.JSONException;
 import org.json.JSONObject;
 import java.util.ArrayList;
@@ -17,16 +17,19 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.CityDBSchema.ID;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.CityDBSchema.NAME;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.CityDBSchema.TABLE;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.CommonDBSchema.UPDATE;
+import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.JSON_TAG;
+import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.SQLITE_TAG;
 
 /**
  * Manager class used to manage the city entities from databases.
  */
-public final class CityDBManager extends DBManager {
+public final class CityDBManager extends SimpleDBManager {
     /**
      * CityDBManager's constructor.
      * @param context The associated context.
@@ -87,21 +90,13 @@ public final class CityDBManager extends DBManager {
      * @return The loaded entity if exists else null.
      */
     public City loadSQLite(int id) {
-        try {
-            String[] selectArgs = {String.valueOf(id)};
-            String query = String.format(this.SIMPLE_QUERY_ALL, this.table, ID);
-            Cursor result = this.database.rawQuery(query, selectArgs);
+        Cursor result = this.loadCursorSQLite(id);
 
-            if (result.getCount() == 0) {
-                return null;
-            }
-
-            return new City(result);
-        } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
-
+        if (result == null || result.getCount() == 0) {
             return null;
         }
+
+        return new City(result);
     }
 
     /**
@@ -140,14 +135,24 @@ public final class CityDBManager extends DBManager {
      * Creates a city entity in MySQL database.
      * @param city The city to create.
      */
-    public void createMySQL(City city) {
+    public void createMySQL(final City city) {
         String url = this.baseUrl + APIManager.CREATE;
         Map<String, String> param = new HashMap<>();
 
         param.put(ID, String.valueOf(city.getId()));
         param.put(NAME, city.getName());
 
-        super.requestString(Request.Method.POST, url, null, param);
+        super.requestString(Request.Method.POST, url, response -> {
+            Pattern pattern = Pattern.compile("^\\d.$");
+
+            if (pattern.matcher(response).find()) {
+                city.setId(Integer.valueOf(response));
+            }
+            
+            HTTPRequestQueueSingleton.getInstance(this.getContext()).finishRequest(this.getClass().getName());
+        }, param);
+
+        this.waitForResponse();
     }
 
     /**
@@ -162,7 +167,7 @@ public final class CityDBManager extends DBManager {
         super.requestJsonArray(Request.Method.GET, url,  response -> {
             try {
                 city.init(response.getJSONObject(0));
-                HTTPRequestQueueSingleton.getInstance(CityDBManager.this.getContext()).finishRequest(this.getClass().getName());
+                HTTPRequestQueueSingleton.getInstance(this.getContext()).finishRequest(this.getClass().getName());
             } catch (JSONException e) {
                 Log.e(JSON_TAG, e.getMessage());
             }
@@ -173,8 +178,32 @@ public final class CityDBManager extends DBManager {
         return (city.isEmpty()) ? null : city;
     }
 
+    /**
+     * Loads a city from MySQL database.
+     * @param cityName The name of the city.
+     * @return The loaded city.
+     */
+    public City loadMySQL(String cityName) {
+        final City city = new City(cityName);
+        String url = this.baseUrl + APIManager.READ + NAME + "=" + cityName;
+
+        super.requestJsonArray(Request.Method.GET, url,  response -> {
+            try {
+                city.init(response.getJSONObject(0));
+            } catch (JSONException e) {
+                Log.e(JSON_TAG, e.getMessage());
+            } finally {
+                HTTPRequestQueueSingleton.getInstance(this.getContext()).finishRequest(this.getClass().getName());
+            }
+        });
+
+        this.waitForResponse();
+
+        return (city.isEmpty()) ? null : city;
+    }
+
     @Override
-    protected void createSQLite(@NonNull JSONObject entity) {
+    public void createSQLite(@NonNull JSONObject entity) {
         try {
             ContentValues data = new ContentValues();
 

@@ -16,16 +16,10 @@ import org.junit.Test;
 import java.util.List;
 
 import static com.imie.a2dev.teamculte.readeo.DBManagers.DBManager.MYSQL_TEST_ID;
-import static com.imie.a2dev.teamculte.readeo.DBSchemas.UserDBSchema.CITY;
-import static com.imie.a2dev.teamculte.readeo.DBSchemas.UserDBSchema.COUNTRY;
-import static com.imie.a2dev.teamculte.readeo.DBSchemas.UserDBSchema.EMAIL;
-import static com.imie.a2dev.teamculte.readeo.DBSchemas.UserDBSchema.ID;
-import static com.imie.a2dev.teamculte.readeo.DBSchemas.UserDBSchema.PASSWORD;
-import static com.imie.a2dev.teamculte.readeo.DBSchemas.UserDBSchema.PROFILE;
-import static com.imie.a2dev.teamculte.readeo.DBSchemas.UserDBSchema.PSEUDO;
+import static com.imie.a2dev.teamculte.readeo.DBSchemas.UserDBSchema.*;
 import static org.junit.Assert.*;
 
-public class UserDBManagerTest extends CommonDBManagerTest {
+public final class UserDBManagerTest extends CommonDBManagerTest {
     /**
      * Stores the default user pseudo given for tests.
      */
@@ -55,7 +49,6 @@ public class UserDBManagerTest extends CommonDBManagerTest {
      * Stores the default user city given for tests.
      */
     private final int TEST_PROFILE = 1;
-
 
     /**
      * Stores the associated manager used to interact with the database.
@@ -183,10 +176,11 @@ public class UserDBManagerTest extends CommonDBManagerTest {
     @Test
     public void testCreateMySQL() {
         PrivateUser created = this.initTestEntityMySQL();
-
+        PrivateUser loaded = this.manager.loadMySQL(created.getEmail(), TEST_PASSWORD);
+        
         assertNotNull(created);
         assertEquals(TEST_PSEUDO, created.getPseudo());
-        assertEquals(TEST_PASSWORD, created.getPassword());
+        assertEquals(loaded.getPassword(), created.getPassword());
         assertEquals(TEST_EMAIL, created.getEmail());
         assertEquals(MYSQL_TEST_ID, created.getProfile().getId());
         assertEquals(MYSQL_TEST_ID, created.getCity().getId());
@@ -199,7 +193,7 @@ public class UserDBManagerTest extends CommonDBManagerTest {
 
         assertNotNull(created);
 
-        PrivateUser loaded = this.manager.loadMySQL(created.getEmail(), created.getPassword());
+        PrivateUser loaded = this.manager.loadMySQL(created.getEmail(), TEST_PASSWORD);
 
         assertNotNull(loaded);
         assertEquals(created.getId(), loaded.getId());
@@ -209,6 +203,19 @@ public class UserDBManagerTest extends CommonDBManagerTest {
         assertEquals(created.getProfile().getId(), loaded.getProfile().getId());
         assertEquals(created.getCity().getId(), loaded.getCity().getId());
         assertEquals(created.getCountry().getId(), loaded.getCountry().getId());
+    }
+    
+    @Test
+    public void testIsAvailableMySQL() {
+        this.initTestEntityMySQL();
+        
+        String availablePseudo = "_plop_";
+        String availableEmail = "_plop_";
+        
+        assertFalse(this.manager.isAvailableMySQL(PSEUDO, TEST_PSEUDO));
+        assertFalse(this.manager.isAvailableMySQL(EMAIL, TEST_EMAIL));
+        assertTrue(this.manager.isAvailableMySQL(PSEUDO, availablePseudo));
+        assertTrue(this.manager.isAvailableMySQL(EMAIL, availableEmail));
     }
 
     @Test
@@ -241,14 +248,14 @@ public class UserDBManagerTest extends CommonDBManagerTest {
         this.manager.updateMySQL(user);
         this.manager.waitForResponse();
 
-        user = this.manager.loadMySQL(user.getId());
+        PrivateUser loaded = this.manager.loadMySQL(user.getId());
 
-        assertNotNull(user);
-        assertEquals(newPseudo, user.getPseudo());
-        assertEquals(newPassword, user.getPassword());
-        assertEquals(newEmail, user.getEmail());
-        assertEquals(newId, user.getCity().getId());
-        assertEquals(newId, user.getCountry().getId());
+        assertNotNull(loaded);
+        assertEquals(newPseudo, loaded.getPseudo());
+        assertNotEquals(user.getPassword(), loaded.getPassword());
+        assertEquals(newEmail, loaded.getEmail());
+        assertEquals(newId, loaded.getCity().getId());
+        assertEquals(newId, loaded.getCountry().getId());
     }
 
     @Test
@@ -277,14 +284,14 @@ public class UserDBManagerTest extends CommonDBManagerTest {
         this.manager.updateFieldMySQL(user.getId(), COUNTRY, String.valueOf(newId));
         this.manager.waitForResponse();
 
-        user = this.manager.loadMySQL(user.getId());
+        PrivateUser loaded = this.manager.loadMySQL(user.getId());
 
-        assertNotNull(user);
-        assertEquals(newPseudo, user.getPseudo());
-        assertEquals(newPassword, user.getPassword());
-        assertEquals(newEmail, user.getEmail());
-        assertEquals(newId, user.getCity().getId());
-        assertEquals(newId, user.getCountry().getId());
+        assertNotNull(loaded);
+        assertEquals(newPseudo, loaded.getPseudo());
+        assertNotEquals(user.getPassword(), loaded.getPassword());
+        assertEquals(newEmail, loaded.getEmail());
+        assertEquals(newId, loaded.getCity().getId());
+        assertEquals(newId, loaded.getCountry().getId());
     }
 
     @Test
@@ -293,7 +300,7 @@ public class UserDBManagerTest extends CommonDBManagerTest {
 
         assertNotNull(toDelete);
 
-        this.manager.deleteMySQL(toDelete.getEmail(), toDelete.getPassword());
+        this.manager.deleteMySQL(toDelete.getEmail(), TEST_PASSWORD);
         this.manager.waitForResponse();
 
         assertNull(this.manager.loadMySQL(toDelete.getId()));
@@ -304,6 +311,8 @@ public class UserDBManagerTest extends CommonDBManagerTest {
         PrivateUser user = this.initTestEntityMySQL();
 
         assertNotNull(user);
+        
+        user.setPassword(TEST_PASSWORD);
 
         this.manager.deleteMySQL(user);
         this.manager.waitForResponse();
@@ -317,7 +326,7 @@ public class UserDBManagerTest extends CommonDBManagerTest {
 
         assertNotNull(toRestore);
 
-        this.manager.deleteMySQL(toRestore.getEmail(), toRestore.getPassword());
+        this.manager.deleteMySQL(toRestore.getEmail(), TEST_PASSWORD);
         this.manager.waitForResponse();
 
         assertNull(this.manager.loadMySQL(toRestore.getId()));
@@ -334,12 +343,12 @@ public class UserDBManagerTest extends CommonDBManagerTest {
 
         assertNotNull(toRestore);
 
-        this.manager.deleteMySQL(toRestore.getEmail(), toRestore.getPassword());
+        this.manager.deleteMySQL(toRestore.getEmail(), TEST_PASSWORD);
         this.manager.waitForResponse();
 
         assertNull(this.manager.loadMySQL(toRestore.getId()));
 
-        this.manager.restoreMySQL(toRestore.getEmail(), toRestore.getPassword());
+        this.manager.restoreMySQL(toRestore.getEmail(), TEST_PASSWORD);
         this.manager.waitForResponse();
 
         assertNotNull(this.manager.loadMySQL(toRestore.getId()));
@@ -353,7 +362,7 @@ public class UserDBManagerTest extends CommonDBManagerTest {
     }
 
     @Test
-    public void TestSQLiteGetId() {
+    public void testSQLiteGetId() {
         int loadedId = this.manager.SQLiteGetId(TEST_LOAD_PSEUDO);
 
         assertEquals(TEST_LOAD_ID, loadedId);
@@ -379,14 +388,14 @@ public class UserDBManagerTest extends CommonDBManagerTest {
     }
 
     @Test
-    public void deleteSQLite() {
+    public void testDeleteSQLite() {
         this.manager.deleteSQLite(ENTITY_NB);
 
         assertEquals(ENTITY_NB - 1, this.manager.countSQLite());
     }
 
     @Test
-    public void countSQLite() {
+    public void testCountSQLite() {
         assertEquals(ENTITY_NB, this.manager.countSQLite());
     }
 
@@ -425,8 +434,7 @@ public class UserDBManagerTest extends CommonDBManagerTest {
         PrivateUser user = new PrivateUser(id, pseudo, password, email, profile, country, city, null, null);
 
         this.manager.createMySQL(user);
-        this.manager.waitForResponse();
-
+        
         return this.manager.loadMySQL(id);
     }
 
@@ -438,8 +446,7 @@ public class UserDBManagerTest extends CommonDBManagerTest {
         City city = new CityDBManagerTest().initTestEntityMySQL();
         Profile profile = new ProfileDBManagerTest().initTestEntityMySQL();
         Country country = new CountryDBManagerTest().initTestEntityMySQL();
-
-
+        
         return this.initTestEntityMySQL(MYSQL_TEST_ID, TEST_PSEUDO, TEST_PASSWORD, TEST_EMAIL, profile, country, city);
     }
 

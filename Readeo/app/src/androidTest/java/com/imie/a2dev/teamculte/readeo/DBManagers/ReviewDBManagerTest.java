@@ -19,13 +19,10 @@ import org.junit.Test;
 import java.util.List;
 
 import static com.imie.a2dev.teamculte.readeo.DBManagers.DBManager.MYSQL_TEST_ID;
-import static com.imie.a2dev.teamculte.readeo.DBSchemas.ReviewDBSchema.BOOK;
-import static com.imie.a2dev.teamculte.readeo.DBSchemas.ReviewDBSchema.REVIEW;
-import static com.imie.a2dev.teamculte.readeo.DBSchemas.ReviewDBSchema.SHARED;
-import static com.imie.a2dev.teamculte.readeo.DBSchemas.ReviewDBSchema.USER;
+import static com.imie.a2dev.teamculte.readeo.DBSchemas.ReviewDBSchema.*;
 import static org.junit.Assert.*;
 
-public class ReviewDBManagerTest extends CommonDBManagerTest {
+public final class ReviewDBManagerTest extends CommonDBManagerTest {
     /**
      * Stores the default associated user given for tests.
      */
@@ -399,7 +396,7 @@ public class ReviewDBManagerTest extends CommonDBManagerTest {
     }
 
     @Test
-    public void countSQLite() {
+    public void testCountSQLite() {
         assertEquals(ENTITY_NB, this.manager.countSQLite());
     }
 

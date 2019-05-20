@@ -7,13 +7,10 @@ import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import com.android.volley.Request;
-import com.android.volley.Response;
 import com.imie.a2dev.teamculte.readeo.APIManager;
-import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Country;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.PrivateUser;
-import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Profile;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.PublicUser;
-import com.imie.a2dev.teamculte.readeo.HTTPRequestQueueSingleton;
+import com.imie.a2dev.teamculte.readeo.Utils.HTTPRequestQueueSingleton;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -22,6 +19,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.CommonDBSchema.UPDATE;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.UserDBSchema.CITY;
@@ -32,11 +30,13 @@ import static com.imie.a2dev.teamculte.readeo.DBSchemas.UserDBSchema.PASSWORD;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.UserDBSchema.PROFILE;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.UserDBSchema.PSEUDO;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.UserDBSchema.TABLE;
+import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.JSON_TAG;
+import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.SQLITE_TAG;
 
 /**
  * Manager class used to manage the user entities from databases.
  */
-public final class UserDBManager extends DBManager {
+public final class UserDBManager extends SimpleDBManager {
     /**
      * UserDBManager's constructor.
      * @param context The associated context.
@@ -120,21 +120,13 @@ public final class UserDBManager extends DBManager {
      * @return The loaded entity if exists else null.
      */
     public PublicUser loadSQLite(int id) {
-        try {
-            String[] selectArgs = {String.valueOf(id)};
-            String query = String.format(this.SIMPLE_QUERY_ALL, this.table, ID);
-            Cursor result = this.database.rawQuery(query, selectArgs);
+        Cursor result = this.loadCursorSQLite(id);
 
-            if (result.getCount() == 0) {
-                return null;
-            }
-
-            return new PublicUser(result);
-        } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
-
+        if (result == null || result.getCount() == 0) {
             return null;
         }
+
+        return new PublicUser(result);
     }
 
     /**
@@ -217,7 +209,7 @@ public final class UserDBManager extends DBManager {
      * Creates a user entity in MySQL database.
      * @param user The user to create.
      */
-    public void createMySQL(PrivateUser user) {
+    public void createMySQL(final PrivateUser user) {
         String url = this.baseUrl + APIManager.CREATE;
         Map<String, String> param = new HashMap<>();
 
@@ -232,7 +224,17 @@ public final class UserDBManager extends DBManager {
         param.put(CITY, String.valueOf(user.getCity().getId()));
         param.put(COUNTRY, String.valueOf(user.getCountry().getId()));
 
-        super.requestString(Request.Method.POST, url, null, param);
+        super.requestString(Request.Method.POST, url, response -> {
+            Pattern pattern = Pattern.compile("^\\d.$");
+
+            if (pattern.matcher(response).find()) {
+                user.setId(Integer.valueOf(response));
+            }
+            
+            HTTPRequestQueueSingleton.getInstance(this.getContext()).finishRequest(this.getClass().getName());
+        }, param);
+
+        this.waitForResponse();
     }
 
     /**
@@ -291,9 +293,10 @@ public final class UserDBManager extends DBManager {
                 idCountry[0] = object.getInt(COUNTRY);
 
                 user.init(object);
-                HTTPRequestQueueSingleton.getInstance(UserDBManager.this.getContext()).finishRequest(this.getClass().getName());
             } catch (JSONException e) {
                 Log.e(JSON_TAG, e.getMessage());
+            } finally {
+                HTTPRequestQueueSingleton.getInstance(this.getContext()).finishRequest(this.getClass().getName());
             }
         });
 
@@ -328,9 +331,10 @@ public final class UserDBManager extends DBManager {
                 idCountry[0] = object.getInt(COUNTRY);
 
                 user.init(object);
-                HTTPRequestQueueSingleton.getInstance(UserDBManager.this.getContext()).finishRequest(this.getClass().getName());
             } catch (JSONException e) {
                 Log.e(JSON_TAG, e.getMessage());
+            } finally {
+                HTTPRequestQueueSingleton.getInstance(this.getContext()).finishRequest(this.getClass().getName());
             }
         });
 
@@ -342,6 +346,28 @@ public final class UserDBManager extends DBManager {
         user.setBookLists(new BookListDBManager(this.getContext()).loadUserMySQL(user.getId()));
 
         return (user.isEmpty()) ? null : user;
+    }
+
+    /**
+     * Checks if a value is available for a specific field (not already taken).
+     * @param field The associated field.
+     * @param value The value to check.
+     * @return True if the value is available (not taken) else false.
+     */
+    public boolean isAvailableMySQL(String field, String value) {
+        final boolean[] available = new boolean[1];
+        String url = this.baseUrl + APIManager.READ + field + "=" + value + "&public=1";
+        available[0] = true;
+        
+        super.requestJsonArray(Request.Method.GET, url, response -> {
+            available[0] = false;
+
+            HTTPRequestQueueSingleton.getInstance(this.getContext()).finishRequest(this.getClass().getName());
+        });
+        
+        this.waitForResponse();
+        
+        return available[0];
     }
 
     /**
@@ -396,7 +422,7 @@ public final class UserDBManager extends DBManager {
     }
 
     @Override
-    protected void createSQLite(@NonNull JSONObject entity) {
+    public void createSQLite(@NonNull JSONObject entity) {
         try {
             ContentValues data = new ContentValues();
 

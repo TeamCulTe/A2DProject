@@ -26,7 +26,7 @@ import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Profile;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.PublicUser;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Quote;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Review;
-import com.imie.a2dev.teamculte.readeo.HTTPRequestQueueSingleton;
+import com.imie.a2dev.teamculte.readeo.Utils.HTTPRequestQueueSingleton;
 import com.imie.a2dev.teamculte.readeo.R;
 
 import java.util.List;
@@ -68,8 +68,6 @@ public class MainActivity extends AppCompatActivity implements HTTPRequestQueueS
         Review review = new Review();
 
 //        String[][] a = reviewDBManager.getUpdateFieldsSQLite();
-        authorDBManager.getUpdateFromMySQL();
-
         //DBManager.importMySQLDatabase();
 
 //        List<Author> authors = authorDBManager.queryAllSQLite();
@@ -86,7 +84,7 @@ public class MainActivity extends AppCompatActivity implements HTTPRequestQueueS
         HTTPRequestQueueSingleton r = HTTPRequestQueueSingleton.getInstance(this);
         r.setListener(this);
     }
-
+    
     @Override
     public void onRequestsFinished() {
         AuthorDBManager authorDBManager = new AuthorDBManager(this);

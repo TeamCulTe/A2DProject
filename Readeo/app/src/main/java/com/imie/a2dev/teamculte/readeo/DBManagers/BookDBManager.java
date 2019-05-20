@@ -12,7 +12,7 @@ import com.imie.a2dev.teamculte.readeo.DBSchemas.AuthorDBSchema;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.CategoryDBSchema;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.WriterDBSchema;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Book;
-import com.imie.a2dev.teamculte.readeo.HTTPRequestQueueSingleton;
+import com.imie.a2dev.teamculte.readeo.Utils.HTTPRequestQueueSingleton;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -21,6 +21,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookDBSchema.ID;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookDBSchema.TABLE;
@@ -30,11 +31,13 @@ import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookDBSchema.COVER;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookDBSchema.SUMMARY;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookDBSchema.DATE;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.CommonDBSchema.UPDATE;
+import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.JSON_TAG;
+import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.SQLITE_TAG;
 
 /**
  * Manager class used to manage the book entities from databases.
  */
-public final class BookDBManager extends DBManager {
+public final class BookDBManager extends SimpleDBManager {
     /**
      * BookDBManager's constructor.
      * @param context The associated context.
@@ -105,21 +108,13 @@ public final class BookDBManager extends DBManager {
      * @return The loaded entity if exists else null.
      */
     public Book loadSQLite(int id) {
-        try {
-            String[] selectArgs = {String.valueOf(id)};
-            String query = String.format(this.SIMPLE_QUERY_ALL, this.table, ID);
-            Cursor result = this.database.rawQuery(query, selectArgs);
+        Cursor result = this.loadCursorSQLite(id);
 
-            if (result.getCount() == 0) {
-                return null;
-            }
-
-            return new Book(result);
-        } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
-
+        if (result == null || result.getCount() == 0) {
             return null;
         }
+
+        return new Book(result);
     }
 
     /**
@@ -305,7 +300,7 @@ public final class BookDBManager extends DBManager {
      * Creates a book entity in MySQL database.
      * @param book The book to create.
      */
-    public void createMySQL(Book book) {
+    public void createMySQL(final Book book) {
         String url = this.baseUrl + APIManager.CREATE;
         Map<String, String> param = new HashMap<>();
 
@@ -319,7 +314,17 @@ public final class BookDBManager extends DBManager {
         param.put(SUMMARY, book.getSummary());
         param.put(DATE, String.valueOf(book.getDatePublished()));
 
-        super.requestString(Request.Method.POST, url, null, param);
+        super.requestString(Request.Method.POST, url, response -> {
+            Pattern pattern = Pattern.compile("^\\d.$");
+
+            if (pattern.matcher(response).find()) {
+                book.setId(Integer.valueOf(response));
+            }
+            
+            HTTPRequestQueueSingleton.getInstance(this.getContext()).finishRequest(BookDBManager.this.getClass().getName());
+        }, param);
+
+        this.waitForResponse();
     }
 
     /**
@@ -339,9 +344,10 @@ public final class BookDBManager extends DBManager {
                 idCategory[0] = object.getInt(CATEGORY);
 
                 book.init(object);
-                HTTPRequestQueueSingleton.getInstance(BookDBManager.this.getContext()).finishRequest(this.getClass().getName());
             } catch (JSONException e) {
                 Log.e(JSON_TAG, e.getMessage());
+            }  finally {
+                HTTPRequestQueueSingleton.getInstance(this.getContext()).finishRequest(this.getClass().getName());
             }
         });
 
@@ -352,7 +358,7 @@ public final class BookDBManager extends DBManager {
     }
 
     @Override
-    protected void createSQLite(@NonNull JSONObject entity) {
+    public void createSQLite(@NonNull JSONObject entity) {
         try {
             ContentValues data = new ContentValues();
 

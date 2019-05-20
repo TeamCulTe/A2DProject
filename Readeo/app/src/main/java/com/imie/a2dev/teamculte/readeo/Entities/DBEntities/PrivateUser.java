@@ -1,15 +1,8 @@
 package com.imie.a2dev.teamculte.readeo.Entities.DBEntities;
 
-import android.content.Context;
 import android.support.annotation.NonNull;
 import android.util.Log;
-import com.imie.a2dev.teamculte.readeo.App;
-import com.imie.a2dev.teamculte.readeo.DBManagers.BookListDBManager;
-import com.imie.a2dev.teamculte.readeo.DBManagers.CityDBManager;
-import com.imie.a2dev.teamculte.readeo.DBManagers.CountryDBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.DBManager;
-import com.imie.a2dev.teamculte.readeo.DBManagers.ProfileDBManager;
-import com.imie.a2dev.teamculte.readeo.DBManagers.ReviewDBManager;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.UserDBSchema;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,6 +13,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.JSON_TAG;
 
 /**
  * Final class representing a private user of the application (the one connected with all its attribute).
@@ -146,7 +141,7 @@ public final class PrivateUser extends PublicUser {
             this.password = object.getString(UserDBSchema.PASSWORD);
             this.email = object.getString(UserDBSchema.EMAIL);
         } catch (JSONException e) {
-            Log.e(DBManager.JSON_TAG, e.getMessage());
+            Log.e(JSON_TAG, e.getMessage());
         }
     }
 }

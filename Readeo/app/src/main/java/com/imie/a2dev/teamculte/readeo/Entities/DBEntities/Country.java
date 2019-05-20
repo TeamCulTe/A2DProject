@@ -1,16 +1,19 @@
 package com.imie.a2dev.teamculte.readeo.Entities.DBEntities;
 
+import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import com.imie.a2dev.teamculte.readeo.DBManagers.DBManager;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.CountryDBSchema;
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.JSON_TAG;
+import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.SQLITE_TAG;
 
 /**
  * Final class representing a country from the application.
@@ -69,6 +72,22 @@ public final class Country extends DBEntity {
         this.init(result, false);
     }
 
+    /**
+     * Country's full filled constructor providing all its attributes values from a ContentValues object.
+     * @param contentValues The ContentValues object used to initialize the entity.
+     */
+    public Country(ContentValues contentValues) {
+        this.init(contentValues);
+    }
+
+    /**
+     * Initializes the country from a ContentValues object.
+     * @param contentValues The ContentValues object.
+     */
+    public void init(@NonNull ContentValues contentValues) {
+        this.id = contentValues.getAsInteger(CountryDBSchema.ID);
+        this.name = contentValues.getAsString(CountryDBSchema.NAME);
+    }
 
     /**
      * Initializes the country from a JSON response object.
@@ -79,7 +98,7 @@ public final class Country extends DBEntity {
             this.id = object.getInt(CountryDBSchema.ID);
             this.name = object.getString(CountryDBSchema.NAME);
         } catch (JSONException e) {
-            Log.e(DBManager.JSON_TAG, e.getMessage());
+            Log.e(JSON_TAG, e.getMessage());
         }
     }
 
@@ -97,7 +116,7 @@ public final class Country extends DBEntity {
                 result.close();
             }
         } catch (SQLiteException e) {
-            Log.e(DBManager.SQLITE_TAG, e.getMessage());
+            Log.e(SQLITE_TAG, e.getMessage());
         }
     }
 }

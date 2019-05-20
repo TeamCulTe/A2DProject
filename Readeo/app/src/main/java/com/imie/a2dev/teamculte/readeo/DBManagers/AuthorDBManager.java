@@ -9,7 +9,7 @@ import android.util.Log;
 import com.android.volley.Request;
 import com.imie.a2dev.teamculte.readeo.APIManager;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Author;
-import com.imie.a2dev.teamculte.readeo.HTTPRequestQueueSingleton;
+import com.imie.a2dev.teamculte.readeo.Utils.HTTPRequestQueueSingleton;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -18,16 +18,19 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.AuthorDBSchema.TABLE;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.AuthorDBSchema.ID;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.AuthorDBSchema.NAME;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.CommonDBSchema.UPDATE;
+import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.JSON_TAG;
+import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.SQLITE_TAG;
 
 /**
  * Manager class used to manage the author entities from databases.
  */
-public final class AuthorDBManager extends DBManager {
+public final class AuthorDBManager extends SimpleDBManager {
     /**
      * AuthorDBManager's constructor.
      * @param context The associated context.
@@ -82,28 +85,20 @@ public final class AuthorDBManager extends DBManager {
             return false;
         }
     }
-
+    
     /**
      * From an id, returns the associated java entity.
      * @param id The id of entity to load from the database.
      * @return The loaded entity if exists else null.
      */
     public Author loadSQLite(int id) {
-        try {
-            String[] selectArgs = {String.valueOf(id)};
-            String query = String.format(this.SIMPLE_QUERY_ALL, this.table, ID);
-            Cursor result = this.database.rawQuery(query, selectArgs);
+        Cursor result = this.loadCursorSQLite(id);
 
-            if (result.getCount() == 0) {
-                return null;
-            }
-
-            return new Author(result);
-        } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
-
+        if (result == null || result.getCount() == 0) {
             return null;
         }
+
+        return new Author(result);
     }
 
     /**
@@ -142,7 +137,7 @@ public final class AuthorDBManager extends DBManager {
      * Creates a author entity in MySQL database.
      * @param author The author to create.
      */
-    public void createMySQL(Author author) {
+    public void createMySQL(final Author author) {
         String url = this.baseUrl + APIManager.CREATE;
         Map<String, String> param = new HashMap<>();
 
@@ -152,7 +147,17 @@ public final class AuthorDBManager extends DBManager {
 
         param.put(NAME, author.getName());
 
-        super.requestString(Request.Method.POST, url, null, param);
+        super.requestString(Request.Method.POST, url, response -> {
+            Pattern pattern = Pattern.compile("^\\d.$");
+            
+            if (pattern.matcher(response).find()) {
+                author.setId(Integer.valueOf(response));
+            }
+            
+            HTTPRequestQueueSingleton.getInstance(this.getContext()).finishRequest(this.getClass().getName());
+        }, param);
+        
+        this.waitForResponse();
     }
 
     /**
@@ -167,9 +172,10 @@ public final class AuthorDBManager extends DBManager {
         super.requestJsonArray(Request.Method.GET, url, response -> {
             try {
                 author.init(response.getJSONObject(0));
-                HTTPRequestQueueSingleton.getInstance(AuthorDBManager.this.getContext()).finishRequest(this.getClass().getName());
             } catch (JSONException e) {
                 Log.e(JSON_TAG, e.getMessage());
+            } finally {
+                HTTPRequestQueueSingleton.getInstance(this.getContext()).finishRequest(this.getClass().getName());
             }
         });
 
@@ -179,7 +185,7 @@ public final class AuthorDBManager extends DBManager {
     }
 
     @Override
-    protected void createSQLite(@NonNull JSONObject entity) {
+    public void createSQLite(@NonNull JSONObject entity) {
         try {
             ContentValues data = new ContentValues();
 

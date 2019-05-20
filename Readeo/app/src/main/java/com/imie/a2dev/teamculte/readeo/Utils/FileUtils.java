@@ -14,7 +14,7 @@ import java.util.zip.ZipInputStream;
 /**
  * File util class used to perform actions on files.
  */
-public abstract class FileUtil {
+public abstract class FileUtils {
     /**
      * From a source file, copy it into a destination file given in parameter.
      * @param source The file to copy.

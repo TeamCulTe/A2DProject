@@ -21,11 +21,12 @@ import java.util.Map;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.WriterDBSchema.AUTHOR;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.WriterDBSchema.BOOK;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.WriterDBSchema.TABLE;
+import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.SQLITE_TAG;
 
 /**
  * Manager class used to manage the writer entities from databases.
  */
-public final class WriterDBManager extends DBManager {
+public final class WriterDBManager extends RelationDBManager {
     /**
      * WriterDBManager's constructor.
      * @param context The associated context.
@@ -233,17 +234,7 @@ public final class WriterDBManager extends DBManager {
     }
 
     @Override
-    public String getFieldSQLite(String field, int id) {
-        return null;
-    }
-
-    @Override
-    public boolean deleteSQLite(int id) {
-        return false;
-    }
-
-    @Override
-    protected void createSQLite(@NonNull JSONObject entity) {
+    public void createSQLite(@NonNull JSONObject entity) {
         try {
             ContentValues data = new ContentValues();
 

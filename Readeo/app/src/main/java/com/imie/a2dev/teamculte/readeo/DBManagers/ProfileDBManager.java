@@ -7,10 +7,9 @@ import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import com.android.volley.Request;
-import com.android.volley.Response;
 import com.imie.a2dev.teamculte.readeo.APIManager;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Profile;
-import com.imie.a2dev.teamculte.readeo.HTTPRequestQueueSingleton;
+import com.imie.a2dev.teamculte.readeo.Utils.HTTPRequestQueueSingleton;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -19,17 +18,20 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.CommonDBSchema.UPDATE;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.ProfileDBSchema.AVATAR;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.ProfileDBSchema.DESCRIPTION;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.ProfileDBSchema.ID;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.ProfileDBSchema.TABLE;
+import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.JSON_TAG;
+import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.SQLITE_TAG;
 
 /**
  * Manager class used to manage the profile entities from databases.
  */
-public final class ProfileDBManager extends DBManager {
+public final class ProfileDBManager extends SimpleDBManager {
     /**
      * ProfileDBManager's constructor.
      * @param context The associated context.
@@ -93,21 +95,13 @@ public final class ProfileDBManager extends DBManager {
      * @return The loaded entity if exists else null.
      */
     public Profile loadSQLite(int id) {
-        try {
-            String[] selectArgs = {String.valueOf(id)};
-            String query = String.format(this.SIMPLE_QUERY_ALL, this.table, ID);
-            Cursor result = this.database.rawQuery(query, selectArgs);
+        Cursor result = this.loadCursorSQLite(id);
 
-            if (result.getCount() == 0) {
-                return null;
-            }
-
-            return new Profile(result);
-        } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
-
+        if (result == null || result.getCount() == 0) {
             return null;
         }
+
+        return new Profile(result);
     }
 
     /**
@@ -146,7 +140,7 @@ public final class ProfileDBManager extends DBManager {
      * Creates a profile entity in MySQL database.
      * @param profile The profile to create.
      */
-    public void createMySQL(Profile profile) {
+    public void createMySQL(final Profile profile) {
         String url = this.baseUrl + APIManager.CREATE;
         Map<String, String> param = new HashMap<>();
 
@@ -157,7 +151,17 @@ public final class ProfileDBManager extends DBManager {
         param.put(AVATAR, profile.getAvatar());
         param.put(DESCRIPTION, profile.getDescription());
 
-        super.requestString(Request.Method.POST, url, null, param);
+        super.requestString(Request.Method.POST, url, response -> {
+            Pattern pattern = Pattern.compile("^\\d.$");
+
+            if (pattern.matcher(response).find()) {
+                profile.setId(Integer.valueOf(response));
+            }
+            
+            HTTPRequestQueueSingleton.getInstance(this.getContext()).finishRequest(this.getClass().getName());
+        }, param);
+
+        this.waitForResponse();
     }
 
     /**
@@ -172,9 +176,10 @@ public final class ProfileDBManager extends DBManager {
         super.requestJsonArray(Request.Method.GET, url,  response -> {
             try {
                 profile.init(response.getJSONObject(0));
-                HTTPRequestQueueSingleton.getInstance(ProfileDBManager.this.getContext()).finishRequest(this.getClass().getName());
             } catch (JSONException e) {
                 Log.e(JSON_TAG, e.getMessage());
+            } finally {
+                HTTPRequestQueueSingleton.getInstance(this.getContext()).finishRequest(this.getClass().getName());
             }
         });
 
@@ -249,7 +254,7 @@ public final class ProfileDBManager extends DBManager {
     }
 
     @Override
-    protected void createSQLite(@NonNull JSONObject entity) {
+    public void createSQLite(@NonNull JSONObject entity) {
         try {
             ContentValues data = new ContentValues();
 
