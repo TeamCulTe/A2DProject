@@ -511,8 +511,8 @@ class ReviewDbManager extends DbManager
      */
     public function queryUpdateFields()
     {
-        $statement = sprintf("SELECT %s, %s, %s FROM %s WHERE deleted = 0",
-            static::FIELDS[0], static::FIELDS[1], static::FIELDS[4], static::TABLE);
+        $statement = sprintf("SELECT %s, %s, %s FROM %s WHERE deleted = 0 ORDER BY %s",
+            static::FIELDS[0], static::FIELDS[1], static::FIELDS[4], static::TABLE, static::FIELDS[0]);
         $req = $this->db->query($statement);
         $response = $req->fetchAll(PDO::FETCH_ASSOC);
 
@@ -525,8 +525,8 @@ class ReviewDbManager extends DbManager
      */
     public function querySharedUpdateFields()
     {
-        $statement = sprintf("SELECT %s, %s, %s FROM %s WHERE %s = 1 AND deleted = 0",
-            static::FIELDS[0], static::FIELDS[1], static::FIELDS[4], static::TABLE, static::FIELDS[3]);
+        $statement = sprintf("SELECT %s, %s, %s FROM %s WHERE %s = 1 AND deleted = 0 ORDER BY %s",
+            static::FIELDS[0], static::FIELDS[1], static::FIELDS[4], static::TABLE, static::FIELDS[3], static::FIELDS[0]);
         $req = $this->db->query($statement);
         $response = $req->fetchAll(PDO::FETCH_ASSOC);
 

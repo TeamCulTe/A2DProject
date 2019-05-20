@@ -426,8 +426,8 @@ class BookListDbManager extends DbManager
      */
     public function queryUpdateFields()
     {
-        $statement = sprintf("SELECT %s, %s, %s, %s FROM %s",
-            static::FIELDS[0], static::FIELDS[1], static::FIELDS[2], static::FIELDS[3], static::TABLE);
+        $statement = sprintf("SELECT %s, %s, %s, %s FROM %s WHERE deleted = 0 ORDER BY %s",
+            static::FIELDS[0], static::FIELDS[1], static::FIELDS[2], static::FIELDS[3], static::TABLE, static::FIELDS[0]);
         $req = $this->db->query($statement);
         $response = $req->fetchAll(PDO::FETCH_ASSOC);
 

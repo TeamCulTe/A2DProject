@@ -76,7 +76,7 @@ class WriterDbManager extends DbManager
     public function getBookWriters(int $idBook)
     {
         $statement = sprintf("SELECT %s, %s FROM %s WHERE %s = %s AND deleted = 0",
-            static::FIELDS[0], static::FIELDS[2], static::TABLE, static::FIELDS[1],
+            static::FIELDS[0], static::FIELDS[1], static::TABLE, static::FIELDS[1],
             static::PLACEHOLDERS[1]);
         $req = $this->db->prepare($statement);
 
@@ -96,7 +96,7 @@ class WriterDbManager extends DbManager
     public function getWriterBooks(int $idAuthor)
     {
         $statement = sprintf("SELECT %s, %s FROM %s WHERE %s = %s AND deleted = 0",
-            static::FIELDS[1], static::FIELDS[2], static::TABLE, static::FIELDS[0], static::PLACEHOLDERS[0]);
+            static::FIELDS[0], static::FIELDS[1], static::TABLE, static::FIELDS[0], static::PLACEHOLDERS[0]);
         $req = $this->db->prepare($statement);
 
         $req->bindValue(static::PLACEHOLDERS[0], $idAuthor, PDO::PARAM_INT);
@@ -313,8 +313,8 @@ class WriterDbManager extends DbManager
      */
     public function queryUpdateFields()
     {
-        $statement = sprintf("SELECT %s, %s, %s FROM %s WHERE deleted = 0",
-            static::FIELDS[0], static::FIELDS[1], static::FIELDS[2], static::TABLE);
+        $statement = sprintf("SELECT %s, %s, %s FROM %s WHERE deleted = 0 ORDER BY %s",
+            static::FIELDS[0], static::FIELDS[1], static::FIELDS[2], static::TABLE, static::FIELDS[0]);
         $req = $this->db->query($statement);
         $response = $req->fetchAll(PDO::FETCH_ASSOC);
 
