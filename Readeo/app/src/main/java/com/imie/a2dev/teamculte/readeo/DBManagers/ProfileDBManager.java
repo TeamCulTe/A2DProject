@@ -6,30 +6,41 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.HttpHeaderParser;
+import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.StringRequest;
 import com.imie.a2dev.teamculte.readeo.APIManager;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Profile;
-import com.imie.a2dev.teamculte.readeo.HTTPRequestQueueSingleton;
+import com.imie.a2dev.teamculte.readeo.Utils.HTTPRequestQueueSingleton;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.CommonDBSchema.UPDATE;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.ProfileDBSchema.AVATAR;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.ProfileDBSchema.DESCRIPTION;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.ProfileDBSchema.ID;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.ProfileDBSchema.TABLE;
+import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.ERROR_TAG;
+import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.JSON_TAG;
+import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.SQLITE_TAG;
 
 /**
  * Manager class used to manage the profile entities from databases.
  */
-public final class ProfileDBManager extends DBManager {
+public final class ProfileDBManager extends SimpleDBManager {
     /**
      * ProfileDBManager's constructor.
      * @param context The associated context.
@@ -93,21 +104,13 @@ public final class ProfileDBManager extends DBManager {
      * @return The loaded entity if exists else null.
      */
     public Profile loadSQLite(int id) {
-        try {
-            String[] selectArgs = {String.valueOf(id)};
-            String query = String.format(this.SIMPLE_QUERY_ALL, this.table, ID);
-            Cursor result = this.database.rawQuery(query, selectArgs);
+        Cursor result = this.loadCursorSQLite(id);
 
-            if (result.getCount() == 0) {
-                return null;
-            }
-
-            return new Profile(result);
-        } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
-
+        if (result == null || result.getCount() == 0) {
             return null;
         }
+
+        return new Profile(result);
     }
 
     /**
@@ -146,7 +149,7 @@ public final class ProfileDBManager extends DBManager {
      * Creates a profile entity in MySQL database.
      * @param profile The profile to create.
      */
-    public void createMySQL(Profile profile) {
+    public void createMySQL(final Profile profile) {
         String url = this.baseUrl + APIManager.CREATE;
         Map<String, String> param = new HashMap<>();
 
@@ -157,7 +160,40 @@ public final class ProfileDBManager extends DBManager {
         param.put(AVATAR, profile.getAvatar());
         param.put(DESCRIPTION, profile.getDescription());
 
-        super.requestString(Request.Method.POST, url, null, param);
+        StringRequest request = new StringRequest(Request.Method.POST, url, null, null) {
+            @Override
+            protected Map<String, String> getParams() {
+                return param;
+            }
+
+            @Override
+            protected VolleyError parseNetworkError(VolleyError volleyError) {
+                HTTPRequestQueueSingleton.getInstance(ProfileDBManager.this.getContext()).finishRequest(ProfileDBManager.this.table);
+
+                return super.parseNetworkError(volleyError);
+            }
+
+            @Override
+            protected Response<String> parseNetworkResponse(NetworkResponse response) {
+                try {
+                    String resp = new String(response.data, HttpHeaderParser.parseCharset(response.headers));
+                    Pattern pattern = Pattern.compile("^\\d.$");
+
+                    if (pattern.matcher(resp).find()) {
+                        profile.setId(Integer.valueOf(resp));
+                    }
+                } catch (IOException e) {
+                    Log.e(ERROR_TAG, e.getMessage());
+                } finally {
+                    HTTPRequestQueueSingleton.getInstance(ProfileDBManager.this.getContext()).finishRequest(ProfileDBManager.this.table);
+                }
+
+                return super.parseNetworkResponse(response);
+            }
+        };
+
+        HTTPRequestQueueSingleton.getInstance(this.getContext()).addToRequestQueue(this.table, request);
+        this.waitForResponse();
     }
 
     /**
@@ -168,16 +204,35 @@ public final class ProfileDBManager extends DBManager {
     public Profile loadMySQL(int idProfile) {
         final Profile profile = new Profile();
         String url = this.baseUrl + APIManager.READ + ID + "=" + idProfile;
+        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null, null, null) {
+            @Override
+            protected Response<JSONArray> parseNetworkResponse(NetworkResponse response) {
+                try {
+                    JSONArray jsonArray = new JSONArray(new String(response.data,
+                            HttpHeaderParser.parseCharset(response.headers)));
+                    JSONObject object = jsonArray.getJSONObject(0);
 
-        super.requestJsonArray(Request.Method.GET, url,  response -> {
-            try {
-                profile.init(response.getJSONObject(0));
-                HTTPRequestQueueSingleton.getInstance(ProfileDBManager.this.getContext()).finishRequest(this.getClass().getName());
-            } catch (JSONException e) {
-                Log.e(JSON_TAG, e.getMessage());
+                    profile.init(object);
+                } catch (JSONException e) {
+                    Log.e(JSON_TAG, e.getMessage());
+                } catch (IOException e) {
+                    Log.e(ERROR_TAG, e.getMessage());
+                } finally {
+                    HTTPRequestQueueSingleton.getInstance(ProfileDBManager.this.getContext()).finishRequest(ProfileDBManager.this.table);
+                }
+
+                return super.parseNetworkResponse(response);
             }
-        });
 
+            @Override
+            protected VolleyError parseNetworkError(VolleyError volleyError) {
+                HTTPRequestQueueSingleton.getInstance(ProfileDBManager.this.getContext()).finishRequest(ProfileDBManager.this.table);
+
+                return super.parseNetworkError(volleyError);
+            }
+        };
+
+        HTTPRequestQueueSingleton.getInstance(this.getContext()).addToRequestQueue(this.table, request);
         this.waitForResponse();
 
         return (profile.isEmpty()) ? null : profile;
@@ -249,7 +304,7 @@ public final class ProfileDBManager extends DBManager {
     }
 
     @Override
-    protected void createSQLite(@NonNull JSONObject entity) {
+    public void createSQLite(@NonNull JSONObject entity) {
         try {
             ContentValues data = new ContentValues();
 

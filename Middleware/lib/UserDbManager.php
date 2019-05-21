@@ -47,7 +47,7 @@ class UserDbManager extends DbManager
         $req = $this->db->prepare($statement);
 
         $req->bindValue(static::PLACEHOLDERS[1], $pseudo, PDO::PARAM_STR);
-        $req->bindValue(static::PLACEHOLDERS[2], $password, PDO::PARAM_STR);
+        $req->bindValue(static::PLACEHOLDERS[2], password_hash($password, PASSWORD_BCRYPT), PDO::PARAM_STR);
         $req->bindValue(static::PLACEHOLDERS[3], $email, PDO::PARAM_STR);
         $req->bindValue(static::PLACEHOLDERS[4], $idProfile, PDO::PARAM_INT);
         $req->bindValue(static::PLACEHOLDERS[5], $idCity, PDO::PARAM_INT);
@@ -82,7 +82,7 @@ class UserDbManager extends DbManager
 
         $req->bindValue(static::PLACEHOLDERS[0], $id, PDO::PARAM_INT);
         $req->bindValue(static::PLACEHOLDERS[1], $pseudo, PDO::PARAM_STR);
-        $req->bindValue(static::PLACEHOLDERS[2], $password, PDO::PARAM_STR);
+        $req->bindValue(static::PLACEHOLDERS[2], password_hash($password, PASSWORD_BCRYPT), PDO::PARAM_STR);
         $req->bindValue(static::PLACEHOLDERS[3], $email, PDO::PARAM_STR);
         $req->bindValue(static::PLACEHOLDERS[4], $idProfile, PDO::PARAM_INT);
         $req->bindValue(static::PLACEHOLDERS[5], $idCity, PDO::PARAM_INT);
@@ -160,7 +160,7 @@ class UserDbManager extends DbManager
     public function getPublicUserFromPseudo(string $pseudo)
     {
         $statement = sprintf("SELECT %s, %s, %s, %s, %s, %s FROM %s WHERE %s = %s AND deleted = 0",
-            static::FIELDS[0], static::FIELDS[3], static::FIELDS[4], static::FIELDS[5], static::FIELDS[6],
+            static::FIELDS[0], static::FIELDS[1], static::FIELDS[4], static::FIELDS[5], static::FIELDS[6],
             static::FIELDS[7], static::TABLE, static::FIELDS[1], static::PLACEHOLDERS[1]);
         $req = $this->db->prepare($statement);
 
@@ -200,19 +200,23 @@ class UserDbManager extends DbManager
      */
     public function getUserFromAuth(string $email, string $password)
     {
-        $statement = sprintf("SELECT %s, %s, %s, %s, %s, %s, %s, %s FROM %s WHERE %s = %s AND %s =%s AND deleted = 0",
-            static::FIELDS[0], static::FIELDS[1], static::FIELDS[2], static::FIELDS[3], static::FIELDS[4],
-            static::FIELDS[5], static::FIELDS[6], static::FIELDS[7], static::TABLE, static::FIELDS[3],
-            static::PLACEHOLDERS[3], static::FIELDS[2], static::PLACEHOLDERS[2]);
-        $req = $this->db->prepare($statement);
+        if (password_verify($password, $this->getUserPassword($email)))
+        {
+            $statement = sprintf("SELECT %s, %s, %s, %s, %s, %s, %s, %s FROM %s WHERE %s = %s AND deleted = 0",
+                static::FIELDS[0], static::FIELDS[1], static::FIELDS[2], static::FIELDS[3], static::FIELDS[4],
+                static::FIELDS[5], static::FIELDS[6], static::FIELDS[7], static::TABLE, static::FIELDS[3],
+                static::PLACEHOLDERS[3]);
+            $req = $this->db->prepare($statement);
 
-        $req->bindValue(static::PLACEHOLDERS[3], $email, PDO::PARAM_STR);
-        $req->bindValue(static::PLACEHOLDERS[2], $password, PDO::PARAM_STR);
-        $req->execute();
+            $req->bindValue(static::PLACEHOLDERS[3], $email, PDO::PARAM_STR);
+            $req->execute();
 
-        $response = $req->fetchAll(PDO::FETCH_ASSOC);
+            $response = $req->fetchAll(PDO::FETCH_ASSOC);
 
-        return (!empty($response)) ? json_encode($response) : null;
+            return (!empty($response)) ? json_encode($response) : null;
+        }
+
+        return null;
     }
 
     /**
@@ -257,7 +261,7 @@ class UserDbManager extends DbManager
 
         $req->bindValue(static::PLACEHOLDERS[0], $id, PDO::PARAM_INT);
         $req->bindValue(static::PLACEHOLDERS[1], $pseudo, PDO::PARAM_STR);
-        $req->bindValue(static::PLACEHOLDERS[2], $password, PDO::PARAM_STR);
+        $req->bindValue(static::PLACEHOLDERS[2], password_hash($password, PASSWORD_BCRYPT), PDO::PARAM_STR);
         $req->bindValue(static::PLACEHOLDERS[3], $email, PDO::PARAM_STR);
         $req->bindValue(static::PLACEHOLDERS[4], $idProfile, PDO::PARAM_INT);
         $req->bindValue(static::PLACEHOLDERS[5], $idCity, PDO::PARAM_INT);
@@ -299,7 +303,7 @@ class UserDbManager extends DbManager
         $req = $this->db->prepare($statement);
 
         $req->bindValue(static::PLACEHOLDERS[0], $id, PDO::PARAM_INT);
-        $req->bindValue(static::PLACEHOLDERS[2], $password, PDO::PARAM_STR);
+        $req->bindValue(static::PLACEHOLDERS[2], password_hash($password, PASSWORD_BCRYPT), PDO::PARAM_STR);
 
         return $req->execute();
     }
@@ -385,14 +389,18 @@ class UserDbManager extends DbManager
      */
     public function softDeleteFromAuth(string $email, string $password)
     {
-        $statement = sprintf("UPDATE %s SET deleted = 1, %s = CURRENT_TIMESTAMP WHERE %s = %s AND %s = %s",
-            static::TABLE, static::FIELDS[7], static::FIELDS[2], static::PLACEHOLDERS[2], static::FIELDS[3], static::PLACEHOLDERS[3]);
-        $req = $this->db->prepare($statement);
+        if (password_verify($password, $this->getUserPassword($email)))
+        {
+            $statement = sprintf("UPDATE %s SET deleted = 1, %s = CURRENT_TIMESTAMP WHERE %s = %s",
+                static::TABLE, static::FIELDS[7], static::FIELDS[3], static::PLACEHOLDERS[3]);
+            $req = $this->db->prepare($statement);
 
-        $req->bindValue(static::PLACEHOLDERS[3], $email, PDO::PARAM_STR);
-        $req->bindValue(static::PLACEHOLDERS[2], $password, PDO::PARAM_STR);
+            $req->bindValue(static::PLACEHOLDERS[3], $email, PDO::PARAM_STR);
 
-        return $req->execute();
+            return $req->execute();
+        }
+
+        return false;
     }
 
     /**
@@ -419,15 +427,17 @@ class UserDbManager extends DbManager
      */
     public function restoreSoftDeletedFromAuth(string $email, string $password)
     {
-        $statement = sprintf("UPDATE %s SET deleted = 0, %s = CURRENT_TIMESTAMP WHERE %s = %s AND %s = %s",
-            static::TABLE, static::FIELDS[7], static::FIELDS[2], static::PLACEHOLDERS[2], static::FIELDS[3],
-            static::PLACEHOLDERS[3]);
-        $req = $this->db->prepare($statement);
+        if (password_verify($password, $this->getUserPassword($email))) {
+            $statement = sprintf("UPDATE %s SET deleted = 0, %s = CURRENT_TIMESTAMP WHERE %s = %s",
+                static::TABLE, static::FIELDS[7], static::FIELDS[3], static::PLACEHOLDERS[3]);
+            $req = $this->db->prepare($statement);
 
-        $req->bindValue(static::PLACEHOLDERS[3], $email, PDO::PARAM_STR);
-        $req->bindValue(static::PLACEHOLDERS[2], $password, PDO::PARAM_STR);
+            $req->bindValue(static::PLACEHOLDERS[3], $email, PDO::PARAM_STR);
 
-        return $req->execute();
+            return $req->execute();
+        }
+
+        return false;
     }
 
     /**
@@ -454,14 +464,17 @@ class UserDbManager extends DbManager
      */
     public function deleteFromAuth(string $email, string $password)
     {
-        $statement = sprintf("DELETE FROM %s WHERE %s = %s AND %s = %s",
-            static::TABLE, static::FIELDS[2], static::PLACEHOLDERS[2], static::FIELDS[3], static::PLACEHOLDERS[3]);
-        $req = $this->db->prepare($statement);
+        if (password_verify($password, $this->getUserPassword($email))) {
+            $statement = sprintf("DELETE FROM %s WHERE %s = %s AND %s = %s",
+                static::TABLE, static::FIELDS[3], static::PLACEHOLDERS[3]);
+            $req = $this->db->prepare($statement);
 
-        $req->bindValue(static::PLACEHOLDERS[3], $email, PDO::PARAM_STR);
-        $req->bindValue(static::PLACEHOLDERS[2], $password, PDO::PARAM_STR);
+            $req->bindValue(static::PLACEHOLDERS[3], $email, PDO::PARAM_STR);
 
-        return $req->execute();
+            return $req->execute();
+        }
+
+        return false;
     }
 
     /**
@@ -597,8 +610,8 @@ class UserDbManager extends DbManager
      */
     public function queryUpdateFields()
     {
-        $statement = sprintf("SELECT %s, %s FROM %s WHERE deleted = 0",
-            static::FIELDS[0], static::FIELDS[7], static::TABLE);
+        $statement = sprintf("SELECT %s, %s FROM %s WHERE deleted = 0 ORDER BY %s",
+            static::FIELDS[0], static::FIELDS[7], static::TABLE, static::FIELDS[0]);
         $req = $this->db->query($statement);
         $response = $req->fetchAll(PDO::FETCH_ASSOC);
 
@@ -612,5 +625,23 @@ class UserDbManager extends DbManager
         $statement = sprintf("DELETE FROM %s WHERE %s < 0", static::TABLE, static::FIELDS[0]);
 
         $this->db->exec($statement);
+    }
+
+    /**
+     * From an email, gets the associated hashed password in the db.
+     * @param string $email The user's email.
+     * @return null|string if not match returns null else, the password.
+     */
+    public function getUserPassword(string $email) {
+        $statement = sprintf("SELECT %s FROM %s WHERE %s = %s", static::FIELDS[2], static::TABLE, static::FIELDS[3],
+            static::PLACEHOLDERS[3]);
+        $req = $this->db->prepare($statement);
+
+        $req->bindValue(static::PLACEHOLDERS[3], $email, PDO::PARAM_STR);
+        $req->execute();
+
+        $response = $req->fetchAll(PDO::FETCH_ASSOC);
+
+        return (!empty($response)) ? $response[0][static::FIELDS[2]] : null;
     }
 }

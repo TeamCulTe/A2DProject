@@ -15,7 +15,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-public class CountryDBManagerTest extends CommonDBManagerTest {
+public final class CountryDBManagerTest extends CommonDBManagerTest {
     /**
      * Stores the default name given for tests.
      */
@@ -127,9 +127,20 @@ public class CountryDBManagerTest extends CommonDBManagerTest {
     }
 
     @Test
-    public void testLoadMySQL() {
+    public void testIdLoadMySQL() {
         Country created = this.initTestEntityMySQL();
         Country loaded = this.manager.loadMySQL(created.getId());
+
+        assertNotNull(created);
+        assertNotNull(loaded);
+        assertEquals(created.getId(), loaded.getId());
+        assertEquals(created.getName(), loaded.getName());
+    }
+
+    @Test
+    public void testNameLoadMySQL() {
+        Country created = this.initTestEntityMySQL();
+        Country loaded = this.manager.loadMySQL(created.getName());
 
         assertNotNull(created);
         assertNotNull(loaded);
@@ -187,7 +198,6 @@ public class CountryDBManagerTest extends CommonDBManagerTest {
         this.testedMySQL = true;
 
         this.manager.createMySQL(new Country(id, name));
-        this.manager.waitForResponse();
 
         return this.manager.loadMySQL(id);
     }

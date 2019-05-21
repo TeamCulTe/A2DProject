@@ -11,19 +11,65 @@
         android:label="@string/app_name"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
+        android:largeHeap="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true">
-        <activity android:name=".Views.ReadingListActivity"></activity>
+        
+        <activity android:name=".Views.ReadingListActivity" />
         <activity android:name=".Views.AccountActivity" />
         <activity android:name=".Views.IndexActivity" />
-        <activity android:name=".Views.SplashScreenActivity" />
-        <activity android:name=".Views.MainActivity">
+        <activity android:name=".Views.SplashScreenActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity android:name=".Views.MainActivity" />
+
+        <provider
+            android:name=".Providers.AuthorContentProvider"
+            android:authorities="com.imie.a2dev.teamculte.readeo.providers"
+            android:exported="true"/>
+        <provider
+            android:name=".Providers.BookContentProvider"
+            android:authorities="com.imie.a2dev.teamculte.readeo.providers"
+            android:exported="true"/>
+        <provider
+            android:name=".Providers.BookListTypeContentProvider"
+            android:authorities="com.imie.a2dev.teamculte.readeo.providers"
+            android:exported="true"/>
+        <provider
+            android:name=".Providers.CategoryContentProvider"
+            android:authorities="com.imie.a2dev.teamculte.readeo.providers"
+            android:exported="true"/>
+        <provider
+            android:name=".Providers.CityContentProvider"
+            android:authorities="com.imie.a2dev.teamculte.readeo.providers"
+            android:exported="true"/>
+        <provider
+            android:name=".Providers.CountryContentProvider"
+            android:authorities="com.imie.a2dev.teamculte.readeo.providers"
+            android:exported="true"/>
+        <provider
+            android:name=".Providers.ProfileContentProvider"
+            android:authorities="com.imie.a2dev.teamculte.readeo.providers"
+            android:exported="true"/>
+        <provider
+            android:name=".Providers.QuoteContentProvider"
+            android:authorities="com.imie.a2dev.teamculte.readeo.providers"
+            android:exported="true"/>
+        <provider
+            android:name=".Providers.ReviewContentProvider"
+            android:authorities="com.imie.a2dev.teamculte.readeo.providers"
+            android:exported="true"/>
+        <provider
+            android:name=".Providers.UserContentProvider"
+            android:authorities="com.imie.a2dev.teamculte.readeo.providers"
+            android:exported="true"/>
+        <provider
+            android:name=".Providers.WriterContentProvider"
+            android:authorities="com.imie.a2dev.teamculte.readeo.providers"
+            android:exported="true"/>
     </application>
 
 </manifest>

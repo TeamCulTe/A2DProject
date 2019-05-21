@@ -12,11 +12,10 @@ import static com.imie.a2dev.teamculte.readeo.DBManagers.DBManager.MYSQL_TEST_ID
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.CategoryDBSchema.ID;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.CategoryDBSchema.NAME;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
-public class CategoryDBManagerTest extends CommonDBManagerTest {
+public final class CategoryDBManagerTest extends CommonDBManagerTest {
     /**
      * Stores the default name given for tests.
      */
@@ -188,7 +187,6 @@ public class CategoryDBManagerTest extends CommonDBManagerTest {
         this.testedMySQL = true;
 
         this.manager.createMySQL(new Category(id, name));
-        this.manager.waitForResponse();
 
         return this.manager.loadMySQL(id);
     }

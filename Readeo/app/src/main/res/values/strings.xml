@@ -1,8 +1,5 @@
 <resources>
     <string name="app_name">Readeo</string>
-
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="mail_address">Mail address</string>
     <string name="password">Password</string>
     <string name="password_forgotten">Password forgotten ?</string>
@@ -24,4 +21,11 @@
     <string name="edit_a_review">Edit a review</string>
     <string name="edit_a_quote">Edit a quote</string>
     <string name="profile_s_description">Profile\'s description</string>
+    <string name="don_t_have_an_account_yet">Don\'t have an account yet ?</string>
+    <string name="log_in">Log in</string>
+    <string name="save_changes">Save changes</string>
+    <string name="change_password">Change password</string>
+    <string name="delete_account">Delete account ?</string>
+    <string name="updating">Updating...</string>
+    <string name="update_progress">%d out of %d</string>
 </resources>

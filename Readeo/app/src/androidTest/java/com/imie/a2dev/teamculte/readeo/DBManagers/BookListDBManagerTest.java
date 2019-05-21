@@ -16,7 +16,7 @@ import java.util.Map;
 import static com.imie.a2dev.teamculte.readeo.DBManagers.DBManager.MYSQL_TEST_ID;
 import static org.junit.Assert.*;
 
-public class BookListDBManagerTest extends CommonDBManagerTest {
+public final class BookListDBManagerTest extends CommonDBManagerTest {
     /**
      * Defines the default number of books for each types.
      */
@@ -47,7 +47,6 @@ public class BookListDBManagerTest extends CommonDBManagerTest {
             this.testedMySQL = false;
         }
     }
-
 
     @Test
     public void testCreateEntityMySQL() {

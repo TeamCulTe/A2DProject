@@ -17,7 +17,7 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 
-public class ProfileDBManagerTest extends CommonDBManagerTest {
+public final class ProfileDBManagerTest extends CommonDBManagerTest {
     /**
      * Stores the default avatar given for tests.
      */
@@ -286,7 +286,6 @@ public class ProfileDBManagerTest extends CommonDBManagerTest {
         this.testedMySQL = true;
 
         this.manager.createMySQL(new Profile(id, avatar, description));
-        this.manager.waitForResponse();
 
         return this.manager.loadMySQL(id);
     }

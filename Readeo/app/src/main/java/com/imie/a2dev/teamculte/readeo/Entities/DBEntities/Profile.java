@@ -1,5 +1,6 @@
 package com.imie.a2dev.teamculte.readeo.Entities.DBEntities;
 
+import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
@@ -11,6 +12,9 @@ import lombok.Setter;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.JSON_TAG;
+import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.SQLITE_TAG;
+
 /**
  * Final class representing the profile of an user with its related information.
  */
@@ -20,12 +24,12 @@ public final class Profile extends DBEntity {
     /**
      * Stores the path of the user's avatar displayed on his profile.
      */
-    private String avatar;
+    private String avatar = "";
 
     /**
      * Stores the description written by the user for his profile.
      */
-    private String description;
+    private String description = "";
 
     /**
      * Profile's default constructor.
@@ -86,6 +90,24 @@ public final class Profile extends DBEntity {
     }
 
     /**
+     * Profile's full filled constructor providing all its attributes values from a ContentValues object.
+     * @param contentValues The ContentValues object used to initialize the entity.
+     */
+    public Profile(ContentValues contentValues) {
+        this.init(contentValues);
+    }
+
+    /**
+     * Initializes the profile from a ContentValues object.
+     * @param contentValues The ContentValues object.
+     */
+    public void init(@NonNull ContentValues contentValues) {
+        this.id = contentValues.getAsInteger(ProfileDBSchema.ID);
+        this.avatar = contentValues.getAsString(ProfileDBSchema.AVATAR);
+        this.description = contentValues.getAsString(ProfileDBSchema.DESCRIPTION);
+    }
+
+    /**
      * Initializes the profile from a JSON response object.
      * @param object The JSON response from the API.
      */
@@ -95,7 +117,7 @@ public final class Profile extends DBEntity {
             this.avatar = object.getString(ProfileDBSchema.AVATAR);
             this.description = object.getString(ProfileDBSchema.DESCRIPTION);
         } catch (JSONException e) {
-            Log.e(DBManager.JSON_TAG, e.getMessage());
+            Log.e(JSON_TAG, e.getMessage());
         }
     }
 
@@ -114,7 +136,7 @@ public final class Profile extends DBEntity {
                 result.close();
             }
         } catch (SQLiteException e) {
-            Log.e(DBManager.SQLITE_TAG, e.getMessage());
+            Log.e(SQLITE_TAG, e.getMessage());
         }
     }
 }

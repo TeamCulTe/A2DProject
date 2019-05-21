@@ -6,18 +6,27 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.HttpHeaderParser;
+import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.StringRequest;
 import com.imie.a2dev.teamculte.readeo.APIManager;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Quote;
-import com.imie.a2dev.teamculte.readeo.HTTPRequestQueueSingleton;
+import com.imie.a2dev.teamculte.readeo.Utils.HTTPRequestQueueSingleton;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.CommonDBSchema.UPDATE;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.QuoteDBSchema.BOOK;
@@ -25,11 +34,14 @@ import static com.imie.a2dev.teamculte.readeo.DBSchemas.QuoteDBSchema.ID;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.QuoteDBSchema.QUOTE;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.QuoteDBSchema.TABLE;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.QuoteDBSchema.USER;
+import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.ERROR_TAG;
+import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.JSON_TAG;
+import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.SQLITE_TAG;
 
 /**
  * Manager class used to manage the quote entities from databases.
  */
-public final class QuoteDBManager extends DBManager {
+public final class QuoteDBManager extends SimpleDBManager {
     /**
      * QuoteDBManager's constructor.
      * @param context The associated context.
@@ -86,28 +98,20 @@ public final class QuoteDBManager extends DBManager {
             return false;
         }
     }
-
+    
     /**
      * From an id, returns the associated java entity.
      * @param id The id of entity to load from the database.
      * @return The loaded entity if exists else null.
      */
     public Quote loadSQLite(int id) {
-        try {
-            String[] selectArgs = {String.valueOf(id)};
-            String query = String.format(this.SIMPLE_QUERY_ALL, this.table, ID);
-            Cursor result = this.database.rawQuery(query, selectArgs);
+        Cursor result = this.loadCursorSQLite(id);
 
-            if (result.getCount() == 0) {
-                return null;
-            }
-
-            return new Quote(result);
-        } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
-
+        if (result == null || result.getCount() == 0) {
             return null;
         }
+
+        return new Quote(result);
     }
 
     /**
@@ -245,7 +249,7 @@ public final class QuoteDBManager extends DBManager {
      * Creates a quote entity in MySQL database.
      * @param quote The quote to create.
      */
-    public void createMySQL(Quote quote) {
+    public void createMySQL(final Quote quote) {
         String url = this.baseUrl + APIManager.CREATE;
         Map<String, String> param = new HashMap<>();
 
@@ -258,7 +262,40 @@ public final class QuoteDBManager extends DBManager {
         param.put(BOOK, String.valueOf(quote.getBookId()));
         param.put(QUOTE, quote.getQuote());
 
-        super.requestString(Request.Method.POST, url, null, param);
+        StringRequest request = new StringRequest(Request.Method.POST, url, null, null) {
+            @Override
+            protected Map<String, String> getParams() {
+                return param;
+            }
+
+            @Override
+            protected VolleyError parseNetworkError(VolleyError volleyError) {
+                HTTPRequestQueueSingleton.getInstance(QuoteDBManager.this.getContext()).finishRequest(QuoteDBManager.this.table);
+
+                return super.parseNetworkError(volleyError);
+            }
+
+            @Override
+            protected Response<String> parseNetworkResponse(NetworkResponse response) {
+                try {
+                    String resp = new String(response.data, HttpHeaderParser.parseCharset(response.headers));
+                    Pattern pattern = Pattern.compile("^\\d.$");
+
+                    if (pattern.matcher(resp).find()) {
+                        quote.setId(Integer.valueOf(resp));
+                    }
+                } catch (IOException e) {
+                    Log.e(ERROR_TAG, e.getMessage());
+                } finally {
+                    HTTPRequestQueueSingleton.getInstance(QuoteDBManager.this.getContext()).finishRequest(QuoteDBManager.this.table);
+                }
+
+                return super.parseNetworkResponse(response);
+            }
+        };
+
+        HTTPRequestQueueSingleton.getInstance(this.getContext()).addToRequestQueue(this.table, request);
+        this.waitForResponse();
     }
 
     /**
@@ -268,20 +305,36 @@ public final class QuoteDBManager extends DBManager {
      */
     public Quote loadMySQL(int idQuote) {
         final Quote quote = new Quote();
-        final int idUser[] = new int[1];
-        final int idBook[] = new int[1];
-
         String url = this.baseUrl + APIManager.READ + ID + "=" + idQuote;
+        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null, null, null) {
+            @Override
+            protected Response<JSONArray> parseNetworkResponse(NetworkResponse response) {
+                try {
+                    JSONArray jsonArray = new JSONArray(new String(response.data,
+                            HttpHeaderParser.parseCharset(response.headers)));
+                    JSONObject object = jsonArray.getJSONObject(0);
 
-        super.requestJsonArray(Request.Method.GET, url,  response -> {
-            try {
-                quote.init(response.getJSONObject(0));
-                HTTPRequestQueueSingleton.getInstance(QuoteDBManager.this.getContext()).finishRequest(this.getClass().getName());
-            } catch (JSONException e) {
-                Log.e(JSON_TAG, e.getMessage());
+                    quote.init(object);
+                } catch (JSONException e) {
+                    Log.e(JSON_TAG, e.getMessage());
+                } catch (IOException e) {
+                    Log.e(ERROR_TAG, e.getMessage());
+                } finally {
+                    HTTPRequestQueueSingleton.getInstance(QuoteDBManager.this.getContext()).finishRequest(QuoteDBManager.this.table);
+                }
+
+                return super.parseNetworkResponse(response);
             }
-        });
 
+            @Override
+            protected VolleyError parseNetworkError(VolleyError volleyError) {
+                HTTPRequestQueueSingleton.getInstance(QuoteDBManager.this.getContext()).finishRequest(QuoteDBManager.this.table);
+
+                return super.parseNetworkError(volleyError);
+            }
+        };
+
+        HTTPRequestQueueSingleton.getInstance(this.getContext()).addToRequestQueue(this.table, request);
         this.waitForResponse();
 
         return (quote.isEmpty()) ? null : quote;
@@ -359,7 +412,7 @@ public final class QuoteDBManager extends DBManager {
     }
 
     @Override
-    protected void createSQLite(@NonNull JSONObject entity) {
+    public void createSQLite(@NonNull JSONObject entity) {
         try {
             ContentValues data = new ContentValues();
 

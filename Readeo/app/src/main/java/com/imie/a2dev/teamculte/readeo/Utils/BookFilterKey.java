@@ -1,4 +1,4 @@
-package com.imie.a2dev.teamculte.readeo;
+package com.imie.a2dev.teamculte.readeo.Utils;
 
 import com.imie.a2dev.teamculte.readeo.DBSchemas.AuthorDBSchema;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.BookDBSchema;

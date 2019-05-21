@@ -15,7 +15,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-public class AuthorDBManagerTest extends CommonDBManagerTest {
+public final class AuthorDBManagerTest extends CommonDBManagerTest {
     /**
      * Stores the default name given for tests.
      */
@@ -174,11 +174,6 @@ public class AuthorDBManagerTest extends CommonDBManagerTest {
         // TODO: See how to test it (latency).
     }
 
-    @Test
-    public void testGetUpdateFromMySQL() {
-        // TODO: See how to test it (latency).
-    }
-
     /**
      * Creates a test author into the database for testing.
      * @param id The id of the author to create.
@@ -189,7 +184,6 @@ public class AuthorDBManagerTest extends CommonDBManagerTest {
         this.testedMySQL = true;
 
         this.manager.createMySQL(new Author(id, name));
-        this.manager.waitForResponse();
 
         return this.manager.loadMySQL(id);
     }

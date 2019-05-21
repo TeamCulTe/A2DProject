@@ -1,5 +1,6 @@
 package com.imie.a2dev.teamculte.readeo.Entities.DBEntities;
 
+import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
@@ -10,6 +11,8 @@ import com.imie.a2dev.teamculte.readeo.DBManagers.ProfileDBManager;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.UserDBSchema;
 import lombok.Getter;
 import lombok.Setter;
+
+import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.SQLITE_TAG;
 
 /**
  * Final class representing a public user of the application (without personal data, book lists and
@@ -77,6 +80,25 @@ public class PublicUser extends DBEntity {
         this.init(result, close);
     }
 
+    /**
+     * PublicUser's full filled constructor providing all its attributes values from a ContentValues object.
+     * @param contentValues The ContentValues object used to initialize the entity.
+     */
+    public PublicUser(ContentValues contentValues) {
+        this.init(contentValues);
+    }
+
+    /**
+     * Initializes the user from a ContentValues object.
+     * @param contentValues The ContentValues object.
+     */
+    public void init(@NonNull ContentValues contentValues) {
+        this.id = contentValues.getAsInteger(UserDBSchema.ID);
+        this.pseudo = contentValues.getAsString(UserDBSchema.PSEUDO);
+        this.profile =
+                new ProfileDBManager(App.getAppContext()).loadSQLite(contentValues.getAsInteger(UserDBSchema.PROFILE));
+    }
+
     @Override
     protected void init(@NonNull Cursor result, boolean close) {
         try {
@@ -93,7 +115,7 @@ public class PublicUser extends DBEntity {
                 result.close();
             }
         } catch (SQLiteException e) {
-            Log.e(DBManager.SQLITE_TAG, e.getMessage());
+            Log.e(SQLITE_TAG, e.getMessage());
         }
     }
 }

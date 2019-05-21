@@ -17,6 +17,8 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.JSON_TAG;
+
 /**
  * Final class representing a book list from a specific user.
  */
@@ -101,7 +103,7 @@ public final class BookList extends DBEntity {
             this.id = first.getInt(BookListDBSchema.USER);
             this.type = new BookListTypeDBManager(App.getAppContext()).loadSQLite(first.getInt(BookListDBSchema.TYPE));
         } catch (JSONException e) {
-            Log.e(DBManager.JSON_TAG, e.getMessage());
+            Log.e(JSON_TAG, e.getMessage());
         }
     }
 }

@@ -6,21 +6,31 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import com.android.volley.AuthFailureError;
+import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.HttpHeaderParser;
+import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.StringRequest;
 import com.imie.a2dev.teamculte.readeo.APIManager;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.AuthorDBSchema;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.CategoryDBSchema;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.WriterDBSchema;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Book;
-import com.imie.a2dev.teamculte.readeo.HTTPRequestQueueSingleton;
+import com.imie.a2dev.teamculte.readeo.Utils.HTTPRequestQueueSingleton;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookDBSchema.ID;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookDBSchema.TABLE;
@@ -30,11 +40,14 @@ import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookDBSchema.COVER;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookDBSchema.SUMMARY;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookDBSchema.DATE;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.CommonDBSchema.UPDATE;
+import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.ERROR_TAG;
+import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.JSON_TAG;
+import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.SQLITE_TAG;
 
 /**
  * Manager class used to manage the book entities from databases.
  */
-public final class BookDBManager extends DBManager {
+public final class BookDBManager extends SimpleDBManager {
     /**
      * BookDBManager's constructor.
      * @param context The associated context.
@@ -105,21 +118,13 @@ public final class BookDBManager extends DBManager {
      * @return The loaded entity if exists else null.
      */
     public Book loadSQLite(int id) {
-        try {
-            String[] selectArgs = {String.valueOf(id)};
-            String query = String.format(this.SIMPLE_QUERY_ALL, this.table, ID);
-            Cursor result = this.database.rawQuery(query, selectArgs);
+        Cursor result = this.loadCursorSQLite(id);
 
-            if (result.getCount() == 0) {
-                return null;
-            }
-
-            return new Book(result);
-        } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
-
+        if (result == null || result.getCount() == 0) {
             return null;
         }
+
+        return new Book(result);
     }
 
     /**
@@ -305,7 +310,7 @@ public final class BookDBManager extends DBManager {
      * Creates a book entity in MySQL database.
      * @param book The book to create.
      */
-    public void createMySQL(Book book) {
+    public void createMySQL(final Book book) {
         String url = this.baseUrl + APIManager.CREATE;
         Map<String, String> param = new HashMap<>();
 
@@ -319,7 +324,40 @@ public final class BookDBManager extends DBManager {
         param.put(SUMMARY, book.getSummary());
         param.put(DATE, String.valueOf(book.getDatePublished()));
 
-        super.requestString(Request.Method.POST, url, null, param);
+        StringRequest request = new StringRequest(Request.Method.POST, url, null, null) {
+            @Override
+            protected Map<String, String> getParams() {
+                return param;
+            }
+
+            @Override
+            protected VolleyError parseNetworkError(VolleyError volleyError) {
+                HTTPRequestQueueSingleton.getInstance(BookDBManager.this.getContext()).finishRequest(BookDBManager.this.table);
+
+                return super.parseNetworkError(volleyError);
+            }
+
+            @Override
+            protected Response<String> parseNetworkResponse(NetworkResponse response) {
+                try {
+                    String resp = new String(response.data, HttpHeaderParser.parseCharset(response.headers));
+                    Pattern pattern = Pattern.compile("^\\d.$");
+
+                    if (pattern.matcher(resp).find()) {
+                        book.setId(Integer.valueOf(resp));
+                    }
+                } catch (IOException e) {
+                    Log.e(ERROR_TAG, e.getMessage());
+                } finally {
+                    HTTPRequestQueueSingleton.getInstance(BookDBManager.this.getContext()).finishRequest(BookDBManager.this.table);
+                }
+
+                return super.parseNetworkResponse(response);
+            }
+        };
+
+        HTTPRequestQueueSingleton.getInstance(this.getContext()).addToRequestQueue(this.table, request);
+        this.waitForResponse();
     }
 
     /**
@@ -332,27 +370,46 @@ public final class BookDBManager extends DBManager {
         final int idCategory[] = new int[1];
 
         String url = this.baseUrl + APIManager.READ + ID + "=" + idBook;
+        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null, null, null) {
+            @Override
+            protected Response<JSONArray> parseNetworkResponse(NetworkResponse response) {
+                try {
+                    JSONArray jsonArray = new JSONArray(new String(response.data,
+                            HttpHeaderParser.parseCharset(response.headers)));
+                    JSONObject object = jsonArray.getJSONObject(0);
+                    
+                    idCategory[0] = object.getInt(CATEGORY);
+                    
+                    book.init(object);
+                } catch (JSONException e) {
+                    Log.e(JSON_TAG, e.getMessage());
+                } catch (IOException e) {
+                    Log.e(ERROR_TAG, e.getMessage());
+                } finally {
+                    HTTPRequestQueueSingleton.getInstance(BookDBManager.this.getContext()).finishRequest(BookDBManager.this.table);
+                }
 
-        super.requestJsonArray(Request.Method.GET, url,  response -> {
-            try {
-                JSONObject object = response.getJSONObject(0);
-                idCategory[0] = object.getInt(CATEGORY);
-
-                book.init(object);
-                HTTPRequestQueueSingleton.getInstance(BookDBManager.this.getContext()).finishRequest(this.getClass().getName());
-            } catch (JSONException e) {
-                Log.e(JSON_TAG, e.getMessage());
+                return super.parseNetworkResponse(response);
             }
-        });
 
+            @Override
+            protected VolleyError parseNetworkError(VolleyError volleyError) {
+                HTTPRequestQueueSingleton.getInstance(BookDBManager.this.getContext()).finishRequest(BookDBManager.this.table);
+
+                return super.parseNetworkError(volleyError);
+            }
+        };
+
+        HTTPRequestQueueSingleton.getInstance(this.getContext()).addToRequestQueue(this.table, request);
         this.waitForResponse();
+        
         book.setCategory(new CategoryDBManager(this.getContext()).loadMySQL(idCategory[0]));
 
         return (book.isEmpty()) ? null : book;
     }
 
     @Override
-    protected void createSQLite(@NonNull JSONObject entity) {
+    public void createSQLite(@NonNull JSONObject entity) {
         try {
             ContentValues data = new ContentValues();
 

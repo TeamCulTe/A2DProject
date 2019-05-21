@@ -47,9 +47,8 @@
         android:inputType="textEmailAddress"
         android:singleLine="true"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/edit_pseudo" />
+        app:layout_constraintTop_toBottomOf="@+id/txt_pseudo_error_message" />
 
     <EditText
         android:id="@+id/edit_password"
@@ -63,7 +62,7 @@
         android:inputType="textPassword"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/edit_email" />
+        app:layout_constraintTop_toBottomOf="@+id/txt_email_error_message" />
 
     <EditText
         android:id="@+id/edit_confirm"
@@ -77,7 +76,7 @@
         android:inputType="textPassword"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/edit_password" />
+        app:layout_constraintTop_toBottomOf="@+id/txt_password_error_message" />
 
     <Button
         android:id="@+id/btn_sign_in"
@@ -93,7 +92,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/edit_city" />
+        app:layout_constraintTop_toBottomOf="@+id/txt_city_error_message" />
 
     <Spinner
         android:id="@+id/spinner_country"
@@ -101,8 +100,9 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         app:layout_constraintEnd_toEndOf="@+id/edit_confirm"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="@+id/edit_confirm"
-        app:layout_constraintTop_toBottomOf="@+id/edit_confirm" />
+        app:layout_constraintTop_toBottomOf="@+id/txt_confirm_error_message" />
 
     <EditText
         android:id="@+id/edit_city"
@@ -117,4 +117,60 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/spinner_country" />
+
+    <TextView
+        android:id="@+id/txt_pseudo_error_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:textColor="@color/colorAccent"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="@+id/edit_pseudo"
+        app:layout_constraintStart_toStartOf="@+id/edit_pseudo"
+        app:layout_constraintTop_toBottomOf="@+id/edit_pseudo" />
+
+    <TextView
+        android:id="@+id/txt_email_error_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:textColor="@color/colorAccent"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="@+id/edit_email"
+        app:layout_constraintStart_toStartOf="@+id/edit_email"
+        app:layout_constraintTop_toBottomOf="@+id/edit_email" />
+
+    <TextView
+        android:id="@+id/txt_password_error_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:textColor="@color/colorAccent"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="@+id/edit_password"
+        app:layout_constraintStart_toStartOf="@+id/edit_password"
+        app:layout_constraintTop_toBottomOf="@+id/edit_password" />
+
+    <TextView
+        android:id="@+id/txt_confirm_error_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:textColor="@color/colorAccent"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="@+id/edit_confirm"
+        app:layout_constraintStart_toStartOf="@+id/edit_confirm"
+        app:layout_constraintTop_toBottomOf="@+id/edit_confirm" />
+
+    <TextView
+        android:id="@+id/txt_city_error_message"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:textColor="@color/colorAccent"
+        android:visibility="gone"
+        app:layout_constraintEnd_toEndOf="@+id/edit_city"
+        app:layout_constraintStart_toStartOf="@+id/edit_city"
+        app:layout_constraintTop_toBottomOf="@+id/edit_city" />
+
 </android.support.constraint.ConstraintLayout>

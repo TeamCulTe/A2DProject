@@ -263,8 +263,8 @@ class CityDbManager extends DbManager
      */
     public function queryUpdateFields()
     {
-        $statement = sprintf("SELECT %s, %s FROM %s WHERE deleted = 0",
-            static::FIELDS[0], static::FIELDS[2], static::TABLE);
+        $statement = sprintf("SELECT %s, %s FROM %s WHERE deleted = 0 ORDER BY %s",
+            static::FIELDS[0], static::FIELDS[2], static::TABLE, static::FIELDS[0]);
         $req = $this->db->query($statement);
         $response = $req->fetchAll(PDO::FETCH_ASSOC);
 

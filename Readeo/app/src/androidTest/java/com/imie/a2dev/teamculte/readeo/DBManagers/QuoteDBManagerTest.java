@@ -19,13 +19,10 @@ import org.junit.Test;
 import java.util.List;
 
 import static com.imie.a2dev.teamculte.readeo.DBManagers.DBManager.MYSQL_TEST_ID;
-import static com.imie.a2dev.teamculte.readeo.DBSchemas.QuoteDBSchema.BOOK;
-import static com.imie.a2dev.teamculte.readeo.DBSchemas.QuoteDBSchema.USER;
-import static com.imie.a2dev.teamculte.readeo.DBSchemas.QuoteDBSchema.ID;
-import static com.imie.a2dev.teamculte.readeo.DBSchemas.QuoteDBSchema.QUOTE;
+import static com.imie.a2dev.teamculte.readeo.DBSchemas.QuoteDBSchema.*;
 import static org.junit.Assert.*;
 
-public class QuoteDBManagerTest extends CommonDBManagerTest {
+public final class QuoteDBManagerTest extends CommonDBManagerTest {
     /**
      * Stores the default associated user given for tests.
      */
@@ -441,7 +438,6 @@ public class QuoteDBManagerTest extends CommonDBManagerTest {
         this.testedMySQL = true;
 
         this.manager.createMySQL(new Quote(id, idBook, idAuthor, quote));
-        this.manager.waitForResponse();
 
         return this.manager.loadMySQL(id);
     }

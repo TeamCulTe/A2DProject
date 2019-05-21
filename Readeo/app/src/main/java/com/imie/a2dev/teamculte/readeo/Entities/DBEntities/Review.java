@@ -1,5 +1,6 @@
 package com.imie.a2dev.teamculte.readeo.Entities.DBEntities;
 
+import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.util.Log;
@@ -10,6 +11,9 @@ import lombok.NonNull;
 import lombok.Setter;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.JSON_TAG;
+import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.SQLITE_TAG;
 
 /**
  * Final class representing a review written by an user for a specific book.
@@ -78,7 +82,26 @@ public final class Review extends DBEntity {
     public Review(JSONObject result) {
         this.init(result);
     }
+    
+    /**
+     * Review's full filled constructor providing all its attributes values from a ContentValues object.
+     * @param contentValues The ContentValues object used to initialize the entity.
+     */
+    public Review(ContentValues contentValues) {
+        this.init(contentValues);
+    }
 
+    /**
+     * Initializes the review from a ContentValues object.
+     * @param contentValues The ContentValues object.
+     */
+    public void init(@android.support.annotation.NonNull ContentValues contentValues) {
+        this.id = contentValues.getAsInteger(ReviewDBSchema.BOOK);
+        this.userId = contentValues.getAsInteger(ReviewDBSchema.USER);
+        this.review = contentValues.getAsString(ReviewDBSchema.REVIEW);
+        this.shared = true;
+    }
+    
     /**
      * Initializes the review from a JSON response object.
      * @param object The JSON response from the API.
@@ -90,7 +113,7 @@ public final class Review extends DBEntity {
             this.review = object.getString(ReviewDBSchema.REVIEW);
             this.shared = (object.getInt(ReviewDBSchema.SHARED) == 1);
         } catch (JSONException e) {
-            Log.e(DBManager.JSON_TAG, e.getMessage());
+            Log.e(JSON_TAG, e.getMessage());
         }
     }
 
@@ -110,7 +133,7 @@ public final class Review extends DBEntity {
                 result.close();
             }
         } catch (SQLiteException e) {
-            Log.e(DBManager.SQLITE_TAG, e.getMessage());
+            Log.e(SQLITE_TAG, e.getMessage());
         }
     }
 }

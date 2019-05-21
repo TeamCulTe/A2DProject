@@ -1,5 +1,6 @@
 package com.imie.a2dev.teamculte.readeo.Entities.DBEntities;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
@@ -19,6 +20,9 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.JSON_TAG;
+import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.SQLITE_TAG;
 
 /**
  * Final class representing a book from the application.
@@ -161,6 +165,28 @@ public final class Book extends DBEntity {
     }
 
     /**
+     * Book's full filled constructor providing all its attributes values from a ContentValues object.
+     * @param contentValues The ContentValues object used to initialize the entity.
+     */
+    public Book(ContentValues contentValues) {
+        this.init(contentValues);
+    }
+    
+    /**
+     * Initializes the book from a ContentValues object.
+     * @param contentValues The ContentValues object.
+     */
+    public void init(@NonNull ContentValues contentValues) {
+        this.id = contentValues.getAsInteger(BookDBSchema.ID);
+        this.title = contentValues.getAsString(BookDBSchema.TITLE);
+        this.cover = contentValues.getAsString(BookDBSchema.COVER);
+        this.summary = contentValues.getAsString(BookDBSchema.SUMMARY);
+        this.datePublished = contentValues.getAsInteger(BookDBSchema.DATE);
+        this.category =
+                new CategoryDBManager(App.getAppContext()).loadSQLite(contentValues.getAsInteger(BookDBSchema.CATEGORY));
+    }
+    
+    /**
      * Initializes the book from a JSON response object (except for relation objects attribute).
      * @param object The JSON response from the API.
      */
@@ -172,7 +198,7 @@ public final class Book extends DBEntity {
             this.summary = object.getString(BookDBSchema.SUMMARY);
             this.datePublished = object.getInt(BookDBSchema.DATE);
         } catch (JSONException e) {
-            Log.e(DBManager.JSON_TAG, e.getMessage());
+            Log.e(JSON_TAG, e.getMessage());
         }
     }
 
@@ -200,7 +226,7 @@ public final class Book extends DBEntity {
                 result.close();
             }
         } catch (SQLiteException e) {
-            Log.e(DBManager.SQLITE_TAG, e.getMessage());
+            Log.e(SQLITE_TAG, e.getMessage());
         }
     }
 }

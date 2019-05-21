@@ -6,11 +6,14 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.RequestFuture;
 import com.android.volley.toolbox.StringRequest;
 import com.imie.a2dev.teamculte.readeo.APIManager;
 import com.imie.a2dev.teamculte.readeo.App;
@@ -19,28 +22,27 @@ import com.imie.a2dev.teamculte.readeo.DBSchemas.BookDBSchema;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.BookListTypeDBSchema;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.CategoryDBSchema;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.CityDBSchema;
-import com.imie.a2dev.teamculte.readeo.DBSchemas.CommonDBSchema;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.CountryDBSchema;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.ProfileDBSchema;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.QuoteDBSchema;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.ReviewDBSchema;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.UserDBSchema;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.WriterDBSchema;
-import com.imie.a2dev.teamculte.readeo.HTTPRequestQueueSingleton;
+import com.imie.a2dev.teamculte.readeo.Utils.HTTPRequestQueueSingleton;
 import com.imie.a2dev.teamculte.readeo.Utils.UpdateDataElement;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.imie.a2dev.teamculte.readeo.DBSchemas.CommonDBSchema.UPDATE;
+import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.JSON_TAG;
+import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.SERVER_TAG;
+import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.SQLITE_TAG;
 
 /**
  * Abstract class extended by all DBManager classes (used to manage entities into databases).
@@ -55,28 +57,6 @@ public abstract class DBManager {
      * Defines the database file name.
      */
     protected static String dbFileName = "readeo.db";
-
-    // Log tags.
-
-    /**
-     * Defines the common error tag.
-     */
-    public final static String ERROR_TAG = "CommonError";
-
-    /**
-     * Defines the SQLite log tag.
-     */
-    public final static String SQLITE_TAG = "SQLiteError";
-
-    /**
-     * Defines the JSON log tag.
-     */
-    public final static String JSON_TAG = "JSONError";
-
-    /**
-     * Defines the server log tag.
-     */
-    protected final static String SERVER_TAG = "ServerError";
 
     // Predefined queries.
 
@@ -94,53 +74,6 @@ public abstract class DBManager {
      * Defines the default all fields database query with a simple where clause.
      */
     protected final String SIMPLE_QUERY_ALL = "SELECT * FROM %s WHERE %s = ?";
-
-    /**
-     * Defines the default all fields database query with a simple where - like (from start) clause.
-     */
-    protected final String SIMPLE_QUERY_ALL_LIKE_START = "SELECT * FROM %s WHERE %s LIKE ?||'%%'";
-
-    /**
-     * Defines the default field database query with a simple where clause.
-     */
-    protected final String SIMPLE_QUERY_FIELD = "SELECT %s FROM %s WHERE %s = ?";
-
-    /**
-     * Defines the default field database query with a simple where clause.
-     */
-    protected final String DOUBLE_QUERY_FIELD = "SELECT %s FROM %s WHERE %s = ? AND %s = ?";
-
-    /**
-     * Defines the default all fields database query with a double where clause.
-     */
-    protected final String DOUBLE_QUERY_ALL = "SELECT * FROM %s WHERE %s = ? AND %s = ?";
-
-    /**
-     * Defines the default simple update query (getting the id and the last_update fields) from SQLite db.
-     */
-    protected final String SIMPLE_QUERY_UPDATE = "SELECT %s, " + UPDATE + " FROM %s";
-
-    /**
-     * Defines the default double update query (getting the id and the last_update fields) from SQLite db.
-     */
-    protected final String DOUBLE_QUERY_UPDATE = "SELECT %s, %s, " + UPDATE + " FROM %s";
-
-    // Update keys
-
-    /**
-     * Defines the update key from sync maps.
-     */
-    protected static final String TO_UPDATE_KEY = "update";
-
-    /**
-     * Defines the delete key from sync maps.
-     */
-    protected static final String TO_DELETE_KEY = "delete";
-
-    /**
-     * Defines the create key from sync maps.
-     */
-    protected static final String TO_CREATE_KEY = "create";
 
     // Other attributes
 
@@ -160,7 +93,7 @@ public abstract class DBManager {
     private final int PAGINATION = 2000;
 
     /**
-     * Stores the manager's API.
+     * Stores the manager's API url.
      */
     protected String baseUrl;
 
@@ -248,6 +181,30 @@ public abstract class DBManager {
     }
 
     /**
+     * Gets the baseUrl attribute.
+     * @return The String value of baseUrl attribute.
+     */
+    public final String getBaseUrl() {
+        return this.baseUrl;
+    }
+
+    /**
+     * Gets the ids attribute.
+     * @return The String value of ids attribute.
+     */
+    public String[] getIds() {
+        return this.ids;
+    }
+
+    /**
+     * Gets the table attribute.
+     * @return The String value of table attribute.
+     */
+    public final String getTable() {
+        return this.table;
+    }
+
+    /**
      * Returns the database file name.
      * @return The name of the file.
      */
@@ -269,35 +226,7 @@ public abstract class DBManager {
     public void waitForResponse() {
         HTTPRequestQueueSingleton httpRequestQueueSingleton = HTTPRequestQueueSingleton.getInstance(this.context);
 
-        while (httpRequestQueueSingleton.hasRequestPending(this.getClass().getName())) {
-        }
-    }
-
-    /**
-     * Queries the value of a specific field from a specific id.
-     * @param field The field to access.
-     * @param id The id of the db entity to access.
-     * @return The value of the field.
-     */
-    public String getFieldSQLite(String field, int id) {
-        return this.getFieldSQLite(field, this.ids[0], String.valueOf(id));
-    }
-
-    /**
-     * From an id given in parameter, deletes the associated entity in the database.
-     * @param id The id of the entity to delete.
-     * @return true if success else false.
-     */
-    public boolean deleteSQLite(int id) {
-        try {
-            String whereClause = String.format("%s = ?", this.ids[0]);
-            String[] whereArgs = new String[]{String.valueOf(id)};
-
-            return this.database.delete(this.table, whereClause, whereArgs) != 0;
-        } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
-
-            return false;
+        while (httpRequestQueueSingleton.hasRequestPending(this.table)) {
         }
     }
 
@@ -326,6 +255,35 @@ public abstract class DBManager {
     }
 
     /**
+     * From an id given in parameter, deletes the associated entity in the database.
+     * @param ids The ids of the entity to delete.
+     * @return true if success else false.
+     */
+    public boolean deleteSQLite(int ... ids) {
+        try {
+            StringBuilder builder = new StringBuilder();
+            String[] whereArgs = new String[ids.length];
+
+            for (int i = 0; i < ids.length; i++) {
+                builder.append(this.ids[i]);
+                builder.append(" = ?");
+
+                whereArgs[i] = String.valueOf(ids[i]);
+
+                if (i < (ids.length - 1)) {
+                    builder.append(" AND ");
+                }
+            }
+
+            return this.database.delete(this.table, builder.toString(), whereArgs) != 0;
+        } catch (SQLiteException e) {
+            Log.e(SQLITE_TAG, e.getMessage());
+
+            return false;
+        }
+    }
+
+    /**
      * From the API, query the list of entities (depending on the url) from the MySQL database in order to stores it
      * into the SQLite database.
      * @param url The url to request.
@@ -340,7 +298,7 @@ public abstract class DBManager {
                 }
             }
 
-            HTTPRequestQueueSingleton.getInstance(DBManager.this.context).finishRequest(this.getClass().getName());
+            HTTPRequestQueueSingleton.getInstance(DBManager.this.context).finishRequest(this.table);
         });
     }
 
@@ -366,115 +324,8 @@ public abstract class DBManager {
                 Log.e(JSON_TAG, e.getMessage());
             }
 
-            HTTPRequestQueueSingleton.getInstance(DBManager.this.context).finishRequest(this.getClass().getName());
+            HTTPRequestQueueSingleton.getInstance(DBManager.this.context).finishRequest(this.table);
         });
-    }
-
-    /**
-     * Imports all the MySQL database into the SQLite one.
-     */
-    public static void importMySQLDatabase() {
-        Context context = App.getAppContext();
-
-        new AuthorDBManager(context).importFromMySQL();
-        new CategoryDBManager(context).importFromMySQL();
-        new CityDBManager(context).importFromMySQL();
-        new CountryDBManager(context).importFromMySQL();
-        new BookListTypeDBManager(context).importFromMySQL();
-        new ProfileDBManager(context).importFromMySQL();
-        new BookDBManager(context).importFromMySQL();
-        new UserDBManager(context).importFromMySQL();
-        new QuoteDBManager(context).importFromMySQL();
-        new ReviewDBManager(context).importFromMySQL();
-        new WriterDBManager(context).importFromMySQL();
-    }
-
-    /**
-     * Imports all the MySQL table into the SQLite one.
-     */
-    public static void importMySQLTable(String table) {
-        Context context = App.getAppContext();
-
-        switch (table) {
-            case AuthorDBSchema.TABLE:
-                new AuthorDBManager(context).importFromMySQL();
-
-                break;
-            case CategoryDBSchema.TABLE:
-                new CategoryDBManager(context).importFromMySQL();
-
-                break;
-            case CityDBSchema.TABLE:
-                new CityDBManager(context).importFromMySQL();
-
-                break;
-            case CountryDBSchema.TABLE:
-                new CountryDBManager(context).importFromMySQL();
-
-                break;
-            case BookListTypeDBSchema.TABLE:
-                new BookListTypeDBManager(context).importFromMySQL();
-
-                break;
-            case ProfileDBSchema.TABLE:
-                new ProfileDBManager(context).importFromMySQL();
-
-                break;
-            case BookDBSchema.TABLE:
-                new BookDBManager(context).importFromMySQL();
-
-                break;
-            case UserDBSchema.TABLE:
-                new UserDBManager(context).importFromMySQL();
-
-                break;
-            case QuoteDBSchema.TABLE:
-                new QuoteDBManager(context).importFromMySQL();
-
-                break;
-            case ReviewDBSchema.TABLE:
-                new ReviewDBManager(context).importFromMySQL();
-
-                break;
-            case WriterDBSchema.TABLE:
-                new WriterDBManager(context).importFromMySQL();
-
-                break;
-            default:
-                break;
-        }
-    }
-
-    /**
-     * Gets the list of MySQL ids and last update fields in order to check which entities needs to be updated.
-     */
-    public final void getUpdateFromMySQL() {
-        final List<UpdateDataElement> updateFieldsSQLite = this.getUpdateFieldsSQLite();
-        this.requestJsonArray(Request.Method.POST, this.baseUrl + APIManager.READ_UPDATE,
-                response ->  {
-                    List<UpdateDataElement> fieldsMySQL = this.getUpdateFieldsFromJSON(response);
-                    Map<String, List<int[]>> syncDataMap = DBManager.getSyncData(updateFieldsSQLite, fieldsMySQL);
-
-                    this.performDbUpdates(syncDataMap);
-                });
-    }
-
-    /**
-     * Deletes the test entity in MySQL database.
-     * @param id The id of the test entity to delete.
-     */
-    public void deleteTestEntityMySQL(int id) {
-        String url = this.baseUrl + APIManager.DELETE;
-        Map<String, String> param = new HashMap<>();
-
-        for (String elt : this.ids) {
-            param.put(elt, String.valueOf(id));
-        }
-
-        param.put(APIManager.TEST, "1");
-
-        this.requestString(Request.Method.PUT, url, null, param);
-        this.waitForResponse();
     }
 
     /**
@@ -489,33 +340,19 @@ public abstract class DBManager {
         this.requestString(Request.Method.PUT, url, null, param);
         this.waitForResponse();
     }
+    
+    /**
+     * From a JSON object creates the associated entity into the database.
+     * @param entity The JSON object to store into the database.
+     */
+    public abstract void createSQLite(@NonNull JSONObject entity);
 
     /**
-     * Queries the value of a specific field from a specific id.
-     * @param field The field to access.
-     * @param filter The name of the column to filter on.
-     * @param filterValue The value to filter on.
-     * @return The value of the field.
+     * From a JSON object updates the associated entity into the database.
+     * @param entity The JSON object to update into the database.
+     * @return true if success else false.
      */
-    protected final String getFieldSQLite(String field, String filter, String filterValue) {
-        try {
-            String[] selectArgs = {filterValue};
-            String query = String.format(SIMPLE_QUERY_FIELD, field, this.table, filter);
-            Cursor result = this.database.rawQuery(query, selectArgs);
-
-            result.moveToNext();
-
-            String queriedField = result.getString(result.getColumnIndexOrThrow(field));
-
-            result.close();
-
-            return queriedField;
-        } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
-
-            return null;
-        }
-    }
+    public abstract boolean updateSQLite(@NonNull JSONObject entity);
 
     /**
      * Adds a JsonArray HTTP request to the queue.
@@ -524,33 +361,15 @@ public abstract class DBManager {
      * @param successListener The instance implementing response listener in order to call the associated callback
      * function.
      */
-    protected final void requestJsonArray(int method, String url, Response.Listener<JSONArray> successListener) {
+    public final void requestJsonArray(int method, String url, Response.Listener<JSONArray> successListener) {
         JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(method,
                 url,
                 null,
                 successListener,
                 new OnRequestError());
 
-        HTTPRequestQueueSingleton.getInstance(this.context).addToRequestQueue(this.getClass().getName(),
+        HTTPRequestQueueSingleton.getInstance(this.context).addToRequestQueue(this.table,
                 jsonArrayRequest);
-    }
-
-    /**
-     * Adds a JsonObject HTTP request to the queue.
-     * @param method The method to use (POST, GET, PUT...).
-     * @param url The url to request.
-     * @param successListener The instance implementing response listener in order to call the associated callback
-     * function.
-     */
-    protected final void requestJsonObject(int method, String url, Response.Listener<JSONObject> successListener) {
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest(method,
-                url,
-                null,
-                successListener,
-                new OnRequestError());
-
-        HTTPRequestQueueSingleton.getInstance(this.context).addToRequestQueue(this.getClass().getName(),
-                jsonObjectRequest);
     }
 
     /**
@@ -561,157 +380,25 @@ public abstract class DBManager {
      * @param params The param to send (POST and PUT requests).
      *
      */
-    protected final void requestString(int method,
+    public final void requestString(int method,
                                        String url,
                                        Response.Listener<String> successListener,
                                        final Map<String, String> params) {
         if (successListener == null) {
-            successListener = response -> HTTPRequestQueueSingleton.getInstance(DBManager.this.context).finishRequest(this.getClass().getName());
+            successListener = response -> HTTPRequestQueueSingleton.getInstance(DBManager.this.context).finishRequest(this.table);
         }
 
         StringRequest stringRequest = new StringRequest(method, url, successListener, new OnRequestError())
         {
             @Override
-            protected Map<String, String> getParams()
-            {
+            protected Map<String, String> getParams() {
                 return params;
             }
         };
 
-        HTTPRequestQueueSingleton.getInstance(this.context).addToRequestQueue(this.getClass().getName(), stringRequest);
+        HTTPRequestQueueSingleton.getInstance(this.context).addToRequestQueue(this.table, stringRequest);
     }
-
-    /**
-     * Gets the list of id(s) / last_update from the SQLite database.
-     * @return A list of UpdateDataElements.
-     */
-    protected final List<UpdateDataElement> getUpdateFieldsSQLite() {
-        try {
-            String query;
-
-            int idsNumber = this.ids.length;
-            SimpleDateFormat dateFormat = new SimpleDateFormat(CommonDBSchema.DATE_FORMAT);
-
-            if (idsNumber == 1) {
-                query = String.format(SIMPLE_QUERY_UPDATE, ids[0], this.table);
-            } else if (idsNumber == 2) {
-                query = String.format(this.DOUBLE_QUERY_UPDATE, ids[0], ids[1], this.table);
-            } else {
-                // No case yet.
-                return null;
-            }
-
-            Cursor result = this.database.rawQuery(query, null);
-            List<UpdateDataElement> data = new ArrayList<>();
-
-            while (result.moveToNext()) {
-                int[] idsToAdd = new int[idsNumber];
-
-                for (int j = 0; j < idsNumber; j++) {
-                    idsToAdd[j] = result.getInt(result.getColumnIndex(this.ids[j]));
-                }
-
-                try {
-                    data.add(new UpdateDataElement(idsToAdd,
-                            dateFormat.parse(result.getString(result.getColumnIndex(UPDATE)))));
-                } catch (ParseException e) {
-                    Log.e(ERROR_TAG, e.getMessage());
-                }
-            }
-
-            result.close();
-
-            return data;
-        } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
-
-            return null;
-        }
-    }
-
-    /**
-     * From a json update response (ids and last update date), gets the values and returns them into a list of
-     * UpdateDataElements.
-     * @param result The JSON response containing the ids and last update date.
-     * @return The result into a list of UpdateDataElements.
-     */
-    protected final List<UpdateDataElement> getUpdateFieldsFromJSON(JSONArray result) {
-        JSONObject elt;
-
-        List<UpdateDataElement> data = new ArrayList<>();
-        SimpleDateFormat dateFormat = new SimpleDateFormat(CommonDBSchema.DATE_FORMAT);
-
-        for (int i = 0; i < result.length(); i++) {
-            try {
-                elt = result.getJSONObject(i);
-                int[] idsToAdd = new int[this.ids.length];
-
-                for (int j = 0; j < idsToAdd.length; j++) {
-                    idsToAdd[j] = elt.getInt(this.ids[j]);
-                }
-
-                try {
-                    data.add(new UpdateDataElement(idsToAdd, dateFormat.parse(elt.getString(UPDATE))));
-                } catch (ParseException e) {
-                    Log.e(ERROR_TAG, e.getMessage());
-                }
-            } catch (JSONException e) {
-                Log.e(JSON_TAG, e.getMessage());
-
-                return null;
-            }
-        }
-
-        return data;
-    }
-
-    /**
-     * From a map containing the elements to create, update, delete, perform the associated operations.
-     * @param syncDataMap The map containing the elements.
-     */
-    protected void performDbUpdates(Map<String, List<int[]>> syncDataMap) {
-        for (int[] elt : syncDataMap.get(TO_CREATE_KEY)) {
-            this.requestJsonArray(Request.Method.POST,
-                    this.baseUrl + APIManager.READ + this.ids[0] + "=" + String.valueOf(elt[0]),
-                    response -> {
-                        try {
-                            this.createSQLite(response.getJSONObject(0));
-                        } catch (JSONException e) {
-                            Log.e(JSON_TAG, e.getMessage());
-                        }
-                    });
-        }
-
-        for (int[] elt : syncDataMap.get(TO_UPDATE_KEY)) {
-            this.requestJsonArray(Request.Method.POST,
-                    this.baseUrl + APIManager.READ + this.ids[0] + "=" + String.valueOf(elt[0]),
-                    response -> {
-                        try {
-                            this.updateSQLite(response.getJSONObject(0));
-                        } catch (JSONException e) {
-                            Log.e(JSON_TAG, e.getMessage());
-                        }
-                    });
-        }
-
-        for (int[] elt : syncDataMap.get(TO_DELETE_KEY)) {
-            this.deleteSQLite(elt[0]);
-        }
-    }
-
-    /**
-     * From a JSON object creates the associated entity into the database.
-     * @param entity The JSON object to store into the database.
-     */
-    protected abstract void createSQLite(@NonNull JSONObject entity);
-
-    /**
-     * From a JSON object updates the associated entity into the database.
-     * @param entity The JSON object to update into the database.
-     * @return true if success else false.
-     */
-    protected abstract boolean updateSQLite(@NonNull JSONObject entity);
-
+    
     /**
      * Opens and set the SQLiteDatabase.
      */
@@ -735,75 +422,6 @@ public abstract class DBManager {
     }
 
     /**
-     * From a list of UpdateElement from local database and a distant one (SQLite - MySQL), checks the ids and date
-     * in order to return a map gathering the element to update, create and delete.
-     * @param local The local elements list.
-     * @param distant The distant elements list.
-     * @return The map of elements (create, update, delete).
-     */
-    private static Map<String, List<int[]>> getSyncData(List<UpdateDataElement> local, List<UpdateDataElement> distant) {
-        if (local.size() == 0 || distant.size() == 0 || local.get(0).size() != distant.get(0).size()) {
-            return null;
-        }
-
-        boolean same;
-        UpdateDataElement localElement;
-        UpdateDataElement distantElement;
-
-        int syncIdNb = distant.get(0).size();
-        Map<String, List<int[]>> syncDataMap = new HashMap<>();
-        ArrayList<int[]> toCreateData = new ArrayList<>();
-        ArrayList<int[]> toUpdateData = new ArrayList<>();
-        ArrayList<int[]> toDeleteData = new ArrayList<>();
-
-        //TODO: Factorize the method / see if better if defined in an update class.
-        for (int i = 0, j = 0; i < distant.size() && j < local.size(); i++, j++) {
-            same = true;
-            localElement = local.get(j);
-            distantElement = distant.get(i);
-
-            // Browsing all the ids indexes.
-            for (int k = 0; k < syncIdNb; k++) {
-                if (localElement.getId(k) != distantElement.getId(k)) {
-                    // If the id from distant is higher than the local one, element has to be deleted (unless we
-                    // reached the last local element, which means it should be created).
-                    if (distantElement.getId(k) > localElement.getId(k) && i < local.size() - 1) {
-                        toDeleteData.add(Arrays.copyOfRange(localElement.getIds(), 0, syncIdNb));
-
-                        i--;
-                    } else {
-                        toCreateData.add(Arrays.copyOfRange(distantElement.getIds(), 0, syncIdNb));
-
-                        j--;
-                    }
-
-                    same = false;
-                }
-            }
-
-            // If the ids are the same, checking the last update date to see if adding into update list.
-            if (same) {
-                if (localElement.getDateUpdated().before(distantElement.getDateUpdated())) {
-                    toUpdateData.add(Arrays.copyOfRange(distantElement.getIds(), 0, syncIdNb));
-                }
-            }
-
-            // Temporary prevents ArrayOutOfBoundsException or going out of the loop if a list is longer than the other.
-            if (i == distant.size() - 1 && j < local.size() - 2) {
-                i--;
-            } else if (j == local.size() - 1 && i < distant.size() - 2) {
-                j--;
-            }
-        }
-
-        syncDataMap.put(TO_CREATE_KEY, toCreateData);
-        syncDataMap.put(TO_UPDATE_KEY, toUpdateData);
-        syncDataMap.put(TO_DELETE_KEY, toDeleteData);
-
-        return syncDataMap;
-    }
-
-    /**
      * Closes the database.
      */
     private void close() {
@@ -818,14 +436,13 @@ public abstract class DBManager {
         public void onErrorResponse(VolleyError error) {
             HTTPRequestQueueSingleton requestQueueSingleton =
                     HTTPRequestQueueSingleton.getInstance(DBManager.this.context);
-            requestQueueSingleton.finishRequest(DBManager.this.getClass().getName());
+            requestQueueSingleton.finishRequest(DBManager.this.getTable());
 
             String statusCode = (error.networkResponse != null) ? String.valueOf(error.networkResponse.statusCode) :
                     "unexpected";
             String requested = requestQueueSingleton.getLastRequestUrl();
             Log.e(SERVER_TAG,
                     "Error " + statusCode + " while contacting the API at request : \n" + requested);
-
         }
     }
 }
