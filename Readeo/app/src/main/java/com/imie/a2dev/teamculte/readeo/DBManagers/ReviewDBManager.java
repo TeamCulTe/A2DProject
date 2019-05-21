@@ -6,13 +6,20 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.HttpHeaderParser;
+import com.android.volley.toolbox.JsonArrayRequest;
 import com.imie.a2dev.teamculte.readeo.APIManager;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Review;
 import com.imie.a2dev.teamculte.readeo.Utils.HTTPRequestQueueSingleton;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -25,6 +32,7 @@ import static com.imie.a2dev.teamculte.readeo.DBSchemas.ReviewDBSchema.REVIEW;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.ReviewDBSchema.SHARED;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.ReviewDBSchema.TABLE;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.ReviewDBSchema.USER;
+import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.ERROR_TAG;
 import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.JSON_TAG;
 import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.SQLITE_TAG;
 
@@ -245,17 +253,35 @@ public final class ReviewDBManager extends RelationDBManager {
     public Review loadMySQL(int idUser, int idBook) {
         final Review review = new Review();
         String url = this.baseUrl + APIManager.READ + USER + "=" + idUser + "&" + BOOK + "=" + idBook;
+        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null, null, null) {
+            @Override
+            protected Response<JSONArray> parseNetworkResponse(NetworkResponse response) {
+                try {
+                    JSONArray jsonArray = new JSONArray(new String(response.data,
+                            HttpHeaderParser.parseCharset(response.headers)));
+                    JSONObject object = jsonArray.getJSONObject(0);
 
-        super.requestJsonArray(Request.Method.GET, url,  response -> {
-            try {
-                review.init(response.getJSONObject(0));
-            } catch (JSONException e) {
-                Log.e(JSON_TAG, e.getMessage());
-            } finally {
-                HTTPRequestQueueSingleton.getInstance(this.getContext()).finishRequest(this.getClass().getName());
+                    review.init(object);
+                } catch (JSONException e) {
+                    Log.e(JSON_TAG, e.getMessage());
+                } catch (IOException e) {
+                    Log.e(ERROR_TAG, e.getMessage());
+                } finally {
+                    HTTPRequestQueueSingleton.getInstance(ReviewDBManager.this.getContext()).finishRequest(ReviewDBManager.this.table);
+                }
+
+                return super.parseNetworkResponse(response);
             }
-        });
 
+            @Override
+            protected VolleyError parseNetworkError(VolleyError volleyError) {
+                HTTPRequestQueueSingleton.getInstance(ReviewDBManager.this.getContext()).finishRequest(ReviewDBManager.this.table);
+
+                return super.parseNetworkError(volleyError);
+            }
+        };
+
+        HTTPRequestQueueSingleton.getInstance(this.getContext()).addToRequestQueue(this.table, request);
         this.waitForResponse();
 
         return (review.isEmpty()) ? null : review;
@@ -269,20 +295,36 @@ public final class ReviewDBManager extends RelationDBManager {
     public List<Review> loadUserMySQL(int idUser) {
         final List<Review> reviews = new ArrayList<>();
         String url = this.baseUrl + APIManager.READ + USER + "=" + idUser;
-
-        super.requestJsonArray(Request.Method.GET, url, response -> {
-            for (int i = 0; i < response.length(); i++) {
+        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null, null, null) {
+            @Override
+            protected Response<JSONArray> parseNetworkResponse(NetworkResponse response) {
                 try {
-                    reviews.add(new Review(response.getJSONObject(i)));
+                    JSONArray jsonArray = new JSONArray(new String(response.data,
+                            HttpHeaderParser.parseCharset(response.headers)));
+                    
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        reviews.add(new Review(jsonArray.getJSONObject(i)));
+                    }
                 } catch (JSONException e) {
                     Log.e(JSON_TAG, e.getMessage());
+                } catch (IOException e) {
+                    Log.e(ERROR_TAG, e.getMessage());
                 } finally {
-                    HTTPRequestQueueSingleton.getInstance(this.getContext()).finishRequest(this.getClass().getName());
+                    HTTPRequestQueueSingleton.getInstance(ReviewDBManager.this.getContext()).finishRequest(ReviewDBManager.this.table);
                 }
+
+                return super.parseNetworkResponse(response);
             }
 
-        });
+            @Override
+            protected VolleyError parseNetworkError(VolleyError volleyError) {
+                HTTPRequestQueueSingleton.getInstance(ReviewDBManager.this.getContext()).finishRequest(ReviewDBManager.this.table);
 
+                return super.parseNetworkError(volleyError);
+            }
+        };
+
+        HTTPRequestQueueSingleton.getInstance(this.getContext()).addToRequestQueue(this.table, request);
         this.waitForResponse();
 
         return reviews;
@@ -382,7 +424,7 @@ public final class ReviewDBManager extends RelationDBManager {
 
         param.put(APIManager.TEST, "1");
 
-        this.requestString(Request.Method.DELETE, url, null, param);
+        super.requestString(Request.Method.DELETE, url, null, param);
     }
 
     @Override

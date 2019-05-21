@@ -6,14 +6,23 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.HttpHeaderParser;
+import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.StringRequest;
 import com.imie.a2dev.teamculte.readeo.APIManager;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.PrivateUser;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.PublicUser;
+import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Review;
 import com.imie.a2dev.teamculte.readeo.Utils.HTTPRequestQueueSingleton;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -30,6 +39,7 @@ import static com.imie.a2dev.teamculte.readeo.DBSchemas.UserDBSchema.PASSWORD;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.UserDBSchema.PROFILE;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.UserDBSchema.PSEUDO;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.UserDBSchema.TABLE;
+import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.ERROR_TAG;
 import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.JSON_TAG;
 import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.SQLITE_TAG;
 
@@ -140,7 +150,7 @@ public final class UserDBManager extends SimpleDBManager {
             String query = String.format(this.SIMPLE_QUERY_ALL, this.table, PSEUDO);
             Cursor result = this.database.rawQuery(query, selectArgs);
 
-            return new PublicUser(result);
+            return (result.getCount() > 0) ? new PublicUser(result) : null;
         } catch (SQLiteException e) {
             Log.e(SQLITE_TAG, e.getMessage());
 
@@ -212,7 +222,7 @@ public final class UserDBManager extends SimpleDBManager {
     public void createMySQL(final PrivateUser user) {
         String url = this.baseUrl + APIManager.CREATE;
         Map<String, String> param = new HashMap<>();
-
+        
         if (user.getId() != 0) {
             param.put(ID, String.valueOf(user.getId()));
         }
@@ -224,15 +234,39 @@ public final class UserDBManager extends SimpleDBManager {
         param.put(CITY, String.valueOf(user.getCity().getId()));
         param.put(COUNTRY, String.valueOf(user.getCountry().getId()));
 
-        super.requestString(Request.Method.POST, url, response -> {
-            Pattern pattern = Pattern.compile("^\\d.$");
-
-            if (pattern.matcher(response).find()) {
-                user.setId(Integer.valueOf(response));
+        StringRequest request = new StringRequest(Request.Method.POST, url, null, null) {
+            @Override
+            protected Map<String, String> getParams() {
+                return param;
             }
-            
-            HTTPRequestQueueSingleton.getInstance(this.getContext()).finishRequest(this.getClass().getName());
-        }, param);
+
+            @Override
+            protected VolleyError parseNetworkError(VolleyError volleyError) {
+                HTTPRequestQueueSingleton.getInstance(UserDBManager.this.getContext()).finishRequest(UserDBManager.this.table);
+
+                return super.parseNetworkError(volleyError);
+            }
+
+            @Override
+            protected Response<String> parseNetworkResponse(NetworkResponse response) {
+                try {
+                    String resp = new String(response.data, HttpHeaderParser.parseCharset(response.headers));
+                    Pattern pattern = Pattern.compile("^\\d.$");
+
+                    if (pattern.matcher(resp).find()) {
+                        user.setId(Integer.valueOf(resp));
+                    }
+                } catch (IOException e) {
+                    Log.e(ERROR_TAG, e.getMessage());
+                } finally {
+                    HTTPRequestQueueSingleton.getInstance(UserDBManager.this.getContext()).finishRequest(UserDBManager.this.table);
+                }
+                
+                return super.parseNetworkResponse(response);
+            }
+        };
+        
+        HTTPRequestQueueSingleton.getInstance(this.getContext()).addToRequestQueue(TABLE, request);
 
         this.waitForResponse();
     }
@@ -282,25 +316,46 @@ public final class UserDBManager extends SimpleDBManager {
         final int idProfile[] = new int[1];
         final int idCity[] = new int[1];
         final int idCountry[] = new int[1];
-
         String url = this.baseUrl + APIManager.READ + ID + "=" + idUser;
+        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null, null, null) {
+            @Override
+            protected Response<JSONArray> parseNetworkResponse(NetworkResponse response) {
+                try {
+                    JSONArray jsonArray = new JSONArray(new String(response.data,
+                            HttpHeaderParser.parseCharset(response.headers)));
+                    JSONObject object = jsonArray.getJSONObject(0);
+                    
+                    idProfile[0] = object.getInt(PROFILE);
+                    idCity[0] = object.getInt(CITY);
+                    idCountry[0] = object.getInt(COUNTRY);
 
-        super.requestJsonArray(Request.Method.GET, url,  response -> {
-            try {
-                JSONObject object = response.getJSONObject(0);
-                idProfile[0] = object.getInt(PROFILE);
-                idCity[0] = object.getInt(CITY);
-                idCountry[0] = object.getInt(COUNTRY);
-
-                user.init(object);
-            } catch (JSONException e) {
-                Log.e(JSON_TAG, e.getMessage());
-            } finally {
-                HTTPRequestQueueSingleton.getInstance(this.getContext()).finishRequest(this.getClass().getName());
+                    user.init(object);
+                } catch (JSONException e) {
+                    Log.e(JSON_TAG, e.getMessage());
+                } catch (IOException e) {
+                    Log.e(ERROR_TAG, e.getMessage());
+                } finally {
+                    HTTPRequestQueueSingleton.getInstance(UserDBManager.this.getContext()).finishRequest(UserDBManager.this.table);
+                }
+                
+                return super.parseNetworkResponse(response);
             }
-        });
 
+            @Override
+            protected VolleyError parseNetworkError(VolleyError volleyError) {
+                idProfile[0] = 0;
+                idCity[0] = 0;
+                idCountry[0] = 0;
+
+                HTTPRequestQueueSingleton.getInstance(UserDBManager.this.getContext()).finishRequest(UserDBManager.this.table);
+                
+                return super.parseNetworkError(volleyError);
+            }
+        };
+
+        HTTPRequestQueueSingleton.getInstance(this.getContext()).addToRequestQueue(this.table, request);
         this.waitForResponse();
+        
         user.setProfile(new ProfileDBManager(this.getContext()).loadMySQL(idProfile[0]));
         user.setCountry(new CountryDBManager(this.getContext()).loadMySQL(idCountry[0]));
         user.setCity(new CityDBManager(this.getContext()).loadMySQL(idCity[0]));
@@ -322,23 +377,44 @@ public final class UserDBManager extends SimpleDBManager {
         final int idProfile[] = new int[1];
         final int idCity[] = new int[1];
         final int idCountry[] = new int[1];
+        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null, null, null) {
+            @Override
+            protected Response<JSONArray> parseNetworkResponse(NetworkResponse response) {
+                try {
+                    JSONArray jsonArray = new JSONArray(new String(response.data,
+                            HttpHeaderParser.parseCharset(response.headers)));
+                    JSONObject object = jsonArray.getJSONObject(0);
+                    idProfile[0] = object.getInt(PROFILE);
+                    idCity[0] = object.getInt(CITY);
+                    idCountry[0] = object.getInt(COUNTRY);
 
-        super.requestJsonArray(Request.Method.GET, url, response -> {
-            try {
-                JSONObject object = response.getJSONObject(0);
-                idProfile[0] = object.getInt(PROFILE);
-                idCity[0] = object.getInt(CITY);
-                idCountry[0] = object.getInt(COUNTRY);
+                    user.init(object);
+                } catch (JSONException e) {
+                    Log.e(JSON_TAG, e.getMessage());
+                } catch (IOException e) {
+                    Log.e(ERROR_TAG, e.getMessage());
+                } finally {
+                    HTTPRequestQueueSingleton.getInstance(UserDBManager.this.getContext()).finishRequest(UserDBManager.this.table);
+                }
 
-                user.init(object);
-            } catch (JSONException e) {
-                Log.e(JSON_TAG, e.getMessage());
-            } finally {
-                HTTPRequestQueueSingleton.getInstance(this.getContext()).finishRequest(this.getClass().getName());
+                return super.parseNetworkResponse(response);
             }
-        });
 
+            @Override
+            protected VolleyError parseNetworkError(VolleyError volleyError) {
+                idProfile[0] = 0;
+                idCity[0] = 0;
+                idCountry[0] = 0;
+
+                HTTPRequestQueueSingleton.getInstance(UserDBManager.this.getContext()).finishRequest(UserDBManager.this.table);
+
+                return super.parseNetworkError(volleyError);
+            }
+        };
+
+        HTTPRequestQueueSingleton.getInstance(this.getContext()).addToRequestQueue(this.table, request);
         this.waitForResponse();
+        
         user.setProfile(new ProfileDBManager(this.getContext()).loadMySQL(idProfile[0]));
         user.setCountry(new CountryDBManager(this.getContext()).loadMySQL(idCountry[0]));
         user.setCity(new CityDBManager(this.getContext()).loadMySQL(idCity[0]));
@@ -358,13 +434,25 @@ public final class UserDBManager extends SimpleDBManager {
         final boolean[] available = new boolean[1];
         String url = this.baseUrl + APIManager.READ + field + "=" + value + "&public=1";
         available[0] = true;
-        
-        super.requestJsonArray(Request.Method.GET, url, response -> {
-            available[0] = false;
+        StringRequest request = new StringRequest(Request.Method.GET, url, null, null) {
+            @Override
+            protected VolleyError parseNetworkError(VolleyError volleyError) {
+                HTTPRequestQueueSingleton.getInstance(UserDBManager.this.getContext()).finishRequest(UserDBManager.this.table);
+                
+                return super.parseNetworkError(volleyError);
+            }
 
-            HTTPRequestQueueSingleton.getInstance(this.getContext()).finishRequest(this.getClass().getName());
-        });
-        
+            @Override
+            protected Response<String> parseNetworkResponse(NetworkResponse response) {
+                available[0] = false;
+                
+                HTTPRequestQueueSingleton.getInstance(UserDBManager.this.getContext()).finishRequest(UserDBManager.this.table);
+                
+                return super.parseNetworkResponse(response);
+            }            
+        };
+
+        HTTPRequestQueueSingleton.getInstance(this.getContext()).addToRequestQueue(this.table, request);
         this.waitForResponse();
         
         return available[0];

@@ -3,16 +3,23 @@ package com.imie.a2dev.teamculte.readeo.DBManagers;
 import android.content.Context;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.HttpHeaderParser;
+import com.android.volley.toolbox.JsonArrayRequest;
 import com.imie.a2dev.teamculte.readeo.APIManager;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.BookListDBSchema;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Book;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.BookList;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.BookListType;
 import com.imie.a2dev.teamculte.readeo.Utils.HTTPRequestQueueSingleton;
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -22,6 +29,7 @@ import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookListDBSchema.BOOK;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookListDBSchema.TABLE;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookListDBSchema.TYPE;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookListDBSchema.USER;
+import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.ERROR_TAG;
 import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.JSON_TAG;
 
 /**
@@ -87,32 +95,53 @@ public final class BookListDBManager extends RelationDBManager {
         final List<Integer> bookIds = new ArrayList<>();
         final int typeId[] = new int[1];
         String url = this.baseUrl + APIManager.READ + USER + "=" + idUser + "&" + TYPE + "=" + idType;
-
-        super.requestJsonArray(Request.Method.GET, url, response -> {
-            bookList.init(response);
-
-            // TODO : See how to deal with differences between distant and local db.
-            if (bookList.getBooks().size() == 0) {
-                for (int i = 0; i < response.length(); i++) {
-                    try {
-                        bookIds.add(response.getJSONObject(i).getInt(BookListDBSchema.BOOK));
-                    } catch (JSONException e) {
-                        Log.e(JSON_TAG, e.getMessage());
-                    }
-                }
-            }
-
-            if (bookList.getType() == null) {
+        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null, null, null) {
+            @Override
+            protected Response<JSONArray> parseNetworkResponse(NetworkResponse response) {
                 try {
-                    typeId[0] = response.getJSONObject(0).getInt(BookListDBSchema.TYPE);
+                    JSONArray jsonArray = new JSONArray(new String(response.data,
+                            HttpHeaderParser.parseCharset(response.headers)));
+
+                    bookList.init(jsonArray);
+
+                    // TODO : See how to deal with differences between distant and local db.
+                    if (bookList.getBooks().size() == 0) {
+                        for (int i = 0; i < jsonArray.length(); i++) {
+                            try {
+                                bookIds.add(jsonArray.getJSONObject(i).getInt(BookListDBSchema.BOOK));
+                            } catch (JSONException e) {
+                                Log.e(JSON_TAG, e.getMessage());
+                            }
+                        }
+                    }
+
+                    if (bookList.getType() == null) {
+                        try {
+                            typeId[0] = jsonArray.getJSONObject(0).getInt(BookListDBSchema.TYPE);
+                        } catch (JSONException e) {
+                            Log.e(JSON_TAG, e.getMessage());
+                        }
+                    }
                 } catch (JSONException e) {
                     Log.e(JSON_TAG, e.getMessage());
+                } catch (IOException e) {
+                    Log.e(ERROR_TAG, e.getMessage());
+                } finally {
+                    HTTPRequestQueueSingleton.getInstance(BookListDBManager.this.getContext()).finishRequest(BookListDBManager.this.table);
                 }
+
+                return super.parseNetworkResponse(response);
             }
 
-            HTTPRequestQueueSingleton.getInstance(this.getContext()).finishRequest(this.getClass().getName());
-        });
+            @Override
+            protected VolleyError parseNetworkError(VolleyError volleyError) {
+                HTTPRequestQueueSingleton.getInstance(BookListDBManager.this.getContext()).finishRequest(BookListDBManager.this.table);
 
+                return super.parseNetworkError(volleyError);
+            }
+        };
+
+        HTTPRequestQueueSingleton.getInstance(this.getContext()).addToRequestQueue(this.table, request);
         this.waitForResponse();
 
         if (bookIds.size() > 0) {
@@ -152,27 +181,45 @@ public final class BookListDBManager extends RelationDBManager {
         if (bookLists.size() == 0) {
             final List<Integer> typeIds = new ArrayList<>();
             String url = this.baseUrl + APIManager.READ + USER + "=" + idUser;
-
-            super.requestJsonArray(Request.Method.GET, url, response -> {
-                int idType;
-                int previous = 0;
-
-                for (int i = 0; i < response.length(); i++) {
+            JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null, null, null) {
+                @Override
+                protected Response<JSONArray> parseNetworkResponse(NetworkResponse response) {
                     try {
-                        idType = response.getJSONObject(i).getInt(BookListDBSchema.TYPE);
-                        if (idType != previous) {
-                            typeIds.add(idType);
+                        int idType;
+                        
+                        JSONArray jsonArray = new JSONArray(new String(response.data,
+                                HttpHeaderParser.parseCharset(response.headers)));
+                        int previous = 0;
 
-                            previous = idType;
+                        for (int i = 0; i < jsonArray.length(); i++) {
+                            idType = jsonArray.getJSONObject(i).getInt(BookListDBSchema.TYPE);
+                                
+                                if (idType != previous) {
+                                    typeIds.add(idType);
+
+                                    previous = idType;
+                                }
                         }
                     } catch (JSONException e) {
                         Log.e(JSON_TAG, e.getMessage());
+                    } catch (IOException e) {
+                        Log.e(ERROR_TAG, e.getMessage());
+                    } finally {
+                        HTTPRequestQueueSingleton.getInstance(BookListDBManager.this.getContext()).finishRequest(BookListDBManager.this.table);
                     }
+
+                    return super.parseNetworkResponse(response);
                 }
 
-                HTTPRequestQueueSingleton.getInstance(this.getContext()).finishRequest(this.getClass().getName());
-            });
+                @Override
+                protected VolleyError parseNetworkError(VolleyError volleyError) {
+                    HTTPRequestQueueSingleton.getInstance(BookListDBManager.this.getContext()).finishRequest(BookListDBManager.this.table);
 
+                    return super.parseNetworkError(volleyError);
+                }
+            };
+
+            HTTPRequestQueueSingleton.getInstance(this.getContext()).addToRequestQueue(this.table, request);
             this.waitForResponse();
 
             BookListType type;

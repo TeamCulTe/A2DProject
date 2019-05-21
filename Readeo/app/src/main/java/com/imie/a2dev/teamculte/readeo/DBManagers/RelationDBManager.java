@@ -77,7 +77,7 @@ public abstract class RelationDBManager extends DBManager {
         param.put(this.ids[1], String.valueOf(secId));
         param.put(APIManager.TEST, "1");
 
-        this.requestString(Request.Method.PUT, url, null, param);
+        super.requestString(Request.Method.PUT, url, null, param);
         this.waitForResponse();
     }
 }

@@ -212,10 +212,10 @@ public final class UserDBManagerTest extends CommonDBManagerTest {
         String availablePseudo = "_plop_";
         String availableEmail = "_plop_";
         
-        assertFalse(this.manager.isAvailableMySQL(PSEUDO, TEST_PSEUDO));
-        assertFalse(this.manager.isAvailableMySQL(EMAIL, TEST_EMAIL));
         assertTrue(this.manager.isAvailableMySQL(PSEUDO, availablePseudo));
         assertTrue(this.manager.isAvailableMySQL(EMAIL, availableEmail));
+        assertFalse(this.manager.isAvailableMySQL(PSEUDO, TEST_PSEUDO));
+        assertFalse(this.manager.isAvailableMySQL(EMAIL, TEST_EMAIL));
     }
 
     @Test

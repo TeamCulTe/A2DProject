@@ -6,14 +6,11 @@ import android.util.Log;
 import com.android.volley.Request;
 import com.imie.a2dev.teamculte.readeo.APIManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.DBManager;
-import com.imie.a2dev.teamculte.readeo.DBManagers.RelationDBManager;
-import com.imie.a2dev.teamculte.readeo.DBManagers.SimpleDBManager;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.CommonDBSchema;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.security.InvalidParameterException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -102,7 +99,7 @@ public final class UpdaterUtils {
 
                     UpdaterUtils.performDbUpdates(syncDataMap, manager);
 
-                    HTTPRequestQueueSingleton.getInstance(manager.getContext()).finishRequest(manager.getClass().getName());
+                    HTTPRequestQueueSingleton.getInstance(manager.getContext()).finishRequest(manager.getTable());
                 });
     }
     
@@ -173,7 +170,7 @@ public final class UpdaterUtils {
                     Log.e(JSON_TAG, e.getMessage());
                 } finally {
                     HTTPRequestQueueSingleton.getInstance(manager.getContext()).finishRequest(
-                            manager.getClass().getName());
+                            manager.getTable());
                 }
             });
         }
@@ -188,7 +185,7 @@ public final class UpdaterUtils {
                     Log.e(JSON_TAG, e.getMessage());
                 } finally {
                     HTTPRequestQueueSingleton.getInstance(manager.getContext()).finishRequest(
-                            manager.getClass().getName());
+                            manager.getTable());
                 }
             });
         }

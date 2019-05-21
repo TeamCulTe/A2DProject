@@ -230,7 +230,7 @@ public final class WriterDBManager extends RelationDBManager {
 
         param.put(APIManager.TEST, "1");
 
-        this.requestString(Request.Method.DELETE, url, null, param);
+        super.requestString(Request.Method.DELETE, url, null, param);
     }
 
     @Override

@@ -100,7 +100,7 @@ public abstract class SimpleDBManager extends DBManager {
         param.put(this.ids[0], String.valueOf(id));
         param.put(APIManager.TEST, "1");
 
-        this.requestString(Request.Method.PUT, url, null, param);
+        super.requestString(Request.Method.PUT, url, null, param);
         this.waitForResponse();
     }
 }

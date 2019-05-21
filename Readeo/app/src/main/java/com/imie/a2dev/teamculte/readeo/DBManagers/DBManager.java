@@ -6,11 +6,14 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
 import android.util.Log;
+import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.VolleyLog;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.RequestFuture;
 import com.android.volley.toolbox.StringRequest;
 import com.imie.a2dev.teamculte.readeo.APIManager;
 import com.imie.a2dev.teamculte.readeo.App;
@@ -223,7 +226,7 @@ public abstract class DBManager {
     public void waitForResponse() {
         HTTPRequestQueueSingleton httpRequestQueueSingleton = HTTPRequestQueueSingleton.getInstance(this.context);
 
-        while (httpRequestQueueSingleton.hasRequestPending(this.getClass().getName())) {
+        while (httpRequestQueueSingleton.hasRequestPending(this.table)) {
         }
     }
 
@@ -295,7 +298,7 @@ public abstract class DBManager {
                 }
             }
 
-            HTTPRequestQueueSingleton.getInstance(DBManager.this.context).finishRequest(this.getClass().getName());
+            HTTPRequestQueueSingleton.getInstance(DBManager.this.context).finishRequest(this.table);
         });
     }
 
@@ -321,7 +324,7 @@ public abstract class DBManager {
                 Log.e(JSON_TAG, e.getMessage());
             }
 
-            HTTPRequestQueueSingleton.getInstance(DBManager.this.context).finishRequest(this.getClass().getName());
+            HTTPRequestQueueSingleton.getInstance(DBManager.this.context).finishRequest(this.table);
         });
     }
 
@@ -365,7 +368,7 @@ public abstract class DBManager {
                 successListener,
                 new OnRequestError());
 
-        HTTPRequestQueueSingleton.getInstance(this.context).addToRequestQueue(this.getClass().getName(),
+        HTTPRequestQueueSingleton.getInstance(this.context).addToRequestQueue(this.table,
                 jsonArrayRequest);
     }
 
@@ -382,21 +385,20 @@ public abstract class DBManager {
                                        Response.Listener<String> successListener,
                                        final Map<String, String> params) {
         if (successListener == null) {
-            successListener = response -> HTTPRequestQueueSingleton.getInstance(DBManager.this.context).finishRequest(this.getClass().getName());
+            successListener = response -> HTTPRequestQueueSingleton.getInstance(DBManager.this.context).finishRequest(this.table);
         }
 
         StringRequest stringRequest = new StringRequest(method, url, successListener, new OnRequestError())
         {
             @Override
-            protected Map<String, String> getParams()
-            {
+            protected Map<String, String> getParams() {
                 return params;
             }
         };
 
-        HTTPRequestQueueSingleton.getInstance(this.context).addToRequestQueue(this.getClass().getName(), stringRequest);
+        HTTPRequestQueueSingleton.getInstance(this.context).addToRequestQueue(this.table, stringRequest);
     }
-
+    
     /**
      * Opens and set the SQLiteDatabase.
      */
@@ -434,7 +436,7 @@ public abstract class DBManager {
         public void onErrorResponse(VolleyError error) {
             HTTPRequestQueueSingleton requestQueueSingleton =
                     HTTPRequestQueueSingleton.getInstance(DBManager.this.context);
-            requestQueueSingleton.finishRequest(DBManager.this.getClass().getName());
+            requestQueueSingleton.finishRequest(DBManager.this.getTable());
 
             String statusCode = (error.networkResponse != null) ? String.valueOf(error.networkResponse.statusCode) :
                     "unexpected";

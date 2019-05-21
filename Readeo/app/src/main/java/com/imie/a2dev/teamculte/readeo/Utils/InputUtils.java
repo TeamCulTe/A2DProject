@@ -34,7 +34,7 @@ public abstract class InputUtils {
      * Defines the valid password regex pattern.
      */
     private static final Pattern PASSWORD_PATTERN = 
-            Pattern.compile("((?=.*[a-z])(?=.*\\\\d)(?=.*[A-Z])(?=.*[@#$%!]).{8,20})");
+            Pattern.compile("[a-zA-Z0-9]{8,20}");
 
     /**
      * Checks the validity of the pseudo (match to pattern and is available).
@@ -43,7 +43,7 @@ public abstract class InputUtils {
      */
     public static InputError validatePseudo(String pseudo) {
         InputError error = InputError.NO_ERROR;
-        UserDBManager manager = new UserDBManager(App.getAppContext());
+        UserDBManager manager = ManagerHolderUtils.getInstance().getUserDBManager();
         
         if (!InputUtils.validateFormat(pseudo, PSEUDO_PATTERN)) {
             error = InputError.PSEUDO_FORMAT;
@@ -61,7 +61,7 @@ public abstract class InputUtils {
      */
     public static InputError validateEmail(String email) {
         InputError error = InputError.NO_ERROR;
-        UserDBManager manager = new UserDBManager(App.getAppContext());
+        UserDBManager manager = ManagerHolderUtils.getInstance().getUserDBManager();
 
         if (!InputUtils.validateFormat(email, EMAIL_PATTERN)) {
             error = InputError.EMAIL_FORMAT;
@@ -83,7 +83,7 @@ public abstract class InputUtils {
         
         if (!InputUtils.validateFormat(password, PASSWORD_PATTERN)) {
             error = InputError.PASSWORD_FORMAT;
-        } else if (password.equals(confirmation)) {
+        } else if (!password.equals(confirmation)) {
             error = InputError.PASSWORD_MATCH;
         }
         
