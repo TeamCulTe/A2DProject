@@ -6,7 +6,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
 import android.util.Log;
-import com.android.volley.AuthFailureError;
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -198,40 +197,9 @@ public final class CityDBManager extends SimpleDBManager {
      * @return The loaded city.
      */
     public City loadMySQL(int idCity) {
-        final City city = new City();
         String url = this.baseUrl + APIManager.READ + ID + "=" + idCity;
-        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null, null, null) {
-            @Override
-            protected Response<JSONArray> parseNetworkResponse(NetworkResponse response) {
-                try {
-                    JSONArray jsonArray = new JSONArray(new String(response.data,
-                            HttpHeaderParser.parseCharset(response.headers)));
-                    JSONObject object = jsonArray.getJSONObject(0);
-
-                    city.init(object);
-                } catch (JSONException e) {
-                    Log.e(JSON_TAG, e.getMessage());
-                } catch (IOException e) {
-                    Log.e(ERROR_TAG, e.getMessage());
-                } finally {
-                    HTTPRequestQueueSingleton.getInstance(CityDBManager.this.getContext()).finishRequest(CityDBManager.this.table);
-                }
-
-                return super.parseNetworkResponse(response);
-            }
-
-            @Override
-            protected VolleyError parseNetworkError(VolleyError volleyError) {
-                HTTPRequestQueueSingleton.getInstance(CityDBManager.this.getContext()).finishRequest(CityDBManager.this.table);
-
-                return super.parseNetworkError(volleyError);
-            }
-        };
-
-        HTTPRequestQueueSingleton.getInstance(this.getContext()).addToRequestQueue(this.table, request);
-        this.waitForResponse();
-
-        return (city.isEmpty()) ? null : city;
+        
+        return this.loadFromUrlMySQL(url);
     }
 
     /**
@@ -240,8 +208,18 @@ public final class CityDBManager extends SimpleDBManager {
      * @return The loaded city.
      */
     public City loadMySQL(String cityName) {
-        final City city = new City(cityName);
         String url = this.baseUrl + APIManager.READ + NAME + "=" + cityName;
+        
+        return this.loadFromUrlMySQL(url);
+    }
+
+    /**
+     * Loads a city from MySQL database.
+     * @param url The url to query to get the entity.
+     * @return The loaded city.
+     */
+    public City loadFromUrlMySQL(String url) {
+        final City city = new City();
         JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null, null, null) {
             @Override
             protected Response<JSONArray> parseNetworkResponse(NetworkResponse response) {

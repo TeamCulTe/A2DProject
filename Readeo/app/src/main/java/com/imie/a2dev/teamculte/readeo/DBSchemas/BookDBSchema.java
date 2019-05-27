@@ -1,7 +1,5 @@
 package com.imie.a2dev.teamculte.readeo.DBSchemas;
 
-import com.imie.a2dev.teamculte.readeo.DBManagers.CategoryDBManager;
-
 /**
  * Class used to define the book database schema.
  * Useful to separate logic code from managers and structures.

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.AuthorDBSchema;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.BookDBSchema;
+import com.imie.a2dev.teamculte.readeo.DBSchemas.BookListDBSchema;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.BookListTypeDBSchema;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.CategoryDBSchema;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.CityDBSchema;
@@ -13,6 +14,7 @@ import com.imie.a2dev.teamculte.readeo.DBSchemas.QuoteDBSchema;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.ReviewDBSchema;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.UserDBSchema;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.WriterDBSchema;
+import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.BookList;
 import com.readystatesoftware.sqliteasset.SQLiteAssetHelper;
 
 /**
@@ -50,10 +52,6 @@ public final class DBHandler extends SQLiteAssetHelper {
         db.execSQL(AuthorDBSchema.AUTHOR_TABLE_STATEMENT);
         db.execSQL(String.format(INDEX_STATEMENT, AuthorDBSchema.NAME, AuthorDBSchema.TABLE, AuthorDBSchema.NAME));
 
-        //Book table
-        db.execSQL(BookDBSchema.BOOK_TABLE_STATEMENT);
-        db.execSQL(String.format(INDEX_STATEMENT, BookDBSchema.TITLE, BookDBSchema.TABLE, BookDBSchema.TITLE));
-
         //BookListType table
         db.execSQL(BookListTypeDBSchema.BOOK_LIST_TYPE_TABLE_STATEMENT);
         db.execSQL(String.format(INDEX_STATEMENT,
@@ -67,6 +65,10 @@ public final class DBHandler extends SQLiteAssetHelper {
                 CategoryDBSchema.NAME,
                 CategoryDBSchema.TABLE,
                 CategoryDBSchema.NAME));
+
+        //Book table
+        db.execSQL(BookDBSchema.BOOK_TABLE_STATEMENT);
+        db.execSQL(String.format(INDEX_STATEMENT, BookDBSchema.TITLE, BookDBSchema.TABLE, BookDBSchema.TITLE));
 
         //City table
         db.execSQL(CityDBSchema.CITY_TABLE_STATEMENT);
@@ -98,12 +100,16 @@ public final class DBHandler extends SQLiteAssetHelper {
 
         //Writer table
         db.execSQL(WriterDBSchema.WRITER_TABLE_STATEMENT);
+
+        //BookList table
+        db.execSQL(BookListTypeDBSchema.BOOK_LIST_TYPE_TABLE_STATEMENT);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int i, int i1) {
         db.execSQL(String.format(DROP_STATEMENT, AuthorDBSchema.TABLE));
         db.execSQL(String.format(DROP_STATEMENT, BookDBSchema.TABLE));
+        db.execSQL(String.format(DROP_STATEMENT, BookListDBSchema.TABLE));
         db.execSQL(String.format(DROP_STATEMENT, BookListTypeDBSchema.TABLE));
         db.execSQL(String.format(DROP_STATEMENT, CategoryDBSchema.TABLE));
         db.execSQL(String.format(DROP_STATEMENT, CityDBSchema.TABLE));

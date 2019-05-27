@@ -8,7 +8,6 @@ import android.support.annotation.NonNull;
 import android.util.Log;
 import com.imie.a2dev.teamculte.readeo.App;
 import com.imie.a2dev.teamculte.readeo.DBManagers.CategoryDBManager;
-import com.imie.a2dev.teamculte.readeo.DBManagers.DBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.QuoteDBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.ReviewDBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.WriterDBManager;

@@ -4,7 +4,6 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,7 +11,7 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
-import com.imie.a2dev.teamculte.readeo.DBManagers.BookListDBManager;
+import com.imie.a2dev.teamculte.readeo.Views.CountrySpinnerAdapter;
 import com.imie.a2dev.teamculte.readeo.DBManagers.CityDBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.CountryDBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.ProfileDBManager;
@@ -22,11 +21,8 @@ import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Country;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.PrivateUser;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Profile;
 import com.imie.a2dev.teamculte.readeo.R;
-import com.imie.a2dev.teamculte.readeo.Utils.HTTPRequestQueueSingleton;
-import com.imie.a2dev.teamculte.readeo.Utils.InputError;
+import com.imie.a2dev.teamculte.readeo.Utils.Enums.InputError;
 import com.imie.a2dev.teamculte.readeo.Utils.InputUtils;
-
-import static com.imie.a2dev.teamculte.readeo.DBSchemas.UserDBSchema.PSEUDO;
 
 /**
  * Fragment giving the ability to create a new account (by proving the needed info).
@@ -126,7 +122,6 @@ public class SignInFragment extends Fragment implements View.OnClickListener {
      * @param view The fragment's view.
      */
     private void init(View view) {
-        new UserDBManager(this.getContext()).loadMySQL(100);
         this.editPseudo = view.findViewById(R.id.edit_pseudo);
         this.editEmail = view.findViewById(R.id.edit_email);
         this.editPassword = view.findViewById(R.id.edit_password);

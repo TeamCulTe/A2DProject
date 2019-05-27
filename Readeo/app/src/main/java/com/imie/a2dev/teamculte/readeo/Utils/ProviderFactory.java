@@ -12,6 +12,7 @@ import com.imie.a2dev.teamculte.readeo.Providers.ReadeoContentProvider;
 import com.imie.a2dev.teamculte.readeo.Providers.ReviewContentProvider;
 import com.imie.a2dev.teamculte.readeo.Providers.UserContentProvider;
 import com.imie.a2dev.teamculte.readeo.Providers.WriterContentProvider;
+import com.imie.a2dev.teamculte.readeo.Utils.Enums.EntityType;
 
 /**
  * Factory class used to return a desired instance of ReadeoContentProvider (depending on the desired entities).

@@ -6,21 +6,10 @@ import android.database.sqlite.SQLiteException;
 import android.util.Log;
 import com.android.volley.Request;
 import com.imie.a2dev.teamculte.readeo.APIManager;
-import com.imie.a2dev.teamculte.readeo.DBSchemas.CommonDBSchema;
-import com.imie.a2dev.teamculte.readeo.Utils.HTTPRequestQueueSingleton;
-import com.imie.a2dev.teamculte.readeo.Utils.UpdateDataElement;
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import static com.imie.a2dev.teamculte.readeo.DBSchemas.CommonDBSchema.UPDATE;
 import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.SQLITE_TAG;
 
 /**

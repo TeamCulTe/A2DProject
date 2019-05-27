@@ -75,6 +75,7 @@ public final class BookDBManagerTest extends CommonDBManagerTest {
 
         toCreate = this.manager.loadSQLite(MYSQL_TEST_ID);
 
+        assertNotNull(toCreate);
         assertEquals(TEST_TITLE, toCreate.getTitle());
         assertEquals(TEST_COVER, toCreate.getCover());
         assertEquals(TEST_SUMMARY, toCreate.getSummary());
@@ -99,6 +100,7 @@ public final class BookDBManagerTest extends CommonDBManagerTest {
 
         Book toCreate = this.manager.loadSQLite(MYSQL_TEST_ID);
 
+        assertNotNull(toCreate);
         assertEquals(TEST_TITLE, toCreate.getTitle());
         assertEquals(TEST_COVER, toCreate.getCover());
         assertEquals(TEST_SUMMARY, toCreate.getSummary());

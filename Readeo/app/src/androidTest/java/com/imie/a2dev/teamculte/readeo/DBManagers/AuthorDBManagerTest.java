@@ -129,9 +129,11 @@ public final class AuthorDBManagerTest extends CommonDBManagerTest {
     @Test
     public void testLoadMySQL() {
         Author created = this.initTestEntityMySQL();
-        Author loaded = this.manager.loadMySQL(created.getId());
 
         assertNotNull(created);
+        
+        Author loaded = this.manager.loadMySQL(created.getId());
+        
         assertNotNull(loaded);
         assertEquals(created.getId(), loaded.getId());
         assertEquals(created.getName(), loaded.getName());

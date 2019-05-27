@@ -5,7 +5,6 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
 import android.util.Log;
-import com.imie.a2dev.teamculte.readeo.DBManagers.DBManager;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.QuoteDBSchema;
 import lombok.Getter;
 import lombok.Setter;

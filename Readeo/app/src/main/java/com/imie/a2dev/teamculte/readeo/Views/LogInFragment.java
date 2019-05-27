@@ -1,6 +1,7 @@
 package com.imie.a2dev.teamculte.readeo.Views;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -68,7 +69,6 @@ public class LogInFragment extends Fragment implements View.OnClickListener {
                 
                 break;
             default:
-                return;
         }
     }
 
@@ -95,7 +95,7 @@ public class LogInFragment extends Fragment implements View.OnClickListener {
                 this.password.getText().toString());
         
         if (loaded != null) {
-            // TODO: Store the user somewhere ?
+            
             return true;
         }
         

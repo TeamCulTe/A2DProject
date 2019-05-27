@@ -12,6 +12,7 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.JsonArrayRequest;
+import com.android.volley.toolbox.StringRequest;
 import com.imie.a2dev.teamculte.readeo.APIManager;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Country;
 import com.imie.a2dev.teamculte.readeo.Utils.HTTPRequestQueueSingleton;
@@ -141,30 +142,6 @@ public final class CountryDBManager extends SimpleDBManager {
         super.importFromMySQL(baseUrl + APIManager.READ);
     }
 
-    /**
-     * Creates a country entity in MySQL database.
-     * @param country The country to create.
-     */
-    public void createMySQL(final Country country) {
-        String url = this.baseUrl + APIManager.CREATE;
-        Map<String, String> param = new HashMap<>();
-
-        param.put(ID, String.valueOf(country.getId()));
-        param.put(NAME, country.getName());
-
-        super.requestString(Request.Method.POST, url, response -> {
-            Pattern pattern = Pattern.compile("^\\d.$");
-
-            if (pattern.matcher(response).find()) {
-                country.setId(Integer.valueOf(response));
-            }
-            
-            HTTPRequestQueueSingleton.getInstance(this.getContext()).finishRequest(this.getTable());
-        }, param);
-
-        this.waitForResponse();
-    }
-
     @Override
     public void createSQLite(@NonNull JSONObject entity) {
         try {
@@ -181,87 +158,72 @@ public final class CountryDBManager extends SimpleDBManager {
     }
 
     /**
+     * Creates a country entity in MySQL database.
+     * @param country The country to create.
+     */
+    public void createMySQL(final Country country) {
+        String url = this.baseUrl + APIManager.CREATE;
+        Map<String, String> param = new HashMap<>();
+
+        param.put(ID, String.valueOf(country.getId()));
+        param.put(NAME, country.getName());
+
+        StringRequest request = new StringRequest(Request.Method.POST, url, null, null) {
+            @Override
+            protected Map<String, String> getParams() {
+                return param;
+            }
+
+            @Override
+            protected VolleyError parseNetworkError(VolleyError volleyError) {
+                HTTPRequestQueueSingleton.getInstance(CountryDBManager.this.getContext()).finishRequest(CountryDBManager.this.table);
+
+                return super.parseNetworkError(volleyError);
+            }
+
+            @Override
+            protected Response<String> parseNetworkResponse(NetworkResponse response) {
+                try {
+                    String resp = new String(response.data, HttpHeaderParser.parseCharset(response.headers));
+                    Pattern pattern = Pattern.compile("^\\d.$");
+
+                    if (pattern.matcher(resp).find()) {
+                        country.setId(Integer.valueOf(resp));
+                    }
+                } catch (IOException e) {
+                    Log.e(ERROR_TAG, e.getMessage());
+                } finally {
+                    HTTPRequestQueueSingleton.getInstance(CountryDBManager.this.getContext()).finishRequest(CountryDBManager.this.table);
+                }
+
+                return super.parseNetworkResponse(response);
+            }
+        };
+
+        HTTPRequestQueueSingleton.getInstance(this.getContext()).addToRequestQueue(this.table, request);
+        this.waitForResponse();
+    }
+
+    /**
      * Loads a country from MySQL database.
      * @param idCountry The id of the country.
      * @return The loaded country.
      */
     public Country loadMySQL(int idCountry) {
-        final Country country = new Country();
         String url = this.baseUrl + APIManager.READ + ID + "=" + idCountry;
-        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null, null, null) {
-            @Override
-            protected Response<JSONArray> parseNetworkResponse(NetworkResponse response) {
-                try {
-                    JSONArray jsonArray = new JSONArray(new String(response.data,
-                            HttpHeaderParser.parseCharset(response.headers)));
-                    JSONObject object = jsonArray.getJSONObject(0);
-
-                    country.init(object);
-                } catch (JSONException e) {
-                    Log.e(JSON_TAG, e.getMessage());
-                } catch (IOException e) {
-                    Log.e(ERROR_TAG, e.getMessage());
-                } finally {
-                    HTTPRequestQueueSingleton.getInstance(CountryDBManager.this.getContext()).finishRequest(CountryDBManager.this.table);
-                }
-
-                return super.parseNetworkResponse(response);
-            }
-
-            @Override
-            protected VolleyError parseNetworkError(VolleyError volleyError) {
-                HTTPRequestQueueSingleton.getInstance(CountryDBManager.this.getContext()).finishRequest(CountryDBManager.this.table);
-
-                return super.parseNetworkError(volleyError);
-            }
-        };
-
-        HTTPRequestQueueSingleton.getInstance(this.getContext()).addToRequestQueue(this.table, request);
-        this.waitForResponse();
-
-        return (country.isEmpty()) ? null : country;
+        
+        return this.loadFromUrlMySQL(url);
     }
 
     /**
      * Loads a country from MySQL database.
-     * @param countryName The id of the country.
+     * @param countryName The name of the country.
      * @return The loaded country.
      */
     public Country loadMySQL(String countryName) {
-        final Country country = new Country(countryName);
         String url = this.baseUrl + APIManager.READ + NAME + "=" + countryName;
-        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null, null, null) {
-            @Override
-            protected Response<JSONArray> parseNetworkResponse(NetworkResponse response) {
-                try {
-                    JSONArray jsonArray = new JSONArray(new String(response.data,
-                            HttpHeaderParser.parseCharset(response.headers)));
-                    JSONObject object = jsonArray.getJSONObject(0);
-
-                    country.init(object);
-                } catch (JSONException e) {
-                    Log.e(JSON_TAG, e.getMessage());
-                } catch (IOException e) {
-                    Log.e(ERROR_TAG, e.getMessage());
-                } finally {
-                    HTTPRequestQueueSingleton.getInstance(CountryDBManager.this.getContext()).finishRequest(CountryDBManager.this.table);
-                }
-
-                return super.parseNetworkResponse(response);
-            }
-
-            @Override
-            protected VolleyError parseNetworkError(VolleyError volleyError) {
-                HTTPRequestQueueSingleton.getInstance(CountryDBManager.this.getContext()).finishRequest(CountryDBManager.this.table);
-
-                return super.parseNetworkError(volleyError);
-            }
-        };
-
-        HTTPRequestQueueSingleton.getInstance(this.getContext()).addToRequestQueue(this.table, request);
-        this.waitForResponse();
-
-        return (country.isEmpty()) ? null : country;
+        
+        return this.loadFromUrlMySQL(url);
     }
 
     @Override
@@ -283,5 +245,46 @@ public final class CountryDBManager extends SimpleDBManager {
 
             return false;
         }
+    }
+
+    /**
+     * Loads a country from MySQL database.
+     * @param url The url used to get the entity.
+     * @return The loaded country.
+     */
+    private Country loadFromUrlMySQL(String url) {
+        final Country country = new Country();
+        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null, null, null) {
+            @Override
+            protected Response<JSONArray> parseNetworkResponse(NetworkResponse response) {
+                try {
+                    JSONArray jsonArray = new JSONArray(new String(response.data,
+                            HttpHeaderParser.parseCharset(response.headers)));
+                    JSONObject object = jsonArray.getJSONObject(0);
+
+                    country.init(object);
+                } catch (JSONException e) {
+                    Log.e(JSON_TAG, e.getMessage());
+                } catch (IOException e) {
+                    Log.e(ERROR_TAG, e.getMessage());
+                } finally {
+                    HTTPRequestQueueSingleton.getInstance(CountryDBManager.this.getContext()).finishRequest(CountryDBManager.this.table);
+                }
+
+                return super.parseNetworkResponse(response);
+            }
+
+            @Override
+            protected VolleyError parseNetworkError(VolleyError volleyError) {
+                HTTPRequestQueueSingleton.getInstance(CountryDBManager.this.getContext()).finishRequest(CountryDBManager.this.table);
+
+                return super.parseNetworkError(volleyError);
+            }
+        };
+
+        HTTPRequestQueueSingleton.getInstance(this.getContext()).addToRequestQueue(this.table, request);
+        this.waitForResponse();
+
+        return (country.isEmpty()) ? null : country;
     }
 }

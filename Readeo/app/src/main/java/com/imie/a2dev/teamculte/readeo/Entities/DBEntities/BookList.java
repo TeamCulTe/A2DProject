@@ -1,13 +1,14 @@
 package com.imie.a2dev.teamculte.readeo.Entities.DBEntities;
 
+import android.content.Context;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import com.imie.a2dev.teamculte.readeo.App;
 import com.imie.a2dev.teamculte.readeo.DBManagers.BookDBManager;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.BookListDBSchema;
 import com.imie.a2dev.teamculte.readeo.DBManagers.BookListTypeDBManager;
-import com.imie.a2dev.teamculte.readeo.DBManagers.DBManager;
 import lombok.Getter;
 import lombok.Setter;
 import org.json.JSONArray;
@@ -17,7 +18,11 @@ import org.json.JSONObject;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookListDBSchema.BOOK;
+import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookListDBSchema.TYPE;
+import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookListDBSchema.USER;
 import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.JSON_TAG;
+import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.SQLITE_TAG;
 
 /**
  * Final class representing a book list from a specific user.
@@ -33,15 +38,13 @@ public final class BookList extends DBEntity {
     /**
      * Stores the books associated to the book list.
      */
-    private List<Book> books;
+    private List<Book> books =  new ArrayList<>();
 
     /**
      * BookList's default constructor.
      */
     public BookList() {
         super();
-
-        this.books = new ArrayList<>();
     }
 
     /**
@@ -77,9 +80,48 @@ public final class BookList extends DBEntity {
         this.init(result);
     }
 
+    /**
+     * BookList's full filled constructor providing all its attributes values from a cursor object.
+     * @param result The cursor.
+     */
+    public BookList(Cursor result) {
+        this.init(result, true);
+    }
+    
+    /**
+     * BookList's full filled constructor providing all its attributes values from a cursor object.
+     * @param result The cursor.
+     * @param closed Defines if the cursor should be closed or not.
+     */
+    public BookList(Cursor result, boolean closed) {
+        this.books = new ArrayList<>();
+        
+        this.init(result,  closed);
+    }
+
     @Override
     protected void init(@NonNull Cursor result, boolean close) {
-        // Not used as the BookList is a MySQL entity, not an SQLite one.
+        try {
+            if (result.getPosition() == -1) {
+                result.moveToNext();
+            }
+
+            Context context = App.getAppContext();
+            BookDBManager bookDBManager = new BookDBManager(context);
+
+            this.setId(result.getInt(result.getColumnIndex(USER)));
+            this.setType(new BookListTypeDBManager(context).loadSQLite(result.getInt(result.getColumnIndex(TYPE))));
+            
+            do {
+                this.getBooks().add(bookDBManager.loadSQLite(result.getInt(result.getColumnIndex(BOOK))));
+            } while (result.moveToNext() && result.getInt(result.getColumnIndex(TYPE)) == this.getType().getId());
+
+            if (close) {
+                result.close();
+            }
+        } catch (SQLiteException e) {
+            Log.e(SQLITE_TAG, e.getMessage());
+        }
     }
 
     /**
@@ -100,7 +142,7 @@ public final class BookList extends DBEntity {
                 }
             }
 
-            this.id = first.getInt(BookListDBSchema.USER);
+            this.id = first.getInt(USER);
             this.type = new BookListTypeDBManager(App.getAppContext()).loadSQLite(first.getInt(BookListDBSchema.TYPE));
         } catch (JSONException e) {
             Log.e(JSON_TAG, e.getMessage());

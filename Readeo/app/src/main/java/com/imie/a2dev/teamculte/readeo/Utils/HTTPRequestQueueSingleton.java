@@ -1,7 +1,6 @@
 package com.imie.a2dev.teamculte.readeo.Utils;
 
 import android.content.Context;
-import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;

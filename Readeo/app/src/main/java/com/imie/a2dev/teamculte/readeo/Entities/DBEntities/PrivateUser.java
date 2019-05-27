@@ -2,7 +2,6 @@ package com.imie.a2dev.teamculte.readeo.Entities.DBEntities;
 
 import android.support.annotation.NonNull;
 import android.util.Log;
-import com.imie.a2dev.teamculte.readeo.DBManagers.DBManager;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.UserDBSchema;
 import lombok.Getter;
 import lombok.Setter;

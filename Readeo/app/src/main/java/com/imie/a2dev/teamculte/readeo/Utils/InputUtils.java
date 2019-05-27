@@ -1,7 +1,7 @@
 package com.imie.a2dev.teamculte.readeo.Utils;
 
-import com.imie.a2dev.teamculte.readeo.App;
 import com.imie.a2dev.teamculte.readeo.DBManagers.UserDBManager;
+import com.imie.a2dev.teamculte.readeo.Utils.Enums.InputError;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -28,7 +28,7 @@ public abstract class InputUtils {
      * Defines the valid city regex pattern.
      */
     private static final Pattern CITY_PATTERN = 
-            Pattern.compile("^[a-zA-Z\\u0080-\\u024F]+(?:([\\ \\-\\']|(\\.\\ ))[a-zA-Z\\u0080-\\u024F]+)*$");
+            Pattern.compile("^[a-zA-Z\\u0080-\\u024F]+(?:([ \\-']|(\\. ))[a-zA-Z\\u0080-\\u024F]+)*$");
 
     /**
      * Defines the valid password regex pattern.

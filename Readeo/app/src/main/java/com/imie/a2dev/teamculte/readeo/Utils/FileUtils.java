@@ -22,22 +22,16 @@ public abstract class FileUtils {
      * @throws IOException Exception if file not found.
      */
     public static void copy(File source, File destination) throws IOException {
-        FileInputStream fIs = new FileInputStream(source);
 
-        try {
-            FileOutputStream fOS = new FileOutputStream(destination);
-            try {
+        try (FileInputStream fIs = new FileInputStream(source)) {
+            try (FileOutputStream fOS = new FileOutputStream(destination)) {
                 int len;
                 byte[] buf = new byte[1024];
 
                 while ((len = fIs.read(buf)) > 0) {
                     fOS.write(buf, 0, len);
                 }
-            } finally {
-                fOS.close();
             }
-        } finally {
-            fIs.close();
         }
     }
 
@@ -49,9 +43,8 @@ public abstract class FileUtils {
      * @throws IOException Exception if file not found.
      */
     public static void unzip(File source, File destination,@Nullable String fileName) throws IOException {
-        ZipInputStream zIS = new ZipInputStream(new BufferedInputStream(new FileInputStream(source)));
-        
-        try {
+
+        try (ZipInputStream zIS = new ZipInputStream(new BufferedInputStream(new FileInputStream(source)))) {
             ZipEntry zE;
             int count;
 
@@ -64,23 +57,17 @@ public abstract class FileUtils {
                 if (!dir.isDirectory() && !dir.mkdirs()) {
                     throw new FileNotFoundException("Failed to ensure directory: " + dir.getAbsolutePath());
                 }
-                
+
                 if (zE.isDirectory()) {
                     continue;
                 }
-                
-                FileOutputStream fOS = new FileOutputStream(file);
 
-                try {
+                try (FileOutputStream fOS = new FileOutputStream(file)) {
                     while ((count = zIS.read(buffer)) != -1) {
                         fOS.write(buffer, 0, count);
                     }
-                } finally {
-                    fOS.close();
                 }
             }
-        } finally {
-            zIS.close();
         }
     }
 

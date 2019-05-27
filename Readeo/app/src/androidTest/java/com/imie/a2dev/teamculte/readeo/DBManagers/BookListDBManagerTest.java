@@ -5,6 +5,9 @@ import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.BookList;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.BookListType;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Category;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.PrivateUser;
+import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.PublicUser;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -14,6 +17,9 @@ import java.util.List;
 import java.util.Map;
 
 import static com.imie.a2dev.teamculte.readeo.DBManagers.DBManager.MYSQL_TEST_ID;
+import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookListDBSchema.BOOK;
+import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookListDBSchema.TYPE;
+import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookListDBSchema.USER;
 import static org.junit.Assert.*;
 
 public final class BookListDBManagerTest extends CommonDBManagerTest {
@@ -26,6 +32,46 @@ public final class BookListDBManagerTest extends CommonDBManagerTest {
      * Defines the default number of different book list types.
      */
     private final int TEST_TYPES_NUMBER = 3;
+
+    /**
+     * Defines the default user id for SQLite test entity loading.
+     */
+    private final int TEST_USER_LOAD = 1;
+
+    /**
+     * Defines the default type id for SQLite test entity loading.
+     */
+    private final int TEST_TYPE_LOAD = 6;
+
+    /**
+     * Defines the default number of books when loading the test entity.
+     */
+    private final int TEST_BOOK_NUMBER = 3;
+
+    /**
+     * Defines the default number of book lists when loading the user book lists.
+     */
+    private final int TEST_USER_BOOKLIST_NUMBER = 2;
+
+    /**
+     * Defines the default number of books when loading the user book lists.
+     */
+    private final int TEST_USER_BOOK_NUMBER = 4;
+
+    /**
+     * Defines the default user id for SQLite test entity.
+     */
+    private final int TEST_USER = 3;
+
+    /**
+     * Defines the default book id for SQLite test entity.
+     */
+    private final int[] TEST_BOOKS = {1, 2, 3};
+
+    /**
+     * Defines the default type id for SQLite test entity.
+     */
+    private final int TEST_TYPE = 4;
 
     /**
      * Stores the associated manager used to interact with the database.
@@ -48,6 +94,90 @@ public final class BookListDBManagerTest extends CommonDBManagerTest {
         }
     }
 
+    @Test
+    public void testEntityCreateSQLite() {
+        BookDBManager bookDBManager = new BookDBManager(this.context);
+        BookListType type = new BookListTypeDBManager(this.context).loadMySQL(TEST_TYPE);
+        ArrayList<Book> books = new ArrayList<>();
+        
+        for (int id : TEST_BOOKS) {
+            books.add(bookDBManager.loadSQLite(id));
+        }
+        
+        BookList bookList = new BookList(TEST_USER, type, books);
+        
+        this.manager.createSQLite(bookList);
+        
+        BookList created = this.manager.loadSQLite(TEST_USER, TEST_TYPE);
+        
+        assertNotNull(created);
+        assertEquals(bookList.getId(), created.getId());
+        assertEquals(bookList.getType().getId(), created.getType().getId());
+        
+        for (int i = 0; i < created.getBooks().size(); i++) {
+            assertEquals(bookList.getBooks().get(i).getId(), created.getBooks().get(i).getId());
+        }
+    }
+
+    @Test
+    public void testJSONCreateSQLite() throws JSONException {
+        for (int id : TEST_BOOKS) {
+            JSONObject jsonObject = new JSONObject();
+
+            jsonObject.put(USER, TEST_USER);
+            jsonObject.put(TYPE, TEST_TYPE);
+            jsonObject.put(BOOK, id);
+            
+            this.manager.createSQLite(jsonObject);
+        }
+
+        assertEquals(ENTITY_NB + TEST_BOOKS.length, this.manager.countSQLite());
+
+        BookList created = this.manager.loadSQLite(TEST_USER, TEST_TYPE);
+
+        assertNotNull(created);
+        assertEquals(TEST_USER, created.getId());
+        assertEquals(TEST_TYPE, created.getType().getId());
+
+        for (int i = 0; i < created.getBooks().size(); i++) {
+            assertEquals(TEST_BOOKS[i], created.getBooks().get(i).getId());
+        }
+    }
+
+    @Test
+    public void testUpdateSQLite() {
+        BookList loaded = this.manager.loadSQLite(TEST_USER_LOAD, TEST_TYPE_LOAD);
+        
+        assertNotNull(loaded);
+        
+        int bookNb = loaded.getBooks().size();
+        
+        loaded.getBooks().remove(0);
+        
+        this.manager.updateSQLite(loaded);
+        
+        loaded = this.manager.loadSQLite(TEST_USER_LOAD, TEST_TYPE_LOAD);
+        
+        assertNotNull(loaded);
+        assertEquals(bookNb - 1, loaded.getBooks().size());
+    }
+
+    @Test
+    public void testLoadSQLite() {
+        BookList loaded = this.manager.loadSQLite(TEST_USER_LOAD, TEST_TYPE_LOAD);
+        
+        assertNotNull(loaded);
+        assertEquals(TEST_BOOK_NUMBER ,loaded.getBooks().size());
+    }
+
+    @Test
+    public void testUserLoadSQLite() {
+        List<BookList> bookLists = this.manager.loadUserSQLite(TEST_USER_LOAD);
+        
+        assertNotNull(bookLists);
+        assertEquals(TEST_USER_BOOKLIST_NUMBER, bookLists.size());
+    }
+    
     @Test
     public void testCreateEntityMySQL() {
         this.testedMySQL = true;

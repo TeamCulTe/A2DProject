@@ -1,6 +1,9 @@
 package com.imie.a2dev.teamculte.readeo.DBManagers;
 
+import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
 import android.util.Log;
 import com.android.volley.NetworkResponse;
@@ -31,6 +34,7 @@ import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookListDBSchema.TYPE;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookListDBSchema.USER;
 import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.ERROR_TAG;
 import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.JSON_TAG;
+import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.SQLITE_TAG;
 
 /**
  * Manager class used to manage the book list entities from databases.
@@ -44,8 +48,92 @@ public final class BookListDBManager extends RelationDBManager {
         super(context);
 
         this.table = TABLE;
-        this.ids = new String[]{USER, BOOK, TYPE};
+        this.ids = new String[]{USER, TYPE, BOOK};
         this.baseUrl = APIManager.API_URL + APIManager.BOOK_LISTS;
+    }
+
+    /**
+     * From a java entity creates the associated entity into the database.
+     * @param entity The model to store into the database.
+     * @return true if success else false.
+     */
+    public boolean createSQLite(@NonNull BookList entity) {
+        try {
+            ContentValues data;
+
+            for (Book book : entity.getBooks()) {
+                data = new ContentValues();
+
+                data.put(USER, entity.getId());
+                data.put(TYPE, entity.getType().getId());
+                data.put(BOOK, book.getId());
+                
+                this.database.insertOrThrow(this.table, null, data);
+            }
+
+            return true;
+        } catch (SQLiteException e) {
+            Log.e(SQLITE_TAG, e.getMessage());
+
+            return false;
+        }
+    }
+
+    /**
+     * From a java entity updates the associated entity into the database.
+     * @param entity The model to update into the database.
+     * @return true if success else false.
+     */
+    public boolean updateSQLite(@NonNull BookList entity) {
+        try {
+            this.deleteSQLite(entity.getId(), entity.getType().getId());
+
+            return this.createSQLite(entity);
+        } catch (SQLiteException e) {
+            Log.e(SQLITE_TAG, e.getMessage());
+
+            return false;
+        }
+    }
+
+    /**
+     * From a user id, returns the associated list of java entities.
+     * @param idUser The id of the user.
+     * @return The loaded list of entities if exists else null.
+     */
+    public List<BookList> loadUserSQLite(int idUser) {
+        String query = String.format(SIMPLE_QUERY_ALL, this.table, USER);
+        Cursor cursor = this.database.rawQuery(query, new String[]{String.valueOf(idUser)});
+        List<BookList> bookLists = new ArrayList<>();
+        
+        if (cursor == null || cursor.getCount() == 0) {
+            return null;
+        }
+        
+        while (cursor.moveToNext()) {
+            bookLists.add(new BookList(cursor, false));
+        }
+        
+        cursor.close();
+        
+        return bookLists;
+    }
+
+    /**
+     * From a couple of ids, returns the associated java entity.
+     * @param idUser The id of the user.
+     * @param idType The id of the book list type.
+     * @return The loaded list of entities if exists else null.
+     */
+    public BookList loadSQLite(int idUser, int idType) {
+        String query = String.format(DOUBLE_QUERY_ALL, this.table, USER, TYPE);
+        Cursor cursor = this.database.rawQuery(query, new String[]{String.valueOf(idUser), String.valueOf(idType)});
+
+        if (cursor == null || cursor.getCount() == 0) {
+            return null;
+        }
+        
+        return new BookList(cursor);
     }
 
     /**
@@ -59,9 +147,9 @@ public final class BookListDBManager extends RelationDBManager {
             Map<String, String> param = new HashMap<>();
 
             param.put(USER, String.valueOf(bookList.getId()));
-            param.put(BOOK, String.valueOf(book.getId()));
             param.put(TYPE, String.valueOf(bookList.getType().getId()));
-
+            param.put(BOOK, String.valueOf(book.getId()));
+            
             super.requestString(Request.Method.POST, url, null, param);
         }
     }
@@ -77,8 +165,8 @@ public final class BookListDBManager extends RelationDBManager {
         Map<String, String> param = new HashMap<>();
 
         param.put(USER, String.valueOf(idUser));
-        param.put(BOOK, String.valueOf(idBook));
         param.put(TYPE, String.valueOf(idType));
+        param.put(BOOK, String.valueOf(idBook));
 
         super.requestString(Request.Method.POST, url, null, param);
     }
@@ -299,12 +387,24 @@ public final class BookListDBManager extends RelationDBManager {
 
     @Override
     public void createSQLite(@NonNull JSONObject entity) {
-        // Nothing to do as the entity is not a SQLite one.
+        try {
+            ContentValues data = new ContentValues();
+
+            data.put(USER, entity.getInt(USER));
+            data.put(BOOK, entity.getInt(BOOK));
+            data.put(TYPE, entity.getInt(TYPE));
+
+            this.database.insertOrThrow(this.table, null, data);
+        } catch (SQLiteException e) {
+            Log.e(SQLITE_TAG, e.getMessage());
+        } catch (JSONException e) {
+            Log.e(SQLITE_TAG, e.getMessage());
+        }
     }
 
     @Override
     public boolean updateSQLite(@NonNull JSONObject entity) {
-        // Nothing to do as the entity is not a SQLite one.
+        // Nothing to do as the entity is not supposed to be updated..
         return false;
     }
 }
