@@ -10,6 +10,7 @@ import org.junit.Test;
 
 import static com.imie.a2dev.teamculte.readeo.DBManagers.DBManager.MYSQL_TEST_ID;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookListTypeDBSchema.ID;
+import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookListTypeDBSchema.IMAGE;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookListTypeDBSchema.NAME;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -20,6 +21,11 @@ public final class BookListTypeDBManagerTest extends CommonDBManagerTest {
      * Stores the default name given for tests.
      */
     protected final String TEST_NAME = "testName";
+
+    /**
+     * Stores the default image given for tests.
+     */
+    protected final String TEST_IMAGE = "testImage";
 
     /**
      * Stores the associated manager used to interact with the database.
@@ -44,11 +50,16 @@ public final class BookListTypeDBManagerTest extends CommonDBManagerTest {
 
     @Test
     public void testEntityCreateSQLite() {
-        BookListType toCreate = new BookListType(MYSQL_TEST_ID, TEST_NAME);
+        BookListType toCreate = new BookListType(MYSQL_TEST_ID, TEST_NAME, TEST_IMAGE);
 
         assertTrue(this.manager.createSQLite(toCreate));
         assertEquals(ENTITY_NB + 1, this.manager.countSQLite());
-        assertEquals(TEST_NAME, this.manager.loadSQLite(MYSQL_TEST_ID).getName());
+        
+        toCreate = this.manager.loadSQLite(MYSQL_TEST_ID);
+
+        assertNotNull(toCreate);
+        assertEquals(TEST_NAME, toCreate.getName());
+        assertEquals(TEST_IMAGE, toCreate.getImage());
     }
 
     @Test
@@ -57,11 +68,17 @@ public final class BookListTypeDBManagerTest extends CommonDBManagerTest {
 
         jsonObject.put(ID, MYSQL_TEST_ID);
         jsonObject.put(NAME, TEST_NAME);
+        jsonObject.put(IMAGE, TEST_IMAGE);
 
         this.manager.createSQLite(jsonObject);
 
         assertEquals(ENTITY_NB + 1, this.manager.countSQLite());
-        assertEquals(TEST_NAME, this.manager.loadSQLite(MYSQL_TEST_ID).getName());
+        
+        BookListType created = this.manager.loadSQLite(MYSQL_TEST_ID);
+        
+        assertNotNull(created);
+        assertEquals(TEST_NAME, created.getName());
+        assertEquals(TEST_IMAGE, created.getImage());
     }
 
     @Test
@@ -69,10 +86,17 @@ public final class BookListTypeDBManagerTest extends CommonDBManagerTest {
         BookListType updated = this.manager.loadSQLite(ENTITY_NB);
 
         assertNotNull(updated);
+        
         updated.setName(TEST_NAME);
+        updated.setImage(TEST_IMAGE);
+        
         this.manager.updateSQLite(updated);
-
-        assertEquals(TEST_NAME, this.manager.loadSQLite(ENTITY_NB).getName());
+        
+        updated = this.manager.loadSQLite(ENTITY_NB);
+        
+        assertNotNull(updated);
+        assertEquals(TEST_NAME, updated.getName());
+        assertEquals(TEST_IMAGE, updated.getImage());
     }
 
     @Test
@@ -81,10 +105,15 @@ public final class BookListTypeDBManagerTest extends CommonDBManagerTest {
 
         jsonObject.put(ID, ENTITY_NB);
         jsonObject.put(NAME, TEST_NAME);
+        jsonObject.put(IMAGE, TEST_IMAGE);
 
         this.manager.updateSQLite(jsonObject);
+        
+        BookListType updated = this.manager.loadSQLite(ENTITY_NB);
 
-        assertEquals(TEST_NAME, this.manager.loadSQLite(ENTITY_NB).getName());
+        assertNotNull(updated);
+        assertEquals(TEST_NAME, updated.getName());
+        assertEquals(TEST_IMAGE, updated.getImage());
     }
 
     @Test
@@ -114,6 +143,7 @@ public final class BookListTypeDBManagerTest extends CommonDBManagerTest {
         assertNotNull(imported);
         assertEquals(bookListType.getId(), imported.getId());
         assertEquals(bookListType.getName(), imported.getName());
+        assertEquals(bookListType.getImage(), imported.getImage());
     }
 
     @Test
@@ -123,6 +153,7 @@ public final class BookListTypeDBManagerTest extends CommonDBManagerTest {
         assertNotNull(created);
         assertEquals(MYSQL_TEST_ID, created.getId());
         assertEquals(TEST_NAME, created.getName());
+        assertEquals(TEST_IMAGE, created.getImage());
     }
 
     @Test
@@ -134,15 +165,18 @@ public final class BookListTypeDBManagerTest extends CommonDBManagerTest {
         assertNotNull(loaded);
         assertEquals(created.getId(), loaded.getId());
         assertEquals(created.getName(), loaded.getName());
+        assertEquals(created.getImage(), loaded.getImage());
     }
 
     @Test
     public void testGetFieldSQLite() {
         BookListType type = this.manager.loadSQLite(ENTITY_NB);
         String loadedName = this.manager.getFieldSQLite(NAME, ENTITY_NB);
-
+        String loadedImage = this.manager.getFieldSQLite(IMAGE, ENTITY_NB);
+        
         assertNotNull(type);
         assertEquals(type.getName(), loadedName);
+        assertEquals(type.getImage(), loadedImage);
     }
 
     @Test
@@ -181,12 +215,13 @@ public final class BookListTypeDBManagerTest extends CommonDBManagerTest {
      * Creates a test book list type into the database for testing.
      * @param id The id of the book list type to create.
      * @param name The name of the book list type to create.
+     * @param image The image of the book list type to create.
      * @return The created Book list type.
      */
-    protected BookListType initTestEntityMySQL(int id, String name) {
+    protected BookListType initTestEntityMySQL(int id, String name, String image) {
         this.testedMySQL = true;
 
-        this.manager.createMySQL(new BookListType(id, name));
+        this.manager.createMySQL(new BookListType(id, name, image));
 
         return this.manager.loadMySQL(id);
     }
@@ -196,7 +231,7 @@ public final class BookListTypeDBManagerTest extends CommonDBManagerTest {
      * @return The created book list type.
      */
     protected BookListType initTestEntityMySQL() {
-        return this.initTestEntityMySQL(MYSQL_TEST_ID, TEST_NAME);
+        return this.initTestEntityMySQL(MYSQL_TEST_ID, TEST_NAME, TEST_IMAGE);
     }
 
     /**

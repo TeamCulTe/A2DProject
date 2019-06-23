@@ -15,6 +15,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -191,7 +192,7 @@ public final class UpdaterUtils {
         }
 
         for (int[] elt : syncDataMap.get(TO_DELETE_KEY)) {
-            manager.deleteSQLite(elt[0], elt[1]);
+            manager.deleteSQLite(elt);
         }
     }
 
@@ -203,12 +204,15 @@ public final class UpdaterUtils {
      * @return The map of elements (create, update, delete).
      */
     private static Map<String, List<int[]>> getSyncData(List<UpdateDataElement> local, List<UpdateDataElement> distant) {
-        if (local.size() == 0 || distant.size() == 0 || local.get(0).size() != distant.get(0).size()) {
+        if (distant.size() == 0 || (local.size() != 0 && local.get(0).size() != distant.get(0).size())) {
             return null;
         }
         
+        if (local.size() == 0) {
+            local.add(new UpdateDataElement(new int[distant.size()], new Date()));
+        }
+        
         boolean same;
-        boolean added;
         UpdateDataElement localElement;
         UpdateDataElement distantElement;
 
@@ -220,9 +224,8 @@ public final class UpdaterUtils {
         ArrayList<int[]> toDeleteData = new ArrayList<>();
 
         //TODO: Factorize the method + fix elements order issue => having same elements in toCreate and toDelete.
-        for (int i = 0, j = 0; i < distant.size() && j < local.size(); i++, j++) {
+        for (int i = 0, j = 0; i < distant.size() || j < local.size(); i++, j++) {
             same = true;
-            added = false;
             localElement = local.get(j);
             distantElement = distant.get(i);
 
@@ -232,19 +235,17 @@ public final class UpdaterUtils {
                     // If the id from distant is higher than the local one, element has to be deleted (unless we
                     // reached the last local element, which means it should be created).
                     if (distantElement.getId(k) > localElement.getId(k)) {
-                        element.setIds(Arrays.copyOfRange(localElement.getIds(), 0, syncIdNb));
-                        
-                        if (toCreateData.stream().anyMatch(a -> Arrays.equals(a, element.getIds()))) {
-                            toDeleteData.add(element.getIds());
-                        }
-                    } else {
                         element.setIds(Arrays.copyOfRange(distantElement.getIds(), 0, syncIdNb));
-
-                        if (toDeleteData.stream().anyMatch(a -> Arrays.equals(a, element.getIds()))) {
+                        
+                        if (!toDeleteData.stream().anyMatch(a -> Arrays.equals(a, element.getIds()))) {
                             toCreateData.add(element.getIds());
                         }
-                        
-                        added = true;
+                    } else {
+                        element.setIds(Arrays.copyOfRange(localElement.getIds(), 0, syncIdNb));
+
+                        if (!toCreateData.stream().anyMatch(a -> Arrays.equals(a, element.getIds()))) {
+                            toDeleteData.add(element.getIds());
+                        }
                     }
 
                     same = false;
@@ -258,13 +259,10 @@ public final class UpdaterUtils {
                 if (localElement.getDateUpdated().before(distantElement.getDateUpdated())) {
                     toUpdateData.add(Arrays.copyOfRange(distantElement.getIds(), 0, syncIdNb));
                 }
-            } else {
-                if (added) {
-                    j--;
-                } else {
-                    i--;
-                }
             }
+            
+            i = (i + 1 == distant.size() && j + 1 < local.size()) ? i - 1 : i;
+            j = (j + 1 == local.size()) && i + 1 < distant.size() ? j - 1 : j;
         }
         
         syncDataMap.put(TO_CREATE_KEY, toCreateData);

@@ -298,6 +298,33 @@ public final class BookDBManager extends SimpleDBManager {
     }
 
     /**
+     * Queries all the books from the database paginated.
+     * @param limit The limit index.
+     * @param offset The offset.
+     * @return The list of books.
+     */
+    public List<Book> queryAllPaginatedSQLite(int limit, int offset) {
+        List<Book> books = new ArrayList<>();
+
+        try {
+            Cursor result = this.database.rawQuery(String.format(this.QUERY_ALL_PAGINATED, this.table, limit, offset),
+                    null);
+
+            if (result.getCount() > 0) {
+                do {
+                    books.add(new Book(result, false));
+                } while (result.moveToNext());
+            }
+
+            result.close();
+        } catch (SQLiteException e) {
+            Log.e(SQLITE_TAG, e.getMessage());
+        }
+
+        return books;
+    }
+
+    /**
      * From the API, query the list of all books from the MySQL database in order to stores it into the SQLite
      * database.
      */
@@ -323,7 +350,7 @@ public final class BookDBManager extends SimpleDBManager {
         param.put(SUMMARY, book.getSummary());
         param.put(DATE, String.valueOf(book.getDatePublished()));
 
-        StringRequest request = new StringRequest(Request.Method.POST, url, null, null) {
+        StringRequest request = new StringRequest(Request.Method.POST, url, null, new OnRequestError()) {
             @Override
             protected Map<String, String> getParams() {
                 return param;
@@ -369,7 +396,7 @@ public final class BookDBManager extends SimpleDBManager {
         final int idCategory[] = new int[1];
 
         String url = this.baseUrl + APIManager.READ + ID + "=" + idBook;
-        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null, null, null) {
+        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null, null, new OnRequestError()) {
             @Override
             protected Response<JSONArray> parseNetworkResponse(NetworkResponse response) {
                 try {

@@ -156,7 +156,7 @@ public final class CategoryDBManager extends SimpleDBManager {
 
         param.put(NAME, category.getName());
 
-        StringRequest request = new StringRequest(Request.Method.POST, url, null, null) {
+        StringRequest request = new StringRequest(Request.Method.POST, url, null, new OnRequestError()) {
             @Override
             protected Map<String, String> getParams() {
                 return param;
@@ -200,7 +200,7 @@ public final class CategoryDBManager extends SimpleDBManager {
     public Category loadMySQL(int idCategory) {
         final Category category = new Category();
         String url = this.baseUrl + APIManager.READ + ID + "=" + idCategory;
-        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null, null, null) {
+        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null, null, new OnRequestError()) {
             @Override
             protected Response<JSONArray> parseNetworkResponse(NetworkResponse response) {
                 try {

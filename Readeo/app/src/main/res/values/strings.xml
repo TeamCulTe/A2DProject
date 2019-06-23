@@ -15,7 +15,7 @@
     <string name="author">Author</string>
     <string name="date">Date</string>
     <string name="summary">Summary</string>
-    <string name="quotes_number_replacement">Quotes (%s)</string>
+    <string name="quotes_number_replacement">Quotes (%d)</string>
     <string name="review">Review</string>
     <string name="review_s_content">Review\'s content</string>
     <string name="edit_a_review">Edit a review</string>
@@ -28,4 +28,20 @@
     <string name="delete_account">Delete account ?</string>
     <string name="updating">Updating...</string>
     <string name="update_progress">%d out of %d</string>
+    <string name="social">Social</string>
+    <string name="library">Library</string>
+    <string name="login_error">The login information are not valid</string>
+    <string name="offline_dialog_message">There is not network access, would you like to use the offline mode ?</string>
+    <string name="offline_never_connected">You should at least connect once on the app in order to use the 
+        offline mode</string> 
+    <string name="yes">yes</string>
+    <string name="no">no</string>
+    <string name="account_settings">Account settings</string>
+    <string name="form_fields_invalid">The fields contains some error(s) : pseudo or email already taken or 
+        missing fields.</string>
+    <string name="not_available_offline">Feature unavailable while offline</string>
+    <string name="account_successfully_created">Account successfully created</string>
+    <string name="not_communicated">Not communicated</string>
+    <string name="separator">-</string>
+    <string name="reading_list_title_replacement">Reading list : %s</string>
 </resources>

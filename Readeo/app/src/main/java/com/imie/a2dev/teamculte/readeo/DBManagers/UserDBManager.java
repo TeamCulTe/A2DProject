@@ -14,6 +14,8 @@ import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.imie.a2dev.teamculte.readeo.APIManager;
+import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.BookList;
+import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.BookListType;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.PrivateUser;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.PublicUser;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Review;
@@ -234,7 +236,7 @@ public final class UserDBManager extends SimpleDBManager {
         param.put(CITY, String.valueOf(user.getCity().getId()));
         param.put(COUNTRY, String.valueOf(user.getCountry().getId()));
 
-        StringRequest request = new StringRequest(Request.Method.POST, url, null, null) {
+        StringRequest request = new StringRequest(Request.Method.POST, url, null, new OnRequestError()) {
             @Override
             protected Map<String, String> getParams() {
                 return param;
@@ -317,7 +319,7 @@ public final class UserDBManager extends SimpleDBManager {
         final int idCity[] = new int[1];
         final int idCountry[] = new int[1];
         String url = this.baseUrl + APIManager.READ + ID + "=" + idUser;
-        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null, null, null) {
+        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null, null, new OnRequestError()) {
             @Override
             protected Response<JSONArray> parseNetworkResponse(NetworkResponse response) {
                 try {
@@ -361,7 +363,7 @@ public final class UserDBManager extends SimpleDBManager {
         user.setCity(new CityDBManager(this.getContext()).loadMySQL(idCity[0]));
         user.setReviews(new ReviewDBManager(this.getContext()).loadUserMySQL(user.getId()));
         user.setBookLists(new BookListDBManager(this.getContext()).loadUserMySQL(user.getId()));
-
+        
         return (user.isEmpty()) ? null : user;
     }
 
@@ -377,7 +379,7 @@ public final class UserDBManager extends SimpleDBManager {
         final int idProfile[] = new int[1];
         final int idCity[] = new int[1];
         final int idCountry[] = new int[1];
-        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null, null, null) {
+        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null, null, new OnRequestError()) {
             @Override
             protected Response<JSONArray> parseNetworkResponse(NetworkResponse response) {
                 try {
@@ -415,11 +417,14 @@ public final class UserDBManager extends SimpleDBManager {
         HTTPRequestQueueSingleton.getInstance(this.getContext()).addToRequestQueue(this.table, request);
         this.waitForResponse();
         
-        user.setProfile(new ProfileDBManager(this.getContext()).loadMySQL(idProfile[0]));
-        user.setCountry(new CountryDBManager(this.getContext()).loadMySQL(idCountry[0]));
-        user.setCity(new CityDBManager(this.getContext()).loadMySQL(idCity[0]));
-        user.setReviews(new ReviewDBManager(this.getContext()).loadUserMySQL(user.getId()));
-        user.setBookLists(new BookListDBManager(this.getContext()).loadUserMySQL(user.getId()));
+        
+        user.setProfile(new ProfileDBManager(this.getContext()).loadSQLite(idProfile[0]));
+        user.setCountry(new CountryDBManager(this.getContext()).loadSQLite(idCountry[0]));
+        user.setCity(new CityDBManager(this.getContext()).loadSQLite(idCity[0]));
+        user.setReviews(new ReviewDBManager(this.getContext()).loadUserSQLite(user.getId()));
+        user.setBookLists(new BookListDBManager(this.getContext()).loadUserSQLite(user.getId()));
+        
+        this.initBookLists(user);
 
         return (user.isEmpty()) ? null : user;
     }
@@ -434,7 +439,7 @@ public final class UserDBManager extends SimpleDBManager {
         final boolean[] available = new boolean[1];
         String url = this.baseUrl + APIManager.READ + field + "=" + value + "&public=1";
         available[0] = true;
-        StringRequest request = new StringRequest(Request.Method.GET, url, null, null) {
+        StringRequest request = new StringRequest(Request.Method.GET, url, null, new OnRequestError()) {
             @Override
             protected VolleyError parseNetworkError(VolleyError volleyError) {
                 HTTPRequestQueueSingleton.getInstance(UserDBManager.this.getContext()).finishRequest(UserDBManager.this.table);
@@ -543,6 +548,28 @@ public final class UserDBManager extends SimpleDBManager {
             Log.e(SQLITE_TAG, e.getMessage());
 
             return false;
+        }
+    }
+
+    /**
+     * Initializes the user book lists if empty.
+     */
+    private void initBookLists(PrivateUser user) {
+        List<BookListType> types = new BookListTypeDBManager(this.getContext()).queryAllSQLite();
+        Map<String, BookList> bookLists = new HashMap<>();
+        BookList bookList;
+        
+        if (user.getBookLists() == null) {
+            user.setBookLists(bookLists);
+        }
+        
+        for (BookListType type : types) {
+            if (!user.getBookLists().containsKey(type.getName())) {
+                bookList = new BookList(type);
+
+                bookList.setId(user.getId());
+                user.getBookLists().put(type.getName(), bookList);
+            }
         }
     }
 }

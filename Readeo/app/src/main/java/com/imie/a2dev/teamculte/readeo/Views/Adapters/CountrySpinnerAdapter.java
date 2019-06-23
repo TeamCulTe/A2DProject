@@ -1,4 +1,4 @@
-package com.imie.a2dev.teamculte.readeo.Views;
+package com.imie.a2dev.teamculte.readeo.Views.Adapters;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -77,5 +77,15 @@ public final class CountrySpinnerAdapter extends ArrayAdapter {
     @Override
     public Country getItem(int i) {
         return this.items.get(i);
+    }
+
+    public int getPosition(Country item) {
+        for (int i = 0; i < this.items.size(); i++) {
+            if ((item.getName().equals(this.items.get(i).getName()))) {
+                return i;
+            }
+        }
+        
+        return -1;
     }
 }

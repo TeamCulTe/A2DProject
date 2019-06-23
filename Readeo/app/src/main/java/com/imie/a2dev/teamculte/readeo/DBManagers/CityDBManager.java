@@ -155,7 +155,7 @@ public final class CityDBManager extends SimpleDBManager {
 
         param.put(NAME, city.getName());
 
-        StringRequest request = new StringRequest(Request.Method.POST, url, null, null) {
+        StringRequest request = new StringRequest(Request.Method.POST, url, null, new OnRequestError()) {
             @Override
             protected Map<String, String> getParams() {
                 return param;
@@ -220,7 +220,7 @@ public final class CityDBManager extends SimpleDBManager {
      */
     public City loadFromUrlMySQL(String url) {
         final City city = new City();
-        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null, null, null) {
+        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null, null, new OnRequestError()) {
             @Override
             protected Response<JSONArray> parseNetworkResponse(NetworkResponse response) {
                 try {

@@ -9,9 +9,14 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
-import com.imie.a2dev.teamculte.readeo.Views.CountrySpinnerAdapter;
+import android.widget.Toast;
+import com.imie.a2dev.teamculte.readeo.DBManagers.BookListTypeDBManager;
+import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.BookList;
+import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.BookListType;
+import com.imie.a2dev.teamculte.readeo.Views.Adapters.CountrySpinnerAdapter;
 import com.imie.a2dev.teamculte.readeo.DBManagers.CityDBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.CountryDBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.ProfileDBManager;
@@ -24,10 +29,14 @@ import com.imie.a2dev.teamculte.readeo.R;
 import com.imie.a2dev.teamculte.readeo.Utils.Enums.InputError;
 import com.imie.a2dev.teamculte.readeo.Utils.InputUtils;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 /**
  * Fragment giving the ability to create a new account (by proving the needed info).
  */
-public class SignInFragment extends Fragment implements View.OnClickListener {
+public final class SignInFragment extends Fragment implements View.OnClickListener {
     /**
      * Stores the pseudo edit field.
      */
@@ -87,6 +96,11 @@ public class SignInFragment extends Fragment implements View.OnClickListener {
      * Stores the spinner's adapter.
      */
     private CountrySpinnerAdapter adapter;
+
+    /**
+     * Stores the loading progress bar.
+     */
+    private ProgressBar progressLoading;
     
     /**
      * SignInFragment's default constructor.
@@ -106,13 +120,20 @@ public class SignInFragment extends Fragment implements View.OnClickListener {
 
     @Override
     public void onClick(View view) {
+        this.progressLoading.setVisibility(View.VISIBLE);
+        
         if (this.checkInputs()) {
             this.saveData();
+
+            this.progressLoading.setVisibility(View.GONE);
+            
+            Toast.makeText(this.getContext(), R.string.account_successfully_created, Toast.LENGTH_SHORT).show();
             
             FragmentManager fragmentManager = this.getActivity().getSupportFragmentManager();
             FragmentTransaction transaction = fragmentManager.beginTransaction();
             
             transaction.replace(R.id.content_fragment, new LogInFragment());
+            transaction.addToBackStack(null);
             transaction.commit();
         }
     }
@@ -122,6 +143,7 @@ public class SignInFragment extends Fragment implements View.OnClickListener {
      * @param view The fragment's view.
      */
     private void init(View view) {
+        this.progressLoading = view.findViewById(R.id.progress_loading);
         this.editPseudo = view.findViewById(R.id.edit_pseudo);
         this.editEmail = view.findViewById(R.id.edit_email);
         this.editPassword = view.findViewById(R.id.edit_password);
@@ -232,6 +254,8 @@ public class SignInFragment extends Fragment implements View.OnClickListener {
      */
     private void saveData() {
         CityDBManager cityDBManager = new CityDBManager(this.getContext());
+        ProfileDBManager profileDBManager = new ProfileDBManager(this.getContext());
+        UserDBManager userDBManager = new UserDBManager(this.getContext());
         String pseudo = this.editPseudo.getText().toString();
         String email = this.editEmail.getText().toString();
         String password = this.editPassword.getText().toString();
@@ -245,12 +269,15 @@ public class SignInFragment extends Fragment implements View.OnClickListener {
             city = new City(cityName);
             
             cityDBManager.createMySQL(city);
+            cityDBManager.createSQLite(city);
         }
-        
-        new ProfileDBManager(this.getContext()).createMySQL(profile);
+
+        profileDBManager.createMySQL(profile);
+        profileDBManager.createSQLite(profile);
         
         PrivateUser usr = new PrivateUser(pseudo, password, email, profile, country, city, null, null);
-        
-        new UserDBManager(this.getContext()).createMySQL(usr);
+
+        userDBManager.createMySQL(usr);
+        userDBManager.createSQLite(usr);
     }
 }

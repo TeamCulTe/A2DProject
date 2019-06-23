@@ -4,12 +4,14 @@ import android.database.Cursor;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.io.Serializable;
+
 /**
  * Abstract class defining the base attributes of the database entities classes.
  */
 @Getter
 @Setter
-public abstract class DBEntity {
+public abstract class DBEntity implements Serializable {
     /**
      * Stores the database identifier.
      */

@@ -20,6 +20,7 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.ERROR_TAG;
 import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.JSON_TAG;
 import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.SERVER_TAG;
 import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.SQLITE_TAG;
@@ -207,6 +208,11 @@ public abstract class DBManager {
         HTTPRequestQueueSingleton httpRequestQueueSingleton = HTTPRequestQueueSingleton.getInstance(this.context);
 
         while (httpRequestQueueSingleton.hasRequestPending(this.table)) {
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                Log.e(ERROR_TAG, "Error while sleeping the thread.");
+            }
         }
     }
 

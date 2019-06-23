@@ -262,7 +262,7 @@ public final class QuoteDBManager extends SimpleDBManager {
         param.put(BOOK, String.valueOf(quote.getBookId()));
         param.put(QUOTE, quote.getQuote());
 
-        StringRequest request = new StringRequest(Request.Method.POST, url, null, null) {
+        StringRequest request = new StringRequest(Request.Method.POST, url, null, new OnRequestError()) {
             @Override
             protected Map<String, String> getParams() {
                 return param;
@@ -306,7 +306,7 @@ public final class QuoteDBManager extends SimpleDBManager {
     public Quote loadMySQL(int idQuote) {
         final Quote quote = new Quote();
         String url = this.baseUrl + APIManager.READ + ID + "=" + idQuote;
-        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null, null, null) {
+        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null, null, new OnRequestError()) {
             @Override
             protected Response<JSONArray> parseNetworkResponse(NetworkResponse response) {
                 try {

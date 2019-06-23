@@ -253,7 +253,7 @@ public final class ReviewDBManager extends RelationDBManager {
     public Review loadMySQL(int idUser, int idBook) {
         final Review review = new Review();
         String url = this.baseUrl + APIManager.READ + USER + "=" + idUser + "&" + BOOK + "=" + idBook;
-        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null, null, null) {
+        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null, null, new OnRequestError()) {
             @Override
             protected Response<JSONArray> parseNetworkResponse(NetworkResponse response) {
                 try {
@@ -295,7 +295,7 @@ public final class ReviewDBManager extends RelationDBManager {
     public List<Review> loadUserMySQL(int idUser) {
         final List<Review> reviews = new ArrayList<>();
         String url = this.baseUrl + APIManager.READ + USER + "=" + idUser;
-        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null, null, null) {
+        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null, null, new OnRequestError()) {
             @Override
             protected Response<JSONArray> parseNetworkResponse(NetworkResponse response) {
                 try {

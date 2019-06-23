@@ -160,7 +160,7 @@ public final class ProfileDBManager extends SimpleDBManager {
         param.put(AVATAR, profile.getAvatar());
         param.put(DESCRIPTION, profile.getDescription());
 
-        StringRequest request = new StringRequest(Request.Method.POST, url, null, null) {
+        StringRequest request = new StringRequest(Request.Method.POST, url, null, new OnRequestError()) {
             @Override
             protected Map<String, String> getParams() {
                 return param;
@@ -204,7 +204,7 @@ public final class ProfileDBManager extends SimpleDBManager {
     public Profile loadMySQL(int idProfile) {
         final Profile profile = new Profile();
         String url = this.baseUrl + APIManager.READ + ID + "=" + idProfile;
-        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null, null, null) {
+        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null, null, new OnRequestError()) {
             @Override
             protected Response<JSONArray> parseNetworkResponse(NetworkResponse response) {
                 try {

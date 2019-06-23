@@ -9,7 +9,7 @@ import com.imie.a2dev.teamculte.readeo.R;
 /**
  * Activity managing the user log in or sign in.
  */
-public class IndexActivity extends AppCompatActivity {
+public final class IndexActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -20,6 +20,7 @@ public class IndexActivity extends AppCompatActivity {
         FragmentTransaction transaction = fragmentManager.beginTransaction();
 
         transaction.replace(R.id.content_fragment, new LogInFragment());
+        transaction.addToBackStack(null);
         transaction.commit();
     }
 }

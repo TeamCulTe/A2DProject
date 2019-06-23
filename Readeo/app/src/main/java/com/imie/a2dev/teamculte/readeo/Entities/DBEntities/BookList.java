@@ -50,6 +50,16 @@ public final class BookList extends DBEntity {
     /**
      * BookList's nearly full filled constructor providing all attributes values except for the database related ones.
      * @param type The BookListType to set.
+     */
+    public BookList(BookListType type) {
+        super();
+
+        this.type = type;
+    }
+
+    /**
+     * BookList's nearly full filled constructor providing all attributes values except for the database related ones.
+     * @param type The BookListType to set.
      * @param books The list of books to set.
      */
     public BookList(BookListType type, List<Book> books) {
@@ -147,5 +157,38 @@ public final class BookList extends DBEntity {
         } catch (JSONException e) {
             Log.e(JSON_TAG, e.getMessage());
         }
+    }
+
+    /**
+     * Checks if the book list contains the given book.
+     * @param book The book to check.
+     * @return True if the book is in the book list else false.
+     */
+    public boolean contains(Book book) {
+        for (Book elt : this.getBooks()) {
+            if (elt.getId() == book.getId()) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+
+    /**
+     * Removes a book from the book list.
+     * @param book The book to remove.
+     */
+    public void remove(Book book) {
+        int pos = 0;
+        
+        for (Book elt : this.getBooks()) {
+            if (elt.getId() == book.getId()) {
+                break;
+            }
+            
+            pos++;
+        }
+
+        this.getBooks().remove(pos);
     }
 }

@@ -168,7 +168,7 @@ public final class CountryDBManager extends SimpleDBManager {
         param.put(ID, String.valueOf(country.getId()));
         param.put(NAME, country.getName());
 
-        StringRequest request = new StringRequest(Request.Method.POST, url, null, null) {
+        StringRequest request = new StringRequest(Request.Method.POST, url, null, new OnRequestError()) {
             @Override
             protected Map<String, String> getParams() {
                 return param;
@@ -254,7 +254,7 @@ public final class CountryDBManager extends SimpleDBManager {
      */
     private Country loadFromUrlMySQL(String url) {
         final Country country = new Country();
-        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null, null, null) {
+        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null, null, new OnRequestError()) {
             @Override
             protected Response<JSONArray> parseNetworkResponse(NetworkResponse response) {
                 try {

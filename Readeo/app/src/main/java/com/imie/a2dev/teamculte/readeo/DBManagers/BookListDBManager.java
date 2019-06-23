@@ -101,22 +101,25 @@ public final class BookListDBManager extends RelationDBManager {
      * @param idUser The id of the user.
      * @return The loaded list of entities if exists else null.
      */
-    public List<BookList> loadUserSQLite(int idUser) {
+    public Map<String, BookList> loadUserSQLite(int idUser) {
         String query = String.format(SIMPLE_QUERY_ALL, this.table, USER);
         Cursor cursor = this.database.rawQuery(query, new String[]{String.valueOf(idUser)});
-        List<BookList> bookLists = new ArrayList<>();
+        BookList bookList;
+        Map<String, BookList> userBookLists = new HashMap<>();
         
         if (cursor == null || cursor.getCount() == 0) {
             return null;
         }
         
         while (cursor.moveToNext()) {
-            bookLists.add(new BookList(cursor, false));
+            bookList = new BookList(cursor, false);
+
+            userBookLists.put(bookList.getType().getName(), bookList);
         }
         
         cursor.close();
         
-        return bookLists;
+        return userBookLists;
     }
 
     /**
@@ -141,7 +144,6 @@ public final class BookListDBManager extends RelationDBManager {
      * @param bookList The book list to create.
      */
     public void createMySQL(BookList bookList) {
-
         for (Book book : bookList.getBooks()) {
             String url = this.baseUrl + APIManager.CREATE;
             Map<String, String> param = new HashMap<>();
@@ -183,7 +185,7 @@ public final class BookListDBManager extends RelationDBManager {
         final List<Integer> bookIds = new ArrayList<>();
         final int typeId[] = new int[1];
         String url = this.baseUrl + APIManager.READ + USER + "=" + idUser + "&" + TYPE + "=" + idType;
-        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null, null, null) {
+        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null, null, new OnRequestError()) {
             @Override
             protected Response<JSONArray> parseNetworkResponse(NetworkResponse response) {
                 try {
@@ -269,7 +271,7 @@ public final class BookListDBManager extends RelationDBManager {
         if (bookLists.size() == 0) {
             final List<Integer> typeIds = new ArrayList<>();
             String url = this.baseUrl + APIManager.READ + USER + "=" + idUser;
-            JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null, null, null) {
+            JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null, null, new OnRequestError()) {
                 @Override
                 protected Response<JSONArray> parseNetworkResponse(NetworkResponse response) {
                     try {

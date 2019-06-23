@@ -32,80 +32,16 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/img_avatar" />
 
-    <android.support.constraint.ConstraintLayout
-        android:id="@+id/constraint_reading_lists_block"
-        android:layout_width="0dp"
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recycler_reading_lists"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="8dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/txt_description">
-
-        <ImageView
-            android:id="@+id/img_read"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:src="@android:drawable/alert_dark_frame"
-            app:layout_constraintEnd_toStartOf="@+id/img_to_read"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <ImageView
-            android:id="@+id/img_reading"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:src="@android:drawable/alert_dark_frame"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/img_to_read"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <ImageView
-            android:id="@+id/img_to_read"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:src="@android:drawable/alert_dark_frame"
-            app:layout_constraintEnd_toStartOf="@+id/img_reading"
-            app:layout_constraintHorizontal_bias="0.5"
-            app:layout_constraintStart_toEndOf="@+id/img_read"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:id="@+id/txt_read"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/read"
-            app:layout_constraintEnd_toEndOf="@+id/img_read"
-            app:layout_constraintStart_toStartOf="@+id/img_read"
-            app:layout_constraintTop_toBottomOf="@+id/img_read" />
-
-        <TextView
-            android:id="@+id/txt_to_read"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/to_read"
-            app:layout_constraintEnd_toEndOf="@+id/img_to_read"
-            app:layout_constraintStart_toStartOf="@+id/img_to_read"
-            app:layout_constraintTop_toBottomOf="@+id/img_to_read" />
-
-        <TextView
-            android:id="@+id/txt_reading"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
-            android:text="@string/reading"
-            app:layout_constraintEnd_toEndOf="@+id/img_reading"
-            app:layout_constraintStart_toStartOf="@+id/img_reading"
-            app:layout_constraintTop_toBottomOf="@+id/img_reading" />
-    </android.support.constraint.ConstraintLayout>
+        app:layout_constraintTop_toBottomOf="@+id/txt_description" />
 
     <Button
         android:id="@+id/btn_account_settings"
@@ -115,10 +51,10 @@
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="8dp"
-        android:text="Account settings"
+        android:text="@string/account_settings"
         android:textAllCaps="false"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/constraint_reading_lists_block" />
+        app:layout_constraintTop_toBottomOf="@+id/recycler_reading_lists" />
 </android.support.constraint.ConstraintLayout>

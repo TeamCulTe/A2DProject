@@ -1,6 +1,5 @@
 package com.imie.a2dev.teamculte.readeo.Views;
 
-
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -12,15 +11,14 @@ import com.imie.a2dev.teamculte.readeo.R;
 /**
  * Fragment containing the social functionality.
  */
-public class SocialFragment extends Fragment {
+public final class SocialFragment extends Fragment {
     /**
      * SocialFragment's default constructor.
      */
     public SocialFragment() {
         // Required empty public constructor
     }
-
-
+    
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {

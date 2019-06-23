@@ -26,6 +26,11 @@ public final class BookListType extends DBEntity {
     private String name;
 
     /**
+     * Stores the book list type image.
+     */
+    private String image;
+
+    /**
      * Book list type's default constructor.
      */
     public BookListType() {
@@ -35,22 +40,26 @@ public final class BookListType extends DBEntity {
     /**
      * Book list type's nearly full filled constructor.
      * @param name The name to set.
+     * @param image The image to set.
      */
-    public BookListType(String name) {
+    public BookListType(String name, String image) {
         super();
 
         this.name = name;
+        this.image = image;
     }
 
     /**
      * Book list type's full filled constructor providing all its attributes values.
      * @param id The id to set.
      * @param name The name to set.
+     * @param image The image to set.
      */
-    public BookListType(int id, String name) {
+    public BookListType(int id, String name, String image) {
         super(id);
 
         this.name = name;
+        this.image = image;
     }
 
     /**
@@ -86,6 +95,7 @@ public final class BookListType extends DBEntity {
     public void init(@NonNull ContentValues contentValues) {
         this.id = contentValues.getAsInteger(BookListTypeDBSchema.ID);
         this.name = contentValues.getAsString(BookListTypeDBSchema.NAME);
+        this.image = contentValues.getAsString(BookListTypeDBSchema.IMAGE);
     }
     
     /**
@@ -96,6 +106,7 @@ public final class BookListType extends DBEntity {
         try {
             this.id = object.getInt(BookListTypeDBSchema.ID);
             this.name = object.getString(BookListTypeDBSchema.NAME);
+            this.image = object.getString(BookListTypeDBSchema.IMAGE);
         } catch (JSONException e) {
             Log.e(JSON_TAG, e.getMessage());
         }
@@ -110,6 +121,7 @@ public final class BookListType extends DBEntity {
 
             this.id = result.getInt(result.getColumnIndexOrThrow(BookListTypeDBSchema.ID));
             this.name = result.getString(result.getColumnIndexOrThrow(BookListTypeDBSchema.NAME));
+            this.image = result.getString(result.getColumnIndexOrThrow(BookListTypeDBSchema.IMAGE));
 
             if (close) {
                 result.close();

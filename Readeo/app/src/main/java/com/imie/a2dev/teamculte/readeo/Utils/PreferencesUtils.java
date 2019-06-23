@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import com.google.gson.Gson;
 import com.imie.a2dev.teamculte.readeo.App;
+import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.BookList;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.PrivateUser;
 
 /**
@@ -61,5 +62,23 @@ public abstract class PreferencesUtils {
         }
         
         return user;
+    }
+
+    /**
+     * Updates a book list from the user saved in the preferences.
+     * @param bookList The book list to set to the user to update.
+     */
+    public static void updateUserBookList(BookList bookList) {
+        PrivateUser user = loadUser();
+        
+        for (String type : user.getBookLists().keySet()) {
+            if (bookList.getType().getName().equals(type)) {
+                user.getBookLists().put(type, bookList);
+                
+                break;
+            }
+        }
+        
+        saveUser(user);
     }
 }

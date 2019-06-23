@@ -39,7 +39,8 @@ public abstract class ProfileDBSchema {
      * Defines the profile create table statement.
      */
     public static final String PROFILE_TABLE_STATEMENT = String.format("CREATE TABLE IF NOT EXISTS %s (%s INTEGER " +
-                    "PRIMARY KEY, %s TEXT(%s) NOT NULL, %s TEXT(%s) NOT NULL, %s DATETIME NOT NULL DEFAULT %s);",
+                    "PRIMARY KEY, %s TEXT(%s) NOT NULL DEFAULT \"\" , %s TEXT(%s) NOT NULL DEFAULT \"\", " +
+                    "%s DATETIME NOT NULL DEFAULT %s);",
             TABLE,
             ID,
             AVATAR,

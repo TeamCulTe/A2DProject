@@ -29,6 +29,7 @@ import java.util.Map;
 import java.util.regex.Pattern;
 
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookListTypeDBSchema.ID;
+import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookListTypeDBSchema.IMAGE;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookListTypeDBSchema.NAME;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookListTypeDBSchema.TABLE;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.CommonDBSchema.UPDATE;
@@ -63,6 +64,7 @@ public final class BookListTypeDBManager extends SimpleDBManager {
 
             data.put(ID, entity.getId());
             data.put(NAME, entity.getName());
+            data.put(IMAGE, entity.getImage());
             this.database.insertOrThrow(this.table, null, data);
 
             return true;
@@ -85,6 +87,7 @@ public final class BookListTypeDBManager extends SimpleDBManager {
             String[] whereArgs = new String[]{String.valueOf(entity.getId())};
 
             data.put(NAME, entity.getName());
+            data.put(IMAGE, entity.getImage());
             data.put(UPDATE, new Date().toString());
 
             return this.database.update(this.table, data, whereClause, whereArgs) != 0;
@@ -155,8 +158,9 @@ public final class BookListTypeDBManager extends SimpleDBManager {
         }
 
         param.put(NAME, type.getName());
+        param.put(IMAGE, type.getImage());
 
-        StringRequest request = new StringRequest(Request.Method.POST, url, null, null) {
+        StringRequest request = new StringRequest(Request.Method.POST, url, null, new OnRequestError()) {
             @Override
             protected Map<String, String> getParams() {
                 return param;
@@ -200,7 +204,7 @@ public final class BookListTypeDBManager extends SimpleDBManager {
     public BookListType loadMySQL(int idType) {
         final BookListType bookListType = new BookListType();
         String url = this.baseUrl + APIManager.READ + ID + "=" + idType;
-        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null, null, null) {
+        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null, null, new OnRequestError()) {
             @Override
             protected Response<JSONArray> parseNetworkResponse(NetworkResponse response) {
                 try {
@@ -241,6 +245,7 @@ public final class BookListTypeDBManager extends SimpleDBManager {
 
             data.put(ID, entity.getInt(ID));
             data.put(NAME, entity.getString(NAME));
+            data.put(IMAGE, entity.getString(IMAGE));
             this.database.insertOrThrow(this.table, null, data);
         } catch (SQLiteException e) {
             Log.e(SQLITE_TAG, e.getMessage());
@@ -257,6 +262,7 @@ public final class BookListTypeDBManager extends SimpleDBManager {
             String[] whereArgs = new String[]{entity.getString(ID)};
 
             data.put(NAME, entity.getString(NAME));
+            data.put(IMAGE, entity.getString(IMAGE));
 
             return this.database.update(this.table, data, whereClause, whereArgs) != 0;
         } catch (SQLiteException e) {

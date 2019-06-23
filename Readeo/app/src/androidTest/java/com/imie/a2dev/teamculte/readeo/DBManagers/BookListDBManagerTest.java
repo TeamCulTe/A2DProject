@@ -172,7 +172,7 @@ public final class BookListDBManagerTest extends CommonDBManagerTest {
 
     @Test
     public void testUserLoadSQLite() {
-        List<BookList> bookLists = this.manager.loadUserSQLite(TEST_USER_LOAD);
+        Map<String, BookList> bookLists = this.manager.loadUserSQLite(TEST_USER_LOAD);
         
         assertNotNull(bookLists);
         assertEquals(TEST_USER_BOOKLIST_NUMBER, bookLists.size());
@@ -382,7 +382,8 @@ public final class BookListDBManagerTest extends CommonDBManagerTest {
         for (int i = 0; i < TEST_TYPES_NUMBER; i++) {
             int testTypeId = MYSQL_TEST_ID - i;
             String testTypeName = "testString" + String.valueOf(i);
-            type = new BookListTypeDBManagerTest().initTestEntityMySQL(testTypeId, testTypeName);
+            String testTypeImage = "testImage" + String.valueOf(i);
+            type = new BookListTypeDBManagerTest().initTestEntityMySQL(testTypeId, testTypeName, testTypeImage);
 
             books = new ArrayList<>();
 

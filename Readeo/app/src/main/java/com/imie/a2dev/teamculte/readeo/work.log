@@ -15,3 +15,5 @@ See how to securize authors / books ... creation, user loading bby id (negative 
 See review sharing mechanism (not used so far).
 See refactor all app + tests methods.
 See if moderation needed (reviews and quotes) if so, add columns.
+
+/!\ Fix testAuthLoadMySQL
