@@ -16,12 +16,12 @@ class BookListTypeDbManager extends DbManager
     /**
      * Stores the associated database fields.
      */
-    public const FIELDS = ["id_book_list_type", "name_book_list_type", "last_update", "deleted"];
+    public const FIELDS = ["id_book_list_type", "name_book_list_type", "image_book_list_type", "last_update", "deleted"];
 
     /**
      * Stores the placeholders for prepared queries.
      */
-    public const PLACEHOLDERS = [":idBLT", ":name", ":update"];
+    public const PLACEHOLDERS = [":idBLT", ":name", ":img", ":update"];
 
     /**
      * Stores the associated table name.
@@ -31,15 +31,17 @@ class BookListTypeDbManager extends DbManager
     /**
      * Creates a book list type in the database.
      * @param string $name The name of the book list type.
+     * @param string $image The image of the book list type.
      * @return string the id of the created entity.
      */
-    public function create(string $name)
+    public function create(string $name, string $image)
     {
-        $statement = sprintf("INSERT INTO %s(%s) VALUE(%s)",
-            static::TABLE, static::FIELDS[1], static::PLACEHOLDERS[1]);
+        $statement = sprintf("INSERT INTO %s(%s, %s) VALUES(%s, %s)",
+            static::TABLE, static::FIELDS[1], static::FIELDS[2], static::PLACEHOLDERS[1], static::PLACEHOLDERS[2]);
         $req = $this->db->prepare($statement);
 
         $req->bindValue(static::PLACEHOLDERS[1], $name, PDO::PARAM_STR);
+        $req->bindValue(static::PLACEHOLDERS[2], $image, PDO::PARAM_STR);
 
         if ($req->execute()) {
             return $this->db->lastInsertId();
@@ -52,16 +54,19 @@ class BookListTypeDbManager extends DbManager
      * Creates a book list type in the database from a name given in parameter.
      * @param int $id The id of the book list type to create.
      * @param string $name The name of the book list type to create.
+     * @param string $image The image of the book list type.
      * @return True if success else false.
      */
-    public function fullCreate(int $id, string $name)
+    public function fullCreate(int $id, string $name, string $image)
     {
-        $statement = sprintf("INSERT INTO %s(%s, %s) VALUE(%s, %s)",
-            static::TABLE, static::FIELDS[0], static::FIELDS[1], static::PLACEHOLDERS[0], static::PLACEHOLDERS[1]);
+        $statement = sprintf("INSERT INTO %s(%s, %s, %s) VALUES(%s, %s, %s)",
+            static::TABLE, static::FIELDS[0], static::FIELDS[1], static::FIELDS[2], static::PLACEHOLDERS[0],
+            static::PLACEHOLDERS[1], static::PLACEHOLDERS[2]);
         $req = $this->db->prepare($statement);
 
         $req->bindValue(static::PLACEHOLDERS[0], $id, PDO::PARAM_INT);
         $req->bindValue(static::PLACEHOLDERS[1], $name, PDO::PARAM_STR);
+        $req->bindValue(static::PLACEHOLDERS[2], $image, PDO::PARAM_STR);
 
         return $req->execute();
     }
@@ -73,8 +78,9 @@ class BookListTypeDbManager extends DbManager
      */
     public function getBookListType(int $id)
     {
-        $statement = sprintf("SELECT %s, %s, %s FROM %s WHERE %s = %s",
-            static::FIELDS[0], static::FIELDS[1], static::FIELDS[2], static::TABLE, static::FIELDS[0], static::PLACEHOLDERS[0]);
+        $statement = sprintf("SELECT %s, %s, %s, %s FROM %s WHERE %s = %s",
+            static::FIELDS[0], static::FIELDS[1], static::FIELDS[2], static::FIELDS[3], static::TABLE, static::FIELDS[0],
+            static::PLACEHOLDERS[0]);
         $req = $this->db->prepare($statement);
 
         $req->bindValue(static::PLACEHOLDERS[0], $id, PDO::PARAM_INT);
@@ -105,20 +111,22 @@ class BookListTypeDbManager extends DbManager
     }
 
     /**
-     * From an id, updates the name of the associated book list.
+     * From an id, updates the associated book list.
      * @param int $id The id of the book list to update.
      * @param string $name The new name to set.
+     * @param string $image The new image to set.
      * @return true|false True if success else false.
      */
-    public function update(int $id, string $name)
+    public function update(int $id, string $name, string $image)
     {
-        $statement = sprintf("UPDATE %s SET %s = %s, %s = CURRENT_TIMESTAMP WHERE %s = %s",
-            static::TABLE, static::FIELDS[1], static::PLACEHOLDERS[1], static::FIELDS[2], static::FIELDS[0],
-            static::PLACEHOLDERS[0]);
+        $statement = sprintf("UPDATE %s SET %s = %s, %s = %s, %s = CURRENT_TIMESTAMP WHERE %s = %s",
+            static::TABLE, static::FIELDS[1], static::PLACEHOLDERS[1], static::FIELDS[2], static::PLACEHOLDERS[2],
+            static::FIELDS[3], static::FIELDS[0], static::PLACEHOLDERS[0]);
         $req = $this->db->prepare($statement);
 
         $req->bindValue(static::PLACEHOLDERS[0], $id, PDO::PARAM_INT);
         $req->bindValue(static::PLACEHOLDERS[1], $name, PDO::PARAM_STR);
+        $req->bindValue(static::PLACEHOLDERS[2], $image, PDO::PARAM_STR);
 
         return $req->execute();
     }
@@ -177,8 +185,8 @@ class BookListTypeDbManager extends DbManager
      */
     public function queryAll()
     {
-        $statement = sprintf("SELECT %s, %s, %s FROM %s WHERE deleted = 0",
-            static::FIELDS[0], static::FIELDS[1], static::FIELDS[2], static::TABLE);
+        $statement = sprintf("SELECT %s, %s, %s, %s FROM %s WHERE deleted = 0",
+            static::FIELDS[0], static::FIELDS[1], static::FIELDS[2], static::FIELDS[3], static::TABLE);
         $req = $this->db->query($statement);
         $response = $req->fetchAll(PDO::FETCH_ASSOC);
 
@@ -195,8 +203,8 @@ class BookListTypeDbManager extends DbManager
     {
         $offsetPlaceholder = ":startResult";
         $limitPlaceholder = ":endResult";
-        $statement = sprintf("SELECT %s, %s, %s FROM %s WHERE deleted = 0 LIMIT %s OFFSET %s",
-            static::FIELDS[0], static::FIELDS[1], static::FIELDS[2], static::TABLE, $limitPlaceholder,
+        $statement = sprintf("SELECT %s, %s, %s, %s FROM %s WHERE deleted = 0 LIMIT %s OFFSET %s",
+            static::FIELDS[0], static::FIELDS[1], static::FIELDS[2], static::FIELDS[3], static::TABLE, $limitPlaceholder,
             $offsetPlaceholder);
         $req = $this->db->prepare($statement);
 
@@ -227,8 +235,9 @@ class BookListTypeDbManager extends DbManager
      * @return null|string The json response if found else null.
      */
     public function queryAbove(int $id) {
-        $statement = sprintf("SELECT %s, %s, %s FROM %s WHERE %s > %s AND deleted = 0",
-            static::FIELDS[0], static::FIELDS[1], static::FIELDS[2], static::TABLE, static::FIELDS[0], static::PLACEHOLDERS[0]);
+        $statement = sprintf("SELECT %s, %s, %s, %s FROM %s WHERE %s > %s AND deleted = 0",
+            static::FIELDS[0], static::FIELDS[1], static::FIELDS[2], static::FIELDS[3], static::TABLE, static::FIELDS[0],
+            static::PLACEHOLDERS[0]);
         $req = $this->db->prepare($statement);
 
         $req->bindValue(static::PLACEHOLDERS[0], $id, PDO::PARAM_INT);
@@ -245,11 +254,12 @@ class BookListTypeDbManager extends DbManager
      * @return null|string The json response if found else null.
      */
     public function queryNewer(string $date) {
-        $statement = sprintf("SELECT %s, %s, %s FROM %s WHERE %s > %s AND deleted = 0",
-            static::FIELDS[0], static::FIELDS[1], static::FIELDS[2], static::TABLE, static::FIELDS[2], static::PLACEHOLDERS[2]);
+        $statement = sprintf("SELECT %s, %s, %s, %s FROM %s WHERE %s > %s AND deleted = 0",
+            static::FIELDS[0], static::FIELDS[1], static::FIELDS[2], static::FIELDS[3], static::TABLE, static::FIELDS[2],
+            static::PLACEHOLDERS[2]);
         $req = $this->db->prepare($statement);
 
-        $req->bindValue(static::PLACEHOLDERS[2], $date, PDO::PARAM_STR);
+        $req->bindValue(static::PLACEHOLDERS[3], $date, PDO::PARAM_STR);
         $req->execute();
 
         $response = $req->fetchAll(PDO::FETCH_ASSOC);
@@ -264,7 +274,7 @@ class BookListTypeDbManager extends DbManager
     public function queryUpdateFields()
     {
         $statement = sprintf("SELECT %s, %s FROM %s WHERE deleted = 0 ORDER BY %s",
-            static::FIELDS[0], static::FIELDS[2], static::TABLE, static::FIELDS[0]);
+            static::FIELDS[0], static::FIELDS[3], static::TABLE, static::FIELDS[0]);
         $req = $this->db->query($statement);
         $response = $req->fetchAll(PDO::FETCH_ASSOC);
 

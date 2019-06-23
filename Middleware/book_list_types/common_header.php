@@ -12,4 +12,5 @@ $dbManager = new BookListTypeDbManager();
 
 $id = BookListTypeDbManager::FIELDS[0];
 $name = BookListTypeDbManager::FIELDS[1];
-$update = BookListTypeDbManager::FIELDS[2];
+$image = BookListTypeDbManager::FIELDS[2];
+$update = BookListTypeDbManager::FIELDS[3];

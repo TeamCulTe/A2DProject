@@ -93,8 +93,8 @@ class CountryDbManager extends DbManager
      */
     public function getCountryId(string $name)
     {
-        $statement = sprintf("SELECT %s FROM %s WHERE %s = %s AND deleted = 0",
-            static::FIELDS[0], static::TABLE, static::FIELDS[1], static::PLACEHOLDERS[1]);
+        $statement = sprintf("SELECT %s, %s FROM %s WHERE %s = %s AND deleted = 0",
+            static::FIELDS[0], static::FIELDS[1], static::TABLE, static::FIELDS[1], static::PLACEHOLDERS[1]);
         $req = $this->db->prepare($statement);
 
         $req->bindValue(static::PLACEHOLDERS[1], $name, PDO::PARAM_INT);

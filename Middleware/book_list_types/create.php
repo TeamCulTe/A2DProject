@@ -8,10 +8,10 @@
 
 require_once "common_header.php";
 
-if (isset($_POST[$id]) && isset($_POST[$name])) {
-    $response_code = ($dbManager->fullCreate($_POST[$id], $_POST[$name])) ? 201 : 404;
-} else if (isset($_POST[$name])) {
-    $createdId = $dbManager->create($_POST[$name]);
+if (isset($_POST[$id]) && isset($_POST[$name]) && isset($_POST[$image])) {
+    $response_code = ($dbManager->fullCreate($_POST[$id], $_POST[$name], $_POST[$image])) ? 201 : 404;
+} else if (isset($_POST[$name]) && isset($_POST[$image])) {
+    $createdId = $dbManager->create($_POST[$name], $_POST[$image]);
 
     if ($createdId != "") {
         $response_code = 201;

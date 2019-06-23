@@ -32,6 +32,8 @@ if (isset($_GET[$updateQuery])) {
     $response = $dbManager->getUserFromAuth($_GET[$email], $_GET[$password]);
 } elseif (isset($_GET[$pseudo])) {
     $response = $dbManager->getUserId($_GET[$pseudo]);
+} elseif (isset($_GET[$email])) {
+    $response = $dbManager->getUserFromEmail($email);
 } elseif (isset($_GET[$count])) {
     $response = $dbManager->count();
 } elseif (isset($_GET[$start]) && isset($_GET[$end]) && isset($_GET[$publicMode])) {
