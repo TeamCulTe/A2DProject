@@ -3,36 +3,37 @@ package com.imie.a2dev.teamculte.readeo.Utils;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.util.Log;
+
 import com.android.volley.Request;
+
 import com.imie.a2dev.teamculte.readeo.APIManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.DBManager;
+
 import com.imie.a2dev.teamculte.readeo.DBSchemas.CommonDBSchema;
+import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.CommonDBSchema.UPDATE;
-import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.ERROR_TAG;
-import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.JSON_TAG;
-import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.SQLITE_TAG;
+
 
 /**
  * Class used to update from distant database to locale.
  */
 public final class UpdaterUtils {
     /**
-     * Stores the default date format.
+     * Defines the default error tag for this class.
      */
-    private static final SimpleDateFormat DATE_FORMAT = new SimpleDateFormat(CommonDBSchema.DATE_FORMAT);
+    private static final String ERR_TAG = "[UpdaterUtils:%s] : ";
     
     /**
      * Defines the update key from sync maps.
@@ -48,6 +49,11 @@ public final class UpdaterUtils {
      * Defines the create key from sync maps.
      */
     private static final String TO_CREATE_KEY = "create";
+
+    /**
+     * Stores the associated date and time formatter.
+     */
+    private static final DateTimeFormatter FORMATTER = DateTimeFormat.forPattern(CommonDBSchema.DEFAULT_FORMAT);
 
     /**
      * From a json update response (ids and last update date), gets the values and returns them into a list of
@@ -71,12 +77,12 @@ public final class UpdaterUtils {
                 }
 
                 try {
-                    data.add(new UpdateDataElement(idsToAdd, DATE_FORMAT.parse(elt.getString(UPDATE))));
-                } catch (ParseException e) {
-                    Log.e(ERROR_TAG, e.getMessage());
+                    data.add(new UpdateDataElement(idsToAdd, FORMATTER.parseDateTime(elt.getString(UPDATE))));
+                } catch (Exception e) {
+                    Log.e(String.format(ERR_TAG, "getUpdateFieldsFromJSON"), e.getMessage());
                 }
             } catch (JSONException e) {
-                Log.e(JSON_TAG, e.getMessage());
+                Log.e(String.format(ERR_TAG, "getUpdateFieldsFromJSON"), e.getMessage());
 
                 return null;
             }
@@ -101,7 +107,7 @@ public final class UpdaterUtils {
                     UpdaterUtils.performDbUpdates(syncDataMap, manager);
 
                     HTTPRequestQueueSingleton.getInstance(manager.getContext()).finishRequest(manager.getTable());
-                });
+                }, null);
     }
     
     /**
@@ -137,9 +143,9 @@ public final class UpdaterUtils {
 
                 try {
                     data.add(new UpdateDataElement(idsToAdd,
-                            DATE_FORMAT.parse(result.getString(result.getColumnIndex(UPDATE)))));
-                } catch (ParseException e) {
-                    Log.e(ERROR_TAG, e.getMessage());
+                                                   FORMATTER.parseDateTime(result.getString(result.getColumnIndex(UPDATE)))));
+                } catch (Exception e) {
+                    Log.e(String.format(ERR_TAG, "getUpdateFieldsSQLite"), e.getMessage());
                 }
             }
 
@@ -147,7 +153,7 @@ public final class UpdaterUtils {
 
             return data;
         } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
+            Log.e(String.format(ERR_TAG, "getUpdateFieldsSQLite"), e.getMessage());
 
             return null;
         }
@@ -160,39 +166,41 @@ public final class UpdaterUtils {
      */
     public static void performDbUpdates(Map<String, List<int[]>> syncDataMap, final DBManager manager) {
         String url;
-        
-        for (int[] elt : syncDataMap.get(TO_CREATE_KEY)) {
-            url = UpdaterUtils.buildUpdateUrl(manager, elt);
-            
-            manager.requestJsonArray(Request.Method.POST, url, response -> {
-                try {
-                    manager.createSQLite(response.getJSONObject(0));
-                } catch (JSONException e) {
-                    Log.e(JSON_TAG, e.getMessage());
-                } finally {
-                    HTTPRequestQueueSingleton.getInstance(manager.getContext()).finishRequest(
-                            manager.getTable());
-                }
-            });
-        }
 
-        for (int[] elt : syncDataMap.get(TO_UPDATE_KEY)) {
-            url = UpdaterUtils.buildUpdateUrl(manager, elt);
-            
-            manager.requestJsonArray(Request.Method.POST, url, response -> {
-                try {
-                    manager.updateSQLite(response.getJSONObject(0));
-                } catch (JSONException e) {
-                    Log.e(JSON_TAG, e.getMessage());
-                } finally {
-                    HTTPRequestQueueSingleton.getInstance(manager.getContext()).finishRequest(
-                            manager.getTable());
-                }
-            });
-        }
+        if (syncDataMap != null) {
+            for (int[] elt : syncDataMap.get(TO_CREATE_KEY)) {
+                url = UpdaterUtils.buildUpdateUrl(manager, elt);
 
-        for (int[] elt : syncDataMap.get(TO_DELETE_KEY)) {
-            manager.deleteSQLite(elt);
+                manager.requestJsonArray(Request.Method.POST, url, response -> {
+                    try {
+                        manager.createSQLite(response.getJSONObject(0));
+                    } catch (JSONException e) {
+                        Log.e(String.format(ERR_TAG, "performDbUpdates"), e.getMessage());
+                    } finally {
+                        HTTPRequestQueueSingleton.getInstance(manager.getContext()).finishRequest(
+                                manager.getTable());
+                    }
+                }, null);
+            }
+
+            for (int[] elt : syncDataMap.get(TO_UPDATE_KEY)) {
+                url = UpdaterUtils.buildUpdateUrl(manager, elt);
+
+                manager.requestJsonArray(Request.Method.POST, url, response -> {
+                    try {
+                        manager.updateSQLite(response.getJSONObject(0));
+                    } catch (JSONException e) {
+                        Log.e(String.format(ERR_TAG, "performDbUpdates"), e.getMessage());
+                    } finally {
+                        HTTPRequestQueueSingleton.getInstance(manager.getContext()).finishRequest(
+                                manager.getTable());
+                    }
+                }, null);
+            }
+
+            for (int[] elt : syncDataMap.get(TO_DELETE_KEY)) {
+                manager.deleteSQLite(elt);
+            }
         }
     }
 
@@ -209,7 +217,7 @@ public final class UpdaterUtils {
         }
         
         if (local.size() == 0) {
-            local.add(new UpdateDataElement(new int[distant.size()], new Date()));
+            local.add(new UpdateDataElement(new int[distant.size()], new DateTime()));
         }
         
         boolean same;
@@ -234,17 +242,18 @@ public final class UpdaterUtils {
                 if (localElement.getId(k) != distantElement.getId(k)) {
                     // If the id from distant is higher than the local one, element has to be deleted (unless we
                     // reached the last local element, which means it should be created).
-                    if (distantElement.getId(k) > localElement.getId(k)) {
-                        element.setIds(Arrays.copyOfRange(distantElement.getIds(), 0, syncIdNb));
-                        
-                        if (!toDeleteData.stream().anyMatch(a -> Arrays.equals(a, element.getIds()))) {
-                            toCreateData.add(element.getIds());
-                        }
-                    } else {
+                    if (distantElement.getId(k) > localElement.getId(k) && localElement.getId(0) != 0) {
                         element.setIds(Arrays.copyOfRange(localElement.getIds(), 0, syncIdNb));
 
                         if (!toCreateData.stream().anyMatch(a -> Arrays.equals(a, element.getIds()))) {
                             toDeleteData.add(element.getIds());
+                        }
+                        
+                    } else {
+                        element.setIds(Arrays.copyOfRange(distantElement.getIds(), 0, syncIdNb));
+
+                        if (!toDeleteData.stream().anyMatch(a -> Arrays.equals(a, element.getIds()))) {
+                            toCreateData.add(element.getIds());
                         }
                     }
 
@@ -256,7 +265,7 @@ public final class UpdaterUtils {
 
             // If the ids are the same, checking the last update date to see if adding into update list.
             if (same) {
-                if (localElement.getDateUpdated().before(distantElement.getDateUpdated())) {
+                if (localElement.getDateUpdated().isBefore(distantElement.getDateUpdated())) {
                     toUpdateData.add(Arrays.copyOfRange(distantElement.getIds(), 0, syncIdNb));
                 }
             }
@@ -283,7 +292,9 @@ public final class UpdaterUtils {
         int idsNb = manager.getIds().length;
         
         if (idsNb != updateElts.length) {
-            Log.e(ERROR_TAG, "The number of id fields from the manager differs from the update elements.");
+            Log.e(String.format(ERR_TAG, "buildUpdateUrl"),
+                  "The number of id fields from the manager differs from the update " +
+                  "elements.");
         }
 
         for (int i = 0; i < idsNb; i++) {

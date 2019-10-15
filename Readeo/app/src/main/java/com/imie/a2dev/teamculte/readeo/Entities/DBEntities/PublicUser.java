@@ -4,14 +4,11 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
-import android.util.Log;
 import com.imie.a2dev.teamculte.readeo.App;
 import com.imie.a2dev.teamculte.readeo.DBManagers.ProfileDBManager;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.UserDBSchema;
 import lombok.Getter;
 import lombok.Setter;
-
-import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.SQLITE_TAG;
 
 /**
  * Final class representing a public user of the application (without personal data, book lists and
@@ -114,7 +111,7 @@ public class PublicUser extends DBEntity {
                 result.close();
             }
         } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
+            this.logError("init", e);
         }
     }
 }

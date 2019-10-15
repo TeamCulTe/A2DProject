@@ -4,8 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
-import java.util.Date;
+import org.joda.time.DateTime;
 
 /**
  * Class used to hold the update data (ids and last update date).
@@ -23,7 +22,7 @@ public final class UpdateDataElement {
     /**
      * Stores the last update date.
      */
-    private Date dateUpdated;
+    private DateTime dateUpdated;
 
     /**
      * Gets the id at specified position.

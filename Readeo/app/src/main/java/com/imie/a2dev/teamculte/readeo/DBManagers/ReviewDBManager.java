@@ -5,7 +5,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
-import android.util.Log;
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -15,26 +14,22 @@ import com.android.volley.toolbox.JsonArrayRequest;
 import com.imie.a2dev.teamculte.readeo.APIManager;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Review;
 import com.imie.a2dev.teamculte.readeo.Utils.HTTPRequestQueueSingleton;
+import org.joda.time.DateTime;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.imie.a2dev.teamculte.readeo.DBSchemas.CommonDBSchema.DEFAULT_FORMAT;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.CommonDBSchema.UPDATE;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.ReviewDBSchema.BOOK;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.ReviewDBSchema.REVIEW;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.ReviewDBSchema.SHARED;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.ReviewDBSchema.TABLE;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.ReviewDBSchema.USER;
-import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.ERROR_TAG;
-import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.JSON_TAG;
-import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.SQLITE_TAG;
 
 /**
  * Manager class used to manage the review entities from databases.
@@ -58,6 +53,8 @@ public final class ReviewDBManager extends RelationDBManager {
      * @return true if success else false.
      */
     public boolean createSQLite(@NonNull Review entity) {
+        this.database.beginTransaction();
+        
         try {
             ContentValues data = new ContentValues();
 
@@ -66,12 +63,45 @@ public final class ReviewDBManager extends RelationDBManager {
             data.put(REVIEW, entity.getReview());
 
             this.database.insertOrThrow(this.table, null, data);
+            this.database.setTransactionSuccessful();
 
             return true;
         } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
+            this.logError("createSQLite", e);
 
             return false;
+        } finally {
+            this.database.endTransaction();
+        }
+    }
+
+    /**
+     * From a java entity updates the associated entity into the database.
+     * @param entity The model to update into the database.
+     * @return true if success else false.
+     */
+    public boolean updateSQLite(@NonNull Review entity) {
+        this.database.beginTransaction();
+        
+        try {
+            ContentValues data = new ContentValues();
+            String whereClause = String.format("%s = ? AND %s = ?", BOOK, USER);
+            String[] whereArgs = new String[]{String.valueOf(entity.getId()), String.valueOf(entity.getUserId())};
+
+            data.put(REVIEW, entity.getReview());
+            data.put(UPDATE, new DateTime().toString(DEFAULT_FORMAT));
+
+            boolean success = this.database.update(this.table, data, whereClause, whereArgs) != 0;
+
+            this.database.setTransactionSuccessful();
+
+            return success;
+        } catch (SQLiteException e) {
+            this.logError("updateSQLite", e);
+
+            return false;
+        } finally {
+            this.database.endTransaction();
         }
     }
 
@@ -96,31 +126,9 @@ public final class ReviewDBManager extends RelationDBManager {
 
             return queriedField;
         } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
+            this.logError("getFieldSQLite", e);
 
             return null;
-        }
-    }
-
-    /**
-     * From a java entity updates the associated entity into the database.
-     * @param entity The model to update into the database.
-     * @return true if success else false.
-     */
-    public boolean updateSQLite(@NonNull Review entity) {
-        try {
-            ContentValues data = new ContentValues();
-            String whereClause = String.format("%s = ? AND %s = ?", BOOK, USER);
-            String[] whereArgs = new String[]{String.valueOf(entity.getId()), String.valueOf(entity.getUserId())};
-
-            data.put(REVIEW, entity.getReview());
-            data.put(UPDATE, new Date().toString());
-
-            return this.database.update(this.table, data, whereClause, whereArgs) != 0;
-        } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
-
-            return false;
         }
     }
 
@@ -164,15 +172,23 @@ public final class ReviewDBManager extends RelationDBManager {
      * @return True if success else false.
      */
     public boolean deleteUserSQLite(int id) {
+        this.database.beginTransaction();
+        
         try {
             String whereClause = String.format("%s = ?", USER);
             String[] whereArgs = new String[]{String.valueOf(id)};
 
-            return this.database.delete(this.table, whereClause, whereArgs) != 0;
+            boolean success = this.database.delete(this.table, whereClause, whereArgs) != 0;
+
+            this.database.setTransactionSuccessful();
+
+            return success;
         } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
+            this.logError("deleteUserSQLite", e);
 
             return false;
+        } finally {
+            this.database.endTransaction();
         }
     }
 
@@ -182,15 +198,23 @@ public final class ReviewDBManager extends RelationDBManager {
      * @return True if success else false.
      */
     public boolean deleteBookSQLite(int id) {
+        this.database.beginTransaction();
+        
         try {
             String whereClause = String.format("%s = ?", BOOK);
             String[] whereArgs = new String[]{String.valueOf(id)};
 
-            return this.database.delete(this.table, whereClause, whereArgs) != 0;
+            boolean success = this.database.delete(this.table, whereClause, whereArgs) != 0;
+
+            this.database.setTransactionSuccessful();
+
+            return success;
         } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
+            this.logError("deleteBookSQLite", e);
 
             return false;
+        } finally {
+            this.database.endTransaction();
         }
     }
 
@@ -212,7 +236,7 @@ public final class ReviewDBManager extends RelationDBManager {
 
             result.close();
         } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
+            this.logError("queryAllSQLite", e);
         }
 
         return reviews;
@@ -258,16 +282,15 @@ public final class ReviewDBManager extends RelationDBManager {
             protected Response<JSONArray> parseNetworkResponse(NetworkResponse response) {
                 try {
                     JSONArray jsonArray = new JSONArray(new String(response.data,
-                            HttpHeaderParser.parseCharset(response.headers)));
+                                                                   HttpHeaderParser.parseCharset(response.headers)));
                     JSONObject object = jsonArray.getJSONObject(0);
 
                     review.init(object);
-                } catch (JSONException e) {
-                    Log.e(JSON_TAG, e.getMessage());
-                } catch (IOException e) {
-                    Log.e(ERROR_TAG, e.getMessage());
+                } catch (Exception e) {
+                    ReviewDBManager.this.logError("loadMySQL", e);
                 } finally {
-                    HTTPRequestQueueSingleton.getInstance(ReviewDBManager.this.getContext()).finishRequest(ReviewDBManager.this.table);
+                    HTTPRequestQueueSingleton.getInstance(ReviewDBManager.this.getContext())
+                                             .finishRequest(ReviewDBManager.this.table);
                 }
 
                 return super.parseNetworkResponse(response);
@@ -275,7 +298,8 @@ public final class ReviewDBManager extends RelationDBManager {
 
             @Override
             protected VolleyError parseNetworkError(VolleyError volleyError) {
-                HTTPRequestQueueSingleton.getInstance(ReviewDBManager.this.getContext()).finishRequest(ReviewDBManager.this.table);
+                HTTPRequestQueueSingleton.getInstance(ReviewDBManager.this.getContext())
+                                         .finishRequest(ReviewDBManager.this.table);
 
                 return super.parseNetworkError(volleyError);
             }
@@ -300,17 +324,16 @@ public final class ReviewDBManager extends RelationDBManager {
             protected Response<JSONArray> parseNetworkResponse(NetworkResponse response) {
                 try {
                     JSONArray jsonArray = new JSONArray(new String(response.data,
-                            HttpHeaderParser.parseCharset(response.headers)));
-                    
+                                                                   HttpHeaderParser.parseCharset(response.headers)));
+
                     for (int i = 0; i < jsonArray.length(); i++) {
                         reviews.add(new Review(jsonArray.getJSONObject(i)));
                     }
-                } catch (JSONException e) {
-                    Log.e(JSON_TAG, e.getMessage());
-                } catch (IOException e) {
-                    Log.e(ERROR_TAG, e.getMessage());
+                } catch (Exception e) {
+                    ReviewDBManager.this.logError("loadUserMySQL", e);
                 } finally {
-                    HTTPRequestQueueSingleton.getInstance(ReviewDBManager.this.getContext()).finishRequest(ReviewDBManager.this.table);
+                    HTTPRequestQueueSingleton.getInstance(ReviewDBManager.this.getContext())
+                                             .finishRequest(ReviewDBManager.this.table);
                 }
 
                 return super.parseNetworkResponse(response);
@@ -318,7 +341,8 @@ public final class ReviewDBManager extends RelationDBManager {
 
             @Override
             protected VolleyError parseNetworkError(VolleyError volleyError) {
-                HTTPRequestQueueSingleton.getInstance(ReviewDBManager.this.getContext()).finishRequest(ReviewDBManager.this.table);
+                HTTPRequestQueueSingleton.getInstance(ReviewDBManager.this.getContext())
+                                         .finishRequest(ReviewDBManager.this.table);
 
                 return super.parseNetworkError(volleyError);
             }
@@ -428,29 +452,9 @@ public final class ReviewDBManager extends RelationDBManager {
     }
 
     @Override
-    public boolean updateSQLite(@NonNull JSONObject entity) {
-        try {
-            ContentValues data = new ContentValues();
-            String whereClause = String.format("%s = ? AND %s = ?", USER, BOOK);
-            String[] whereArgs = new String[]{entity.getString(USER), entity.getString(BOOK)};
+    public boolean createSQLite(@NonNull JSONObject entity) {
+        this.database.beginTransaction();
 
-            data.put(REVIEW, entity.getString(REVIEW));
-            data.put(UPDATE, new Date().toString());
-
-            return this.database.update(this.table, data, whereClause, whereArgs) != 0;
-        } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
-
-            return false;
-        } catch (JSONException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
-
-            return false;
-        }
-    }
-
-    @Override
-    public void createSQLite(@NonNull JSONObject entity) {
         try {
             ContentValues data = new ContentValues();
 
@@ -459,10 +463,41 @@ public final class ReviewDBManager extends RelationDBManager {
             data.put(REVIEW, entity.getString(REVIEW));
 
             this.database.insertOrThrow(this.table, null, data);
-        } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
-        } catch (JSONException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
+            this.database.setTransactionSuccessful();
+
+            return true;
+        } catch (Exception e) {
+            this.logError("createSQLite", e);
+
+            return false;
+        } finally {
+            this.database.endTransaction();
+        }
+    }
+
+    @Override
+    public boolean updateSQLite(@NonNull JSONObject entity) {
+        this.database.beginTransaction();
+        
+        try {
+            ContentValues data = new ContentValues();
+            String whereClause = String.format("%s = ? AND %s = ?", USER, BOOK);
+            String[] whereArgs = new String[]{entity.getString(USER), entity.getString(BOOK)};
+
+            data.put(REVIEW, entity.getString(REVIEW));
+            data.put(UPDATE, new DateTime().toString(DEFAULT_FORMAT));
+
+            boolean success = this.database.update(this.table, data, whereClause, whereArgs) != 0;
+
+            this.database.setTransactionSuccessful();
+
+            return success;
+        } catch (Exception e) {
+            this.logError("updateSQLite", e);
+
+            return false;
+        } finally {
+            this.database.endTransaction();
         }
     }
 
@@ -472,15 +507,23 @@ public final class ReviewDBManager extends RelationDBManager {
      * @return True if success else false.
      */
     private boolean deleteSQLite(int id, String filter) {
+        this.database.beginTransaction();
+        
         try {
             String whereClause = String.format("%s = ?", filter);
             String[] whereArgs = new String[]{String.valueOf(id)};
 
-            return this.database.delete(this.table, whereClause, whereArgs) != 0;
+            boolean success = this.database.delete(this.table, whereClause, whereArgs) != 0;
+
+            this.database.setTransactionSuccessful();
+
+            return success;
         } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
+            this.logError("deleteSQLite", e);
 
             return false;
+        } finally {
+            this.database.endTransaction();
         }
     }
 
@@ -505,7 +548,7 @@ public final class ReviewDBManager extends RelationDBManager {
 
             return reviews;
         } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
+            this.logError("loadSQLite", e);
 
             return null;
         }

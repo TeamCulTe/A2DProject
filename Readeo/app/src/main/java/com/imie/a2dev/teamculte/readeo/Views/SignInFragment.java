@@ -13,7 +13,10 @@ import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.imie.a2dev.teamculte.readeo.DBManagers.BookListDBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.BookListTypeDBManager;
+import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Book;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.BookList;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.BookListType;
 import com.imie.a2dev.teamculte.readeo.Views.Adapters.CountrySpinnerAdapter;
@@ -29,9 +32,7 @@ import com.imie.a2dev.teamculte.readeo.R;
 import com.imie.a2dev.teamculte.readeo.Utils.Enums.InputError;
 import com.imie.a2dev.teamculte.readeo.Utils.InputUtils;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.ArrayList;
 
 /**
  * Fragment giving the ability to create a new account (by proving the needed info).
@@ -81,7 +82,7 @@ public final class SignInFragment extends Fragment implements View.OnClickListen
      * Stores the city error message.
      */
     private TextView cityErrorMessage;
-    
+
     /**
      * Stores the password error message.
      */
@@ -101,7 +102,7 @@ public final class SignInFragment extends Fragment implements View.OnClickListen
      * Stores the loading progress bar.
      */
     private ProgressBar progressLoading;
-    
+
     /**
      * SignInFragment's default constructor.
      */
@@ -112,29 +113,29 @@ public final class SignInFragment extends Fragment implements View.OnClickListen
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_sign_in, container, false);
-        
+
         this.init(view);
-        
+
         return view;
     }
 
     @Override
     public void onClick(View view) {
         this.progressLoading.setVisibility(View.VISIBLE);
-        
+
         if (this.checkInputs()) {
             this.saveData();
 
-            this.progressLoading.setVisibility(View.GONE);
-            
             Toast.makeText(this.getContext(), R.string.account_successfully_created, Toast.LENGTH_SHORT).show();
-            
+
             FragmentManager fragmentManager = this.getActivity().getSupportFragmentManager();
             FragmentTransaction transaction = fragmentManager.beginTransaction();
-            
+
             transaction.replace(R.id.content_fragment, new LogInFragment());
             transaction.addToBackStack(null);
             transaction.commit();
+
+            this.progressLoading.setVisibility(View.GONE);
         }
     }
 
@@ -156,12 +157,12 @@ public final class SignInFragment extends Fragment implements View.OnClickListen
         this.passwordErrorMessage = view.findViewById(R.id.txt_password_error_message);
         this.confirmErrorMessage = view.findViewById(R.id.txt_confirm_error_message);
         this.adapter = new CountrySpinnerAdapter(this.getContext(),
-                new CountryDBManager(this.getContext()).queryAllSQLite());
-        
+                                                 new CountryDBManager(this.getContext()).queryAllSQLite());
+
         this.spinnerCountry.setAdapter(this.adapter);
-        
+
         view.findViewById(R.id.btn_sign_in).setOnClickListener(this);
-        
+
         this.editPseudo.setText("DADADA");
         this.editEmail.setText("blabla@bla.fr");
         this.editPassword.setText("Frk7xet3g5pny");
@@ -201,19 +202,21 @@ public final class SignInFragment extends Fragment implements View.OnClickListen
     private boolean checkInputs() {
         boolean valid = true;
         InputError error;
-        
+
         this.hideErrorMessages();
         
-        error = InputUtils.validatePseudo(this.editPseudo.getText().toString());
-        
+        // TODO : See if using listener pattern here.
+
+        error = InputUtils.validatePseudo(this.editPseudo.getText().toString(), null);
+
         if (error != InputError.NO_ERROR) {
             this.pseudoErrorMessage.setText(error.getMessage());
             this.pseudoErrorMessage.setVisibility(View.VISIBLE);
-            
+
             valid = false;
         }
-        
-        error = InputUtils.validateEmail(this.editEmail.getText().toString());
+
+        error = InputUtils.validateEmail(this.editEmail.getText().toString(), null);
 
         if (error != InputError.NO_ERROR) {
             this.emailErrorMessage.setText(error.getMessage());
@@ -230,9 +233,9 @@ public final class SignInFragment extends Fragment implements View.OnClickListen
 
             valid = false;
         }
-        
+
         error = InputUtils.validatePassword(this.editPassword.getText().toString(),
-                this.editConfirm.getText().toString());
+                                            this.editConfirm.getText().toString());
 
         if (error != InputError.NO_ERROR) {
             if (error == InputError.PASSWORD_FORMAT) {
@@ -242,10 +245,10 @@ public final class SignInFragment extends Fragment implements View.OnClickListen
                 this.confirmErrorMessage.setText(error.getMessage());
                 this.confirmErrorMessage.setVisibility(View.VISIBLE);
             }
-            
+
             valid = false;
         }
-        
+
         return valid;
     }
 
@@ -256,6 +259,7 @@ public final class SignInFragment extends Fragment implements View.OnClickListen
         CityDBManager cityDBManager = new CityDBManager(this.getContext());
         ProfileDBManager profileDBManager = new ProfileDBManager(this.getContext());
         UserDBManager userDBManager = new UserDBManager(this.getContext());
+        
         String pseudo = this.editPseudo.getText().toString();
         String email = this.editEmail.getText().toString();
         String password = this.editPassword.getText().toString();
@@ -263,19 +267,19 @@ public final class SignInFragment extends Fragment implements View.OnClickListen
         Profile profile = new Profile();
         City city = cityDBManager.loadMySQL(cityName);
         Country country = new CountryDBManager(this.getContext()).loadMySQL(
-                        this.adapter.getItem(this.spinnerCountry.getSelectedItemPosition()).getName());
-        
+                this.adapter.getItem(this.spinnerCountry.getSelectedItemPosition()).getName());
+
         if (city == null) {
             city = new City(cityName);
-            
+
             cityDBManager.createMySQL(city);
             cityDBManager.createSQLite(city);
         }
 
         profileDBManager.createMySQL(profile);
         profileDBManager.createSQLite(profile);
-        
-        PrivateUser usr = new PrivateUser(pseudo, password, email, profile, country, city, null, null);
+
+        PrivateUser usr = new PrivateUser(pseudo, password, email, null, profile, country, city, null, null);
 
         userDBManager.createMySQL(usr);
         userDBManager.createSQLite(usr);

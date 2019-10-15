@@ -5,7 +5,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
-import android.util.Log;
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -16,25 +15,22 @@ import com.android.volley.toolbox.StringRequest;
 import com.imie.a2dev.teamculte.readeo.APIManager;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Country;
 import com.imie.a2dev.teamculte.readeo.Utils.HTTPRequestQueueSingleton;
+import org.joda.time.DateTime;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import static com.imie.a2dev.teamculte.readeo.DBSchemas.CommonDBSchema.DEFAULT_FORMAT;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.CommonDBSchema.UPDATE;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.CountryDBSchema.ID;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.CountryDBSchema.NAME;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.CountryDBSchema.TABLE;
-import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.ERROR_TAG;
-import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.JSON_TAG;
-import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.SQLITE_TAG;
 
 /**
  * Manager class used to manage the country entities from databases.
@@ -58,18 +54,24 @@ public final class CountryDBManager extends SimpleDBManager {
      * @return true if success else false.
      */
     public boolean createSQLite(@NonNull Country entity) {
+        this.database.beginTransaction();
+        
         try {
             ContentValues data = new ContentValues();
 
             data.put(ID, entity.getId());
             data.put(NAME, entity.getName());
+            
             this.database.insertOrThrow(this.table, null, data);
+            this.database.setTransactionSuccessful();
 
             return true;
         } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
+            this.logError("createSQLite", e);
 
             return false;
+        } finally {
+            this.database.endTransaction();
         }
     }
 
@@ -79,22 +81,30 @@ public final class CountryDBManager extends SimpleDBManager {
      * @return true if success else false.
      */
     public boolean updateSQLite(@NonNull Country entity) {
+        this.database.beginTransaction();
+        
         try {
             ContentValues data = new ContentValues();
             String whereClause = String.format("%s = ?", ID);
             String[] whereArgs = new String[]{String.valueOf(entity.getId())};
 
             data.put(NAME, entity.getName());
-            data.put(UPDATE, new Date().toString());
+            data.put(UPDATE, new DateTime().toString(DEFAULT_FORMAT));
+            
+            boolean success = this.database.update(this.table, data, whereClause, whereArgs) != 0; 
 
-            return this.database.update(this.table, data, whereClause, whereArgs) != 0;
+            this.database.setTransactionSuccessful();
+            
+            return success;
         } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
+            this.logError("updateSQLite", e);
 
             return false;
+        } finally {
+            this.database.endTransaction();
         }
     }
-    
+
     /**
      * From an id, returns the associated java entity.
      * @param id The id of entity to load from the database.
@@ -128,7 +138,7 @@ public final class CountryDBManager extends SimpleDBManager {
 
             result.close();
         } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
+            this.logError("queryAllSQLite", e);
         }
 
         return countries;
@@ -140,21 +150,6 @@ public final class CountryDBManager extends SimpleDBManager {
      */
     public void importFromMySQL() {
         super.importFromMySQL(baseUrl + APIManager.READ);
-    }
-
-    @Override
-    public void createSQLite(@NonNull JSONObject entity) {
-        try {
-            ContentValues data = new ContentValues();
-
-            data.put(ID, entity.getInt(ID));
-            data.put(NAME, entity.getString(NAME));
-            this.database.insertOrThrow(this.table, null, data);
-        } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
-        } catch (JSONException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
-        }
     }
 
     /**
@@ -176,7 +171,8 @@ public final class CountryDBManager extends SimpleDBManager {
 
             @Override
             protected VolleyError parseNetworkError(VolleyError volleyError) {
-                HTTPRequestQueueSingleton.getInstance(CountryDBManager.this.getContext()).finishRequest(CountryDBManager.this.table);
+                HTTPRequestQueueSingleton.getInstance(CountryDBManager.this.getContext())
+                                         .finishRequest(CountryDBManager.this.table);
 
                 return super.parseNetworkError(volleyError);
             }
@@ -191,9 +187,10 @@ public final class CountryDBManager extends SimpleDBManager {
                         country.setId(Integer.valueOf(resp));
                     }
                 } catch (IOException e) {
-                    Log.e(ERROR_TAG, e.getMessage());
+                    CountryDBManager.this.logError("createMySQL", e);
                 } finally {
-                    HTTPRequestQueueSingleton.getInstance(CountryDBManager.this.getContext()).finishRequest(CountryDBManager.this.table);
+                    HTTPRequestQueueSingleton.getInstance(CountryDBManager.this.getContext())
+                                             .finishRequest(CountryDBManager.this.table);
                 }
 
                 return super.parseNetworkResponse(response);
@@ -211,7 +208,6 @@ public final class CountryDBManager extends SimpleDBManager {
      */
     public Country loadMySQL(int idCountry) {
         String url = this.baseUrl + APIManager.READ + ID + "=" + idCountry;
-        
         return this.loadFromUrlMySQL(url);
     }
 
@@ -222,28 +218,56 @@ public final class CountryDBManager extends SimpleDBManager {
      */
     public Country loadMySQL(String countryName) {
         String url = this.baseUrl + APIManager.READ + NAME + "=" + countryName;
-        
         return this.loadFromUrlMySQL(url);
     }
 
     @Override
+    public boolean createSQLite(@NonNull JSONObject entity) {
+        this.database.beginTransaction();
+        
+        try {
+            ContentValues data = new ContentValues();
+
+            data.put(ID, entity.getInt(ID));
+            data.put(NAME, entity.getString(NAME));
+            data.put(UPDATE, entity.getString(UPDATE));
+
+            this.database.insertOrThrow(this.table, null, data);
+            this.database.setTransactionSuccessful();
+            
+            return true;
+        } catch (Exception e) {
+            this.logError("createSQLite", e);
+            
+            return false;
+        } finally {
+            this.database.endTransaction();
+        }
+    }
+
+    @Override
     public boolean updateSQLite(@NonNull JSONObject entity) {
+        this.database.beginTransaction();
+        
         try {
             ContentValues data = new ContentValues();
             String whereClause = String.format("%s = ?", ID);
             String[] whereArgs = new String[]{entity.getString(ID)};
 
             data.put(NAME, entity.getString(NAME));
+            data.put(UPDATE, new DateTime().toString(DEFAULT_FORMAT));
+            
+            boolean success = this.database.update(this.table, data, whereClause, whereArgs) != 0;
 
-            return this.database.update(this.table, data, whereClause, whereArgs) != 0;
-        } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
+            this.database.setTransactionSuccessful();
+            
+            return success;
+        } catch (Exception e) {
+            this.logError("updateSQLite", e);
 
             return false;
-        } catch (JSONException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
-
-            return false;
+        } finally {
+            this.database.endTransaction();
         }
     }
 
@@ -259,16 +283,15 @@ public final class CountryDBManager extends SimpleDBManager {
             protected Response<JSONArray> parseNetworkResponse(NetworkResponse response) {
                 try {
                     JSONArray jsonArray = new JSONArray(new String(response.data,
-                            HttpHeaderParser.parseCharset(response.headers)));
+                                                                   HttpHeaderParser.parseCharset(response.headers)));
                     JSONObject object = jsonArray.getJSONObject(0);
 
                     country.init(object);
-                } catch (JSONException e) {
-                    Log.e(JSON_TAG, e.getMessage());
-                } catch (IOException e) {
-                    Log.e(ERROR_TAG, e.getMessage());
+                } catch (Exception e) {
+                    CountryDBManager.this.logError("loadFromUrlMySQL", e);
                 } finally {
-                    HTTPRequestQueueSingleton.getInstance(CountryDBManager.this.getContext()).finishRequest(CountryDBManager.this.table);
+                    HTTPRequestQueueSingleton.getInstance(CountryDBManager.this.getContext())
+                                             .finishRequest(CountryDBManager.this.table);
                 }
 
                 return super.parseNetworkResponse(response);
@@ -276,7 +299,8 @@ public final class CountryDBManager extends SimpleDBManager {
 
             @Override
             protected VolleyError parseNetworkError(VolleyError volleyError) {
-                HTTPRequestQueueSingleton.getInstance(CountryDBManager.this.getContext()).finishRequest(CountryDBManager.this.table);
+                HTTPRequestQueueSingleton.getInstance(CountryDBManager.this.getContext())
+                                         .finishRequest(CountryDBManager.this.table);
 
                 return super.parseNetworkError(volleyError);
             }

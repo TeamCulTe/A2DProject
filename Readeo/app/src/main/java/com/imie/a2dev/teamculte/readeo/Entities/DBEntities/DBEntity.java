@@ -1,6 +1,9 @@
 package com.imie.a2dev.teamculte.readeo.Entities.DBEntities;
 
 import android.database.Cursor;
+import android.util.Log;
+
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,6 +14,7 @@ import java.io.Serializable;
  */
 @Getter
 @Setter
+@EqualsAndHashCode
 public abstract class DBEntity implements Serializable {
     /**
      * Stores the database identifier.
@@ -47,4 +51,14 @@ public abstract class DBEntity implements Serializable {
     public boolean isEmpty() {
         return this.id == 0;
     }
+
+    /**
+     * Log a formatted error (class name and method name).
+     * @param methodName The name of the current method.
+     * @param error The error raised.
+     */
+    protected void logError(String methodName, Exception error) {
+        Log.e(String.format("[%s:%s] : ", this.getClass().getName(), methodName), error.getMessage());
+    }
+
 }

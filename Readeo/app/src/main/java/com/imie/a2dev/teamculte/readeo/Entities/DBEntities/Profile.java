@@ -4,15 +4,11 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
-import android.util.Log;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.ProfileDBSchema;
 import lombok.Getter;
 import lombok.Setter;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.JSON_TAG;
-import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.SQLITE_TAG;
 
 /**
  * Final class representing the profile of an user with its related information.
@@ -116,7 +112,7 @@ public final class Profile extends DBEntity {
             this.avatar = object.getString(ProfileDBSchema.AVATAR);
             this.description = object.getString(ProfileDBSchema.DESCRIPTION);
         } catch (JSONException e) {
-            Log.e(JSON_TAG, e.getMessage());
+            this.logError("init", e);
         }
     }
 
@@ -135,7 +131,7 @@ public final class Profile extends DBEntity {
                 result.close();
             }
         } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
+            this.logError("init", e);
         }
     }
 }

@@ -27,7 +27,7 @@ public final class QuoteListAdapter {
     private Context context;
 
     /**
-     * CountrySpinnerAdapter's constructor.
+     * QuoteListAdapter's constructor.
      * @param context The associated context.
      * @param items The list of quote to display.
      */
@@ -41,11 +41,10 @@ public final class QuoteListAdapter {
      */
     public void initList(LinearLayout container) {
         for (Quote quote : this.items) {
-            View view = LayoutInflater.from(this.context).inflate(R.layout.row_quote, container, false);
+            View view = LayoutInflater.from(this.context).inflate(R.layout.row_quote, null);
             QuoteListViewHolder viewHolder = new QuoteListViewHolder(view);
-            
+
             viewHolder.populate(quote);
-            
             container.addView(view);
         }
     }
@@ -63,7 +62,7 @@ public final class QuoteListAdapter {
          * Stores the quote text.
          */
         private TextView txtQuote;
-        
+
         /**
          * QuoteListViewHolder's constructor.
          * @param view The view to populate.
@@ -79,14 +78,14 @@ public final class QuoteListAdapter {
          */
         private void populate(Quote quote) {
             PublicUser user = new UserDBManager(QuoteListAdapter.this.context).loadSQLite(quote.getUserId());
-            
+
             if (user != null) {
                 this.txtUserPseudo.setText(user.getPseudo());
             } else {
                 this.txtUserPseudo.setText(R.string.not_communicated);
             }
-            
+
             this.txtQuote.setText(quote.getQuote());
-        } 
+        }
     }
 }

@@ -176,7 +176,7 @@ public final class UserDBManagerTest extends CommonDBManagerTest {
     @Test
     public void testCreateMySQL() {
         PrivateUser created = this.initTestEntityMySQL();
-        PrivateUser loaded = this.manager.loadMySQL(created.getEmail(), TEST_PASSWORD);
+        PrivateUser loaded = this.manager.loadMySQL(created.getEmail(), TEST_PASSWORD, null);
         
         assertNotNull(created);
         assertEquals(TEST_PSEUDO, created.getPseudo());
@@ -193,7 +193,7 @@ public final class UserDBManagerTest extends CommonDBManagerTest {
 
         assertNotNull(created);
 
-        PrivateUser loaded = this.manager.loadMySQL(created.getEmail(), TEST_PASSWORD);
+        PrivateUser loaded = this.manager.loadMySQL(created.getEmail(), TEST_PASSWORD, null);
 
         assertNotNull(loaded);
         assertEquals(created.getId(), loaded.getId());
@@ -212,10 +212,10 @@ public final class UserDBManagerTest extends CommonDBManagerTest {
         String availablePseudo = "_plop_";
         String availableEmail = "_plop_";
         
-        assertTrue(this.manager.isAvailableMySQL(PSEUDO, availablePseudo));
-        assertTrue(this.manager.isAvailableMySQL(EMAIL, availableEmail));
-        assertFalse(this.manager.isAvailableMySQL(PSEUDO, TEST_PSEUDO));
-        assertFalse(this.manager.isAvailableMySQL(EMAIL, TEST_EMAIL));
+        assertTrue(this.manager.isAvailableMySQL(PSEUDO, availablePseudo, null));
+        assertTrue(this.manager.isAvailableMySQL(EMAIL, availableEmail, null));
+        assertFalse(this.manager.isAvailableMySQL(PSEUDO, TEST_PSEUDO, null));
+        assertFalse(this.manager.isAvailableMySQL(EMAIL, TEST_EMAIL, null));
     }
 
     @Test
@@ -431,7 +431,8 @@ public final class UserDBManagerTest extends CommonDBManagerTest {
                                        Country country, City city) {
         this.testedMySQL = true;
 
-        PrivateUser user = new PrivateUser(id, pseudo, password, email, profile, country, city, null, null);
+        PrivateUser user = new PrivateUser(id, pseudo, password, email, "", profile, country, city
+                , null, null);
 
         this.manager.createMySQL(user);
         

@@ -3,14 +3,11 @@ package com.imie.a2dev.teamculte.readeo.DBManagers;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
-import android.util.Log;
 import com.android.volley.Request;
 import com.imie.a2dev.teamculte.readeo.APIManager;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.SQLITE_TAG;
 
 /**
  * Abstract manager class extended by all "double identified entity" managers (with two id).
@@ -21,11 +18,6 @@ public abstract class RelationDBManager extends DBManager {
      */
     protected final String DOUBLE_QUERY_FIELD = "SELECT %s FROM %s WHERE %s = ? AND %s = ?";
 
-    /**
-     * Defines the default all fields database query with a double where clause.
-     */
-    protected final String DOUBLE_QUERY_ALL = "SELECT * FROM %s WHERE %s = ? AND %s = ?";
-    
     /**
      * DBManager's full filled constructor initializing the handler attribute and opening the database.
      * @param context The associated context.
@@ -47,7 +39,7 @@ public abstract class RelationDBManager extends DBManager {
 
             return this.database.rawQuery(query, selectArgs);
         } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
+            this.logError("loadCursorSQLite", e);
 
             return null;
         }

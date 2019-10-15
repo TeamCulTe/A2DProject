@@ -5,12 +5,10 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
-import android.util.Log;
 import com.android.volley.Request;
 import com.imie.a2dev.teamculte.readeo.APIManager;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Author;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Book;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -18,10 +16,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static com.imie.a2dev.teamculte.readeo.DBSchemas.CommonDBSchema.UPDATE;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.WriterDBSchema.AUTHOR;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.WriterDBSchema.BOOK;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.WriterDBSchema.TABLE;
-import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.SQLITE_TAG;
 
 /**
  * Manager class used to manage the writer entities from databases.
@@ -45,6 +43,8 @@ public final class WriterDBManager extends RelationDBManager {
      * @return true if success else false.
      */
     public boolean createSQLiteBook(@NonNull Book entity) {
+        this.database.beginTransaction();
+        
         try {
             ContentValues data;
 
@@ -55,14 +55,19 @@ public final class WriterDBManager extends RelationDBManager {
 
                 data.put(BOOK, idBook);
                 data.put(AUTHOR, author.getId());
+                
                 this.database.insertOrThrow(this.table, null, data);
             }
+            
+            this.database.setTransactionSuccessful();
 
             return true;
         } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
+            this.logError("createSQLiteBook", e);
 
             return false;
+        } finally {
+            this.database.endTransaction();
         }
     }
 
@@ -87,7 +92,7 @@ public final class WriterDBManager extends RelationDBManager {
 
             return authors;
         } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
+            this.logError("loadAuthorsSQLite", e);
 
             return null;
         }
@@ -114,7 +119,7 @@ public final class WriterDBManager extends RelationDBManager {
 
             return books;
         } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
+            this.logError("loadBooksSQLite", e);
 
             return null;
         }
@@ -127,15 +132,23 @@ public final class WriterDBManager extends RelationDBManager {
      * @return True if success else false.
      */
     public boolean deleteSQLite(int idAuthor, int idBook) {
+        this.database.beginTransaction();
+        
         try {
             String whereClause = String.format("%s = ? AND %s = ?", AUTHOR, BOOK);
             String[] whereArgs = new String[]{String.valueOf(idAuthor), String.valueOf(idBook)};
 
-            return this.database.delete(this.table, whereClause, whereArgs) != 0;
+            boolean success = this.database.delete(this.table, whereClause, whereArgs) != 0;
+
+            this.database.setTransactionSuccessful();
+
+            return success;
         } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
+            this.logError("deleteSQLite", e);
 
             return false;
+        } finally {
+            this.database.endTransaction();
         }
     }
 
@@ -145,15 +158,23 @@ public final class WriterDBManager extends RelationDBManager {
      * @return True if success else false.
      */
     public boolean deleteSQLite(int id, String filter) {
+        this.database.beginTransaction();
+        
         try {
             String whereClause = String.format("%s = ?", filter);
             String[] whereArgs = new String[]{String.valueOf(id)};
 
-            return this.database.delete(this.table, whereClause, whereArgs) != 0;
+            boolean success = this.database.delete(this.table, whereClause, whereArgs) != 0;
+
+            this.database.setTransactionSuccessful();
+
+            return success;
         } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
+            this.logError("deleteSQLite", e);
 
             return false;
+        } finally {
+            this.database.endTransaction();
         }
     }
 
@@ -163,15 +184,23 @@ public final class WriterDBManager extends RelationDBManager {
      * @return True if success else false.
      */
     public boolean deleteAuthorSQLite(int id) {
+        this.database.beginTransaction();
+        
         try {
             String whereClause = String.format("%s = ?", AUTHOR);
             String[] whereArgs = new String[]{String.valueOf(id)};
 
-            return this.database.delete(this.table, whereClause, whereArgs) != 0;
+            boolean success = this.database.delete(this.table, whereClause, whereArgs) != 0;
+
+            this.database.setTransactionSuccessful();
+
+            return success;
         } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
+            this.logError("deleteAuthorSQLite", e);
 
             return false;
+        } finally {
+            this.database.endTransaction();
         }
     }
 
@@ -181,15 +210,23 @@ public final class WriterDBManager extends RelationDBManager {
      * @return True if success else false.
      */
     public boolean deleteBookSQLite(int id) {
+        this.database.beginTransaction();
+        
         try {
             String whereClause = String.format("%s = ?", BOOK);
             String[] whereArgs = new String[]{String.valueOf(id)};
 
-            return this.database.delete(this.table, whereClause, whereArgs) != 0;
+            boolean success = this.database.delete(this.table, whereClause, whereArgs) != 0;
+
+            this.database.setTransactionSuccessful();
+
+            return success;
         } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
+            this.logError("deleteBookSQLite", e);
 
             return false;
+        } finally {
+            this.database.endTransaction();  
         }
     }
 
@@ -234,17 +271,26 @@ public final class WriterDBManager extends RelationDBManager {
     }
 
     @Override
-    public void createSQLite(@NonNull JSONObject entity) {
+    public boolean createSQLite(@NonNull JSONObject entity) {
+        this.database.beginTransaction();
+        
         try {
             ContentValues data = new ContentValues();
 
             data.put(AUTHOR, entity.getInt(AUTHOR));
             data.put(BOOK, entity.getInt(BOOK));
+            data.put(UPDATE, entity.getString(UPDATE));
+            
             this.database.insertOrThrow(this.table, null, data);
-        } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
-        } catch (JSONException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
+            this.database.setTransactionSuccessful();
+            
+            return true;
+        } catch (Exception e) {
+            this.logError("createSQLite", e);
+            
+            return false;
+        } finally {
+            this.database.endTransaction();
         }
     }
 

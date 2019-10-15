@@ -5,7 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
-import android.util.Log;
+
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -18,20 +18,20 @@ import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.BookList;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.BookListType;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.PrivateUser;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.PublicUser;
-import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Review;
 import com.imie.a2dev.teamculte.readeo.Utils.HTTPRequestQueueSingleton;
+
+import org.joda.time.DateTime;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import static com.imie.a2dev.teamculte.readeo.DBSchemas.CommonDBSchema.DEFAULT_FORMAT;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.CommonDBSchema.UPDATE;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.UserDBSchema.CITY;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.UserDBSchema.COUNTRY;
@@ -41,9 +41,6 @@ import static com.imie.a2dev.teamculte.readeo.DBSchemas.UserDBSchema.PASSWORD;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.UserDBSchema.PROFILE;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.UserDBSchema.PSEUDO;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.UserDBSchema.TABLE;
-import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.ERROR_TAG;
-import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.JSON_TAG;
-import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.SQLITE_TAG;
 
 /**
  * Manager class used to manage the user entities from databases.
@@ -67,19 +64,57 @@ public final class UserDBManager extends SimpleDBManager {
      * @return true if success else false.
      */
     public boolean createSQLite(@NonNull PublicUser entity) {
+        this.database.beginTransaction();
+
         try {
             ContentValues data = new ContentValues();
 
             data.put(ID, entity.getId());
             data.put(PSEUDO, entity.getPseudo());
             data.put(PROFILE, entity.getProfile().getId());
+
             this.database.insertOrThrow(this.table, null, data);
+            this.database.setTransactionSuccessful();
 
             return true;
         } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
+            this.logError("createSQLite", e);
 
             return false;
+        } finally {
+            this.database.endTransaction();
+        }
+    }
+
+    /**
+     * From a java entity updates the associated entity into the database.
+     * @param entity The model to update into the database.
+     * @return true if success else false.
+     */
+    public boolean updateSQLite(@NonNull PublicUser entity) {
+        this.database.beginTransaction();
+
+        try {
+            ContentValues data = new ContentValues();
+            String whereClause = String.format("%s = ?", ID);
+            String[] whereArgs = new String[]{String.valueOf(entity.getId())};
+
+            data.put(ID, entity.getId());
+            data.put(PSEUDO, entity.getPseudo());
+            data.put(PROFILE, entity.getProfile().getId());
+            data.put(UPDATE, new DateTime().toString(DEFAULT_FORMAT));
+
+            boolean success = this.database.update(this.table, data, whereClause, whereArgs) != 0;
+
+            this.database.setTransactionSuccessful();
+
+            return success;
+        } catch (SQLiteException e) {
+            this.logError("updateSQLite", e);
+
+            return false;
+        } finally {
+            this.database.endTransaction();
         }
     }
 
@@ -100,30 +135,6 @@ public final class UserDBManager extends SimpleDBManager {
      */
     public int SQLiteGetId(String pseudo) {
         return Integer.valueOf(this.getFieldFromPseudoSQLite(ID, pseudo));
-    }
-
-    /**
-     * From a java entity updates the associated entity into the database.
-     * @param entity The model to update into the database.
-     * @return true if success else false.
-     */
-    public boolean updateSQLite(@NonNull PublicUser entity) {
-        try {
-            ContentValues data = new ContentValues();
-            String whereClause = String.format("%s = ?", ID);
-            String[] whereArgs = new String[]{String.valueOf(entity.getId())};
-
-            data.put(ID, entity.getId());
-            data.put(PSEUDO, entity.getPseudo());
-            data.put(PROFILE, entity.getProfile().getId());
-            data.put(UPDATE, new Date().toString());
-
-            return this.database.update(this.table, data, whereClause, whereArgs) != 0;
-        } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
-
-            return false;
-        }
     }
 
     /**
@@ -154,7 +165,7 @@ public final class UserDBManager extends SimpleDBManager {
 
             return (result.getCount() > 0) ? new PublicUser(result) : null;
         } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
+            this.logError("loadSQLite", e);
 
             return null;
         }
@@ -179,7 +190,7 @@ public final class UserDBManager extends SimpleDBManager {
 
             return users;
         } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
+            this.logError("loadFilteredSQLite", e);
 
             return null;
         }
@@ -203,7 +214,7 @@ public final class UserDBManager extends SimpleDBManager {
 
             result.close();
         } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
+            this.logError("queryAllSQLite", e);
         }
 
         return users;
@@ -224,7 +235,7 @@ public final class UserDBManager extends SimpleDBManager {
     public void createMySQL(final PrivateUser user) {
         String url = this.baseUrl + APIManager.CREATE;
         Map<String, String> param = new HashMap<>();
-        
+
         if (user.getId() != 0) {
             param.put(ID, String.valueOf(user.getId()));
         }
@@ -236,7 +247,8 @@ public final class UserDBManager extends SimpleDBManager {
         param.put(CITY, String.valueOf(user.getCity().getId()));
         param.put(COUNTRY, String.valueOf(user.getCountry().getId()));
 
-        StringRequest request = new StringRequest(Request.Method.POST, url, null, new OnRequestError()) {
+        StringRequest request = new StringRequest(Request.Method.POST, url, null,
+                                                  new OnRequestError()) {
             @Override
             protected Map<String, String> getParams() {
                 return param;
@@ -244,7 +256,8 @@ public final class UserDBManager extends SimpleDBManager {
 
             @Override
             protected VolleyError parseNetworkError(VolleyError volleyError) {
-                HTTPRequestQueueSingleton.getInstance(UserDBManager.this.getContext()).finishRequest(UserDBManager.this.table);
+                HTTPRequestQueueSingleton.getInstance(UserDBManager.this.getContext())
+                                         .finishRequest(UserDBManager.this.table);
 
                 return super.parseNetworkError(volleyError);
             }
@@ -252,22 +265,24 @@ public final class UserDBManager extends SimpleDBManager {
             @Override
             protected Response<String> parseNetworkResponse(NetworkResponse response) {
                 try {
-                    String resp = new String(response.data, HttpHeaderParser.parseCharset(response.headers));
+                    String resp = new String(response.data,
+                                             HttpHeaderParser.parseCharset(response.headers));
                     Pattern pattern = Pattern.compile("^\\d.$");
 
                     if (pattern.matcher(resp).find()) {
                         user.setId(Integer.valueOf(resp));
                     }
                 } catch (IOException e) {
-                    Log.e(ERROR_TAG, e.getMessage());
+                    UserDBManager.this.logError("createMySQL", e);
                 } finally {
-                    HTTPRequestQueueSingleton.getInstance(UserDBManager.this.getContext()).finishRequest(UserDBManager.this.table);
+                    HTTPRequestQueueSingleton.getInstance(UserDBManager.this.getContext())
+                                             .finishRequest(UserDBManager.this.table);
                 }
-                
+
                 return super.parseNetworkResponse(response);
             }
         };
-        
+
         HTTPRequestQueueSingleton.getInstance(this.getContext()).addToRequestQueue(TABLE, request);
 
         this.waitForResponse();
@@ -319,27 +334,28 @@ public final class UserDBManager extends SimpleDBManager {
         final int idCity[] = new int[1];
         final int idCountry[] = new int[1];
         String url = this.baseUrl + APIManager.READ + ID + "=" + idUser;
-        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null, null, new OnRequestError()) {
+        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null, null,
+                                                        new OnRequestError()) {
             @Override
             protected Response<JSONArray> parseNetworkResponse(NetworkResponse response) {
                 try {
                     JSONArray jsonArray = new JSONArray(new String(response.data,
-                            HttpHeaderParser.parseCharset(response.headers)));
+                                                                   HttpHeaderParser.parseCharset(
+                                                                           response.headers)));
                     JSONObject object = jsonArray.getJSONObject(0);
-                    
+
                     idProfile[0] = object.getInt(PROFILE);
                     idCity[0] = object.getInt(CITY);
                     idCountry[0] = object.getInt(COUNTRY);
 
                     user.init(object);
-                } catch (JSONException e) {
-                    Log.e(JSON_TAG, e.getMessage());
-                } catch (IOException e) {
-                    Log.e(ERROR_TAG, e.getMessage());
+                } catch (Exception e) {
+                    UserDBManager.this.logError("loadMySQL", e);
                 } finally {
-                    HTTPRequestQueueSingleton.getInstance(UserDBManager.this.getContext()).finishRequest(UserDBManager.this.table);
+                    HTTPRequestQueueSingleton.getInstance(UserDBManager.this.getContext())
+                                             .finishRequest(UserDBManager.this.table);
                 }
-                
+
                 return super.parseNetworkResponse(response);
             }
 
@@ -349,21 +365,23 @@ public final class UserDBManager extends SimpleDBManager {
                 idCity[0] = 0;
                 idCountry[0] = 0;
 
-                HTTPRequestQueueSingleton.getInstance(UserDBManager.this.getContext()).finishRequest(UserDBManager.this.table);
-                
+                HTTPRequestQueueSingleton.getInstance(UserDBManager.this.getContext())
+                                         .finishRequest(UserDBManager.this.table);
+
                 return super.parseNetworkError(volleyError);
             }
         };
 
-        HTTPRequestQueueSingleton.getInstance(this.getContext()).addToRequestQueue(this.table, request);
+        HTTPRequestQueueSingleton.getInstance(this.getContext())
+                                 .addToRequestQueue(this.table, request);
         this.waitForResponse();
-        
+
         user.setProfile(new ProfileDBManager(this.getContext()).loadMySQL(idProfile[0]));
         user.setCountry(new CountryDBManager(this.getContext()).loadMySQL(idCountry[0]));
         user.setCity(new CityDBManager(this.getContext()).loadMySQL(idCity[0]));
         user.setReviews(new ReviewDBManager(this.getContext()).loadUserMySQL(user.getId()));
         user.setBookLists(new BookListDBManager(this.getContext()).loadUserMySQL(user.getId()));
-        
+
         return (user.isEmpty()) ? null : user;
     }
 
@@ -371,32 +389,44 @@ public final class UserDBManager extends SimpleDBManager {
      * Loads a user from MySQL database.
      * @param email The email of the user.
      * @param password The password of the user.
+     * @param listener The listener to call if defined.
      * @return The loaded user.
      */
-    public PrivateUser loadMySQL(String email, String password) {
+    public PrivateUser loadMySQL(String email, String password,
+                                 HTTPRequestQueueSingleton.HTTPRequestQueueListener listener) {
         final PrivateUser user = new PrivateUser();
-        String url = this.baseUrl + APIManager.READ + EMAIL + "=" + email + "&" + PASSWORD + "=" + password;
+        String url = this.baseUrl + APIManager.READ + EMAIL + "=" + email + "&" + PASSWORD + "=" +
+                     password;
         final int idProfile[] = new int[1];
         final int idCity[] = new int[1];
         final int idCountry[] = new int[1];
-        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null, null, new OnRequestError()) {
+        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null, null,
+                                                        new OnRequestError()) {
             @Override
             protected Response<JSONArray> parseNetworkResponse(NetworkResponse response) {
                 try {
                     JSONArray jsonArray = new JSONArray(new String(response.data,
-                            HttpHeaderParser.parseCharset(response.headers)));
+                                                                   HttpHeaderParser.parseCharset(
+                                                                           response.headers)));
                     JSONObject object = jsonArray.getJSONObject(0);
                     idProfile[0] = object.getInt(PROFILE);
                     idCity[0] = object.getInt(CITY);
                     idCountry[0] = object.getInt(COUNTRY);
 
                     user.init(object);
-                } catch (JSONException e) {
-                    Log.e(JSON_TAG, e.getMessage());
-                } catch (IOException e) {
-                    Log.e(ERROR_TAG, e.getMessage());
+                    
+                    if (listener != null) {
+                        listener.onRequestFinished();
+                    }
+                } catch (Exception e) {
+                    UserDBManager.this.logError("loadMySQL", e);
+                    
+                    if (listener != null) {
+                        listener.onRequestError();
+                    }
                 } finally {
-                    HTTPRequestQueueSingleton.getInstance(UserDBManager.this.getContext()).finishRequest(UserDBManager.this.table);
+                    HTTPRequestQueueSingleton.getInstance(UserDBManager.this.getContext())
+                                             .finishRequest(UserDBManager.this.table);
                 }
 
                 return super.parseNetworkResponse(response);
@@ -408,22 +438,30 @@ public final class UserDBManager extends SimpleDBManager {
                 idCity[0] = 0;
                 idCountry[0] = 0;
 
-                HTTPRequestQueueSingleton.getInstance(UserDBManager.this.getContext()).finishRequest(UserDBManager.this.table);
+                HTTPRequestQueueSingleton.getInstance(UserDBManager.this.getContext())
+                                         .finishRequest(UserDBManager.this.table);
+
+                if (listener != null) {
+                    listener.onRequestError();
+                }
 
                 return super.parseNetworkError(volleyError);
             }
         };
 
-        HTTPRequestQueueSingleton.getInstance(this.getContext()).addToRequestQueue(this.table, request);
-        this.waitForResponse();
+        HTTPRequestQueueSingleton.getInstance(this.getContext())
+                                 .addToRequestQueue(this.table, request);
         
+        if (listener == null) {
+            this.waitForResponse();
+        }
         
         user.setProfile(new ProfileDBManager(this.getContext()).loadSQLite(idProfile[0]));
         user.setCountry(new CountryDBManager(this.getContext()).loadSQLite(idCountry[0]));
         user.setCity(new CityDBManager(this.getContext()).loadSQLite(idCity[0]));
         user.setReviews(new ReviewDBManager(this.getContext()).loadUserSQLite(user.getId()));
         user.setBookLists(new BookListDBManager(this.getContext()).loadUserSQLite(user.getId()));
-        
+
         this.initBookLists(user);
 
         return (user.isEmpty()) ? null : user;
@@ -433,33 +471,52 @@ public final class UserDBManager extends SimpleDBManager {
      * Checks if a value is available for a specific field (not already taken).
      * @param field The associated field.
      * @param value The value to check.
+     * @param listener The listener to call.
      * @return True if the value is available (not taken) else false.
      */
-    public boolean isAvailableMySQL(String field, String value) {
+    public boolean isAvailableMySQL(String field, String value,
+                                    HTTPRequestQueueSingleton.HTTPRequestQueueListener listener) {
         final boolean[] available = new boolean[1];
         String url = this.baseUrl + APIManager.READ + field + "=" + value + "&public=1";
         available[0] = true;
-        StringRequest request = new StringRequest(Request.Method.GET, url, null, new OnRequestError()) {
+        StringRequest request = new StringRequest(Request.Method.GET, url, null,
+                                                  new OnRequestError()) {
             @Override
             protected VolleyError parseNetworkError(VolleyError volleyError) {
-                HTTPRequestQueueSingleton.getInstance(UserDBManager.this.getContext()).finishRequest(UserDBManager.this.table);
+                HTTPRequestQueueSingleton.getInstance(UserDBManager.this.getContext())
+                                         .finishRequest(UserDBManager.this.table);
                 
+                if (listener != null) {
+                    listener.onRequestError();
+                }
+
                 return super.parseNetworkError(volleyError);
             }
 
             @Override
             protected Response<String> parseNetworkResponse(NetworkResponse response) {
-                available[0] = false;
+                if (response.data.length > 2) {
+                    available[0] = false;
+                }
+
+                HTTPRequestQueueSingleton.getInstance(UserDBManager.this.getContext())
+                                         .finishRequest(UserDBManager.this.table);
                 
-                HTTPRequestQueueSingleton.getInstance(UserDBManager.this.getContext()).finishRequest(UserDBManager.this.table);
-                
+                if (listener != null) {
+                    listener.onRequestFinished();
+                }
+
                 return super.parseNetworkResponse(response);
-            }            
+            }
         };
 
-        HTTPRequestQueueSingleton.getInstance(this.getContext()).addToRequestQueue(this.table, request);
-        this.waitForResponse();
+        HTTPRequestQueueSingleton.getInstance(this.getContext())
+                                 .addToRequestQueue(this.table, request);
         
+        if (listener == null) {
+            this.waitForResponse();
+        }
+
         return available[0];
     }
 
@@ -515,39 +572,52 @@ public final class UserDBManager extends SimpleDBManager {
     }
 
     @Override
-    public void createSQLite(@NonNull JSONObject entity) {
+    public boolean createSQLite(@NonNull JSONObject entity) {
+        this.database.beginTransaction();
+
         try {
             ContentValues data = new ContentValues();
 
             data.put(ID, entity.getInt(ID));
             data.put(PSEUDO, entity.getString(PSEUDO));
             data.put(PROFILE, entity.getInt(PROFILE));
+
             this.database.insertOrThrow(this.table, null, data);
-        } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
-        } catch (JSONException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
+            this.database.setTransactionSuccessful();
+
+            return true;
+        } catch (Exception e) {
+            this.logError("createSQLite", e);
+
+            return false;
+        } finally {
+            this.database.endTransaction();
         }
     }
 
     @Override
     public boolean updateSQLite(@NonNull JSONObject entity) {
+        this.database.beginTransaction();
+
         try {
             ContentValues data = new ContentValues();
             String whereClause = String.format("%s = ?", ID);
             String[] whereArgs = new String[]{entity.getString(ID)};
 
             data.put(PSEUDO, entity.getString(PSEUDO));
+            data.put(UPDATE, new DateTime().toString(DEFAULT_FORMAT));
 
-            return this.database.update(this.table, data, whereClause, whereArgs) != 0;
-        } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
+            boolean success = this.database.update(this.table, data, whereClause, whereArgs) != 0;
+
+            this.database.setTransactionSuccessful();
+
+            return success;
+        } catch (Exception e) {
+            this.logError("updateSQLite", e);
 
             return false;
-        } catch (JSONException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
-
-            return false;
+        } finally {
+            this.database.endTransaction();
         }
     }
 
@@ -558,11 +628,11 @@ public final class UserDBManager extends SimpleDBManager {
         List<BookListType> types = new BookListTypeDBManager(this.getContext()).queryAllSQLite();
         Map<String, BookList> bookLists = new HashMap<>();
         BookList bookList;
-        
+
         if (user.getBookLists() == null) {
             user.setBookLists(bookLists);
         }
-        
+
         for (BookListType type : types) {
             if (!user.getBookLists().containsKey(type.getName())) {
                 bookList = new BookList(type);

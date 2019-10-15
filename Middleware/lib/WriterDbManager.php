@@ -65,7 +65,7 @@ class WriterDbManager extends DbManager
 
         $response = $req->fetchAll(PDO::FETCH_ASSOC);
 
-        return (!empty($response)) ? json_encode($response) : null;
+        return json_encode($response);
     }
 
     /**
@@ -85,7 +85,7 @@ class WriterDbManager extends DbManager
 
         $response = $req->fetchAll(PDO::FETCH_ASSOC);
 
-        return (!empty($response)) ? json_encode($response) : null;
+        return json_encode($response);
     }
 
     /**
@@ -104,7 +104,7 @@ class WriterDbManager extends DbManager
 
         $response = $req->fetchAll(PDO::FETCH_ASSOC);
 
-        return (!empty($response)) ? json_encode($response) : null;
+        return json_encode($response);
     }
 
     /**
@@ -251,7 +251,7 @@ class WriterDbManager extends DbManager
         $req = $this->db->query($statement);
         $response = $req->fetchAll(PDO::FETCH_ASSOC);
 
-        return (!empty($response)) ? json_encode($response) : null;
+        return json_encode($response);
     }
 
     /**
@@ -274,7 +274,7 @@ class WriterDbManager extends DbManager
 
         $response = $req->fetchAll(PDO::FETCH_ASSOC);
 
-        return (!empty($response)) ? json_encode($response) : null;
+        return json_encode($response);
     }
 
     /**
@@ -286,7 +286,7 @@ class WriterDbManager extends DbManager
         $req = $this->db->query($statement);
         $response = $req->fetchAll(PDO::FETCH_ASSOC);
 
-        return (!empty($response)) ? json_encode($response) : null;
+        return json_encode($response);
     }
 
     /**
@@ -304,7 +304,7 @@ class WriterDbManager extends DbManager
 
         $response = $req->fetchAll(PDO::FETCH_ASSOC);
 
-        return (!empty($response)) ? json_encode($response) : null;
+        return json_encode($response);
     }
 
     /**
@@ -318,7 +318,7 @@ class WriterDbManager extends DbManager
         $req = $this->db->query($statement);
         $response = $req->fetchAll(PDO::FETCH_ASSOC);
 
-        return (!empty($response)) ? json_encode($response) : null;
+        return json_encode($response);
     }
 
     /**

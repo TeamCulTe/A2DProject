@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Country;
+import com.imie.a2dev.teamculte.readeo.R;
 
 import java.util.List;
 
@@ -49,6 +50,7 @@ public final class CountrySpinnerAdapter extends ArrayAdapter {
         }
         
         TextView text = convertView.findViewById(android.R.id.text1);
+        text.setTextColor(this.getContext().getColor(R.color.grey_anthracite));
         
         text.setText(this.items.get(position).getName());
         

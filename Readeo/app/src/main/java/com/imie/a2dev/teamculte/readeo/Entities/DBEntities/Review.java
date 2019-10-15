@@ -3,16 +3,12 @@ package com.imie.a2dev.teamculte.readeo.Entities.DBEntities;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
-import android.util.Log;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.ReviewDBSchema;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.JSON_TAG;
-import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.SQLITE_TAG;
 
 /**
  * Final class representing a review written by an user for a specific book.
@@ -44,7 +40,20 @@ public final class Review extends DBEntity {
     }
 
     /**
+     * Review's nearly full filled constructor.
+     * @param id  The id of the associated book.
+     * @param userId The id of the user to set.
+     */
+    public Review(int id, int userId) {
+        super(id);
+
+        this.userId = userId;
+        this.review = "";
+    }
+
+    /**
      * Review's full filled constructor, providing all attributes values.
+     * @param id  The id of the associated book.
      * @param userId The id of the user to set.
      * @param review The review to set.
      * @param shared The value defining if the review is shared or not.
@@ -81,7 +90,7 @@ public final class Review extends DBEntity {
     public Review(JSONObject result) {
         this.init(result);
     }
-    
+
     /**
      * Review's full filled constructor providing all its attributes values from a ContentValues object.
      * @param contentValues The ContentValues object used to initialize the entity.
@@ -100,7 +109,7 @@ public final class Review extends DBEntity {
         this.review = contentValues.getAsString(ReviewDBSchema.REVIEW);
         this.shared = true;
     }
-    
+
     /**
      * Initializes the review from a JSON response object.
      * @param object The JSON response from the API.
@@ -112,7 +121,7 @@ public final class Review extends DBEntity {
             this.review = object.getString(ReviewDBSchema.REVIEW);
             this.shared = (object.getInt(ReviewDBSchema.SHARED) == 1);
         } catch (JSONException e) {
-            Log.e(JSON_TAG, e.getMessage());
+            this.logError("init", e);
         }
     }
 
@@ -132,7 +141,7 @@ public final class Review extends DBEntity {
                 result.close();
             }
         } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
+            this.logError("init", e);
         }
     }
 }

@@ -46,6 +46,11 @@ public abstract class UserDBSchema {
     public static final String COUNTRY = CountryDBSchema.ID;
 
     /**
+     * Defines the user's key field.
+     */
+    public static final String KEY = "api_key";
+
+    /**
      * Defines the book list type name field max size.
      */
     private static final int PSEUDO_SIZE = 50;

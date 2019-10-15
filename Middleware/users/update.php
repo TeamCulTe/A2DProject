@@ -13,15 +13,15 @@ if (isset($_PUT[$id]) && isset($_PUT[$pseudo]) && isset($_PUT[$password]) && iss
     $response_code = ($dbManager->update($_PUT[$id], $_PUT[$pseudo], $_PUT[$password], $_PUT[$email],
         $_PUT[$idProfile], $_PUT[$idCity], $_PUT[$idCountry])) ? 201 : 404;
 } elseif (isset($_PUT[$id]) && isset($_PUT[$pseudo])) {
-    $response_code = ($dbManager->updatePseudo($_PUT[$id], $_PUT[$pseudo]));
+    $response_code = ($dbManager->updatePseudo($_PUT[$id], $_PUT[$pseudo])) ? 201 : 404;
 } elseif (isset($_PUT[$id]) && isset($_PUT[$password])) {
-    $response_code = ($dbManager->updatePassword($_PUT[$id], $_PUT[$password]));
+    $response_code = ($dbManager->updatePassword($_PUT[$id], $_PUT[$password])) ? 201 : 404;
 } elseif (isset($_PUT[$id]) && isset($_PUT[$email])) {
-    $response_code = ($dbManager->updateEmail($_PUT[$id], $_PUT[$email]));
+    $response_code = ($dbManager->updateEmail($_PUT[$id], $_PUT[$email])) ? 201 : 404;
 } elseif (isset($_PUT[$id]) && isset($_PUT[$idCity])) {
-    $response_code = ($dbManager->updateCity($_PUT[$id], $_PUT[$idCity]));
+    $response_code = ($dbManager->updateCity($_PUT[$id], $_PUT[$idCity])) ? 201 : 404;
 } elseif (isset($_PUT[$id]) && isset($_PUT[$idCountry])) {
-    $response_code = ($dbManager->updateCountry($_PUT[$id], $_PUT[$idCountry]));
+    $response_code = ($dbManager->updateCountry($_PUT[$id], $_PUT[$idCountry])) ? 201 : 404;
 } else {
     $response_code = 400;
 }

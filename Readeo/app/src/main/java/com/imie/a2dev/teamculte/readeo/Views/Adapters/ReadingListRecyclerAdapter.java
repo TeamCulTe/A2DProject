@@ -28,7 +28,7 @@ public final class ReadingListRecyclerAdapter extends RecyclerView.Adapter<Readi
      * Stores the listener used to notify when a cell is selected.
      */
     private ReadingListAdapterListener listener;
-    
+
     /**
      *     public ReadingListRecyclerAdapter(List<Book> books) {'s constructor.
      * @param books The list of books to set.
@@ -37,25 +37,6 @@ public final class ReadingListRecyclerAdapter extends RecyclerView.Adapter<Readi
         super();
 
         this.books = books;
-    }
-
-    @Override
-    public ReadingListRecyclerAdapter.ReadingListViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.row_reading_list, parent, false);
-
-        return new ReadingListViewHolder(view);
-    }
-
-    @Override
-    public void onBindViewHolder(@NonNull ReadingListRecyclerAdapter.ReadingListViewHolder holder, int position) {
-        Book book = this.books.get(position);
-
-        holder.bind(book);
-    }
-
-    @Override
-    public int getItemCount() {
-        return this.books.size();
     }
 
     /**
@@ -73,7 +54,7 @@ public final class ReadingListRecyclerAdapter extends RecyclerView.Adapter<Readi
     public void setListener(ReadingListAdapterListener newListener) {
         this.listener = newListener;
     }
-    
+
     /**
      * Gets the books attribute.
      * @return the value of the attribute.
@@ -81,15 +62,32 @@ public final class ReadingListRecyclerAdapter extends RecyclerView.Adapter<Readi
     public List<Book> getBooks() {
         return this.books;
     }
-    
+
     /**
      * Sets the books, insert the header messages and refresh the view.
      * @param books The types to set.
      */
     public void setBooks(List<Book> books) {
         this.books = books;
-        
+
         this.notifyDataSetChanged();
+    }
+
+    @Override
+    public ReadingListRecyclerAdapter.ReadingListViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.row_reading_list, parent, false);
+
+        return new ReadingListViewHolder(view);
+    }
+
+    @Override
+    public void onBindViewHolder(@NonNull ReadingListRecyclerAdapter.ReadingListViewHolder holder, int position) {
+        holder.bind(this.books.get(position));
+    }
+
+    @Override
+    public int getItemCount() {
+        return this.books.size();
     }
 
     /**
@@ -100,7 +98,7 @@ public final class ReadingListRecyclerAdapter extends RecyclerView.Adapter<Readi
          * Stores the content view.
          */
         private View contentView;
-        
+
         /**
          * Displays the book cover.
          */
@@ -165,15 +163,15 @@ public final class ReadingListRecyclerAdapter extends RecyclerView.Adapter<Readi
             // TODO: See if "if" statement is needed here.
             imageLoader.displayImage(book.getCover(), this.imgCover);
             this.txtTitle.setText(book.getTitle());
-            
+
             for (Author author : book.getAuthors()) {
                 authors.append(author.getName());
-                
+
                 if (book.getAuthors().indexOf(author) != book.getAuthors().size() - 1) {
                     authors.append("\n");
                 }
             }
-            
+
             if (authors.toString().equals("")) {
                 this.txtAuthor.setText(R.string.not_communicated);
             } else {
@@ -185,21 +183,25 @@ public final class ReadingListRecyclerAdapter extends RecyclerView.Adapter<Readi
             } else {
                 this.txtDate.setText(String.valueOf(book.getDatePublished()));
             }
-            
+
             this.contentView.setOnClickListener(view -> {
                 if (ReadingListRecyclerAdapter.this.listener != null) {
                     ReadingListRecyclerAdapter.this.listener.bookCellSelected(book);
                 }
             });
-            
+
             this.txtEditReview.setOnClickListener(view -> {
-                
+                if (ReadingListRecyclerAdapter.this.listener != null) {
+                    ReadingListRecyclerAdapter.this.listener.editReviewButtonClick(book);
+                }
             });
 
             this.txtEditQuote.setOnClickListener(view -> {
-
+                if (ReadingListRecyclerAdapter.this.listener != null) {
+                    ReadingListRecyclerAdapter.this.listener.editQuoteButtonClick(book);
+                }
             });
-            
+
             this.imgBtnDelete.setOnClickListener(view -> {
                 if (ReadingListRecyclerAdapter.this.listener != null) {
                     ReadingListRecyclerAdapter.this.listener.deleteButtonClicked(book);
@@ -219,9 +221,21 @@ public final class ReadingListRecyclerAdapter extends RecyclerView.Adapter<Readi
         void bookCellSelected(Book book);
 
         /**
-         * Called when a delete button is cliqued.
+         * Called when a delete button is clicked.
          * @param book The associated book.
          */
         void deleteButtonClicked(Book book);
+
+        /**
+         * Called when the edit review button is clicked.
+         * @param book The associated book.
+         */
+        void editReviewButtonClick(Book book);
+
+        /**
+         * Called when the edit quote button is clicked.
+         * @param book The associated book.
+         */
+        void editQuoteButtonClick(Book book);
     }
 }

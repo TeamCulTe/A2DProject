@@ -20,24 +20,14 @@ import org.json.JSONObject;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.ERROR_TAG;
-import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.JSON_TAG;
-import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.SERVER_TAG;
-import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.SQLITE_TAG;
-
 /**
  * Abstract class extended by all DBManager classes (used to manage entities into databases).
  */
 public abstract class DBManager {
     /**
-     * Defines the database version.
-     */
-    private final int VERSION = 1;
-
-    /**
      * Defines the database file name.
      */
-    protected static String dbFileName = "readeo.db";
+    public static String dbFileName = "readeo.db";
 
     // Predefined queries.
 
@@ -45,6 +35,11 @@ public abstract class DBManager {
      * Defines the default all fields database query.
      */
     protected final String QUERY_ALL = "SELECT * FROM %s";
+
+    /**
+     * Defines the default all fields database query with a double where clause.
+     */
+    protected final String DOUBLE_QUERY_ALL = "SELECT * FROM %s WHERE %s = ? AND %s = ?";
 
     /**
      * Defines the default all fields database query with paginated results.
@@ -108,17 +103,10 @@ public abstract class DBManager {
      * @param context The associated context.
      */
     protected DBManager(Context context) {
-        this.handler = new DBHandler(context, dbFileName, null, this.VERSION);
+        this.handler = DBHandler.getInstance();
         this.context = context;
 
         this.open();
-    }
-
-    @Override
-    protected void finalize() throws Throwable {
-        this.close();
-
-        super.finalize();
     }
 
     /**
@@ -209,9 +197,9 @@ public abstract class DBManager {
 
         while (httpRequestQueueSingleton.hasRequestPending(this.table)) {
             try {
-                Thread.sleep(500);
+                Thread.sleep(10);
             } catch (InterruptedException e) {
-                Log.e(ERROR_TAG, "Error while sleeping the thread.");
+                this.logError("waitForResponse", e);
             }
         }
     }
@@ -234,7 +222,7 @@ public abstract class DBManager {
 
             return count;
         } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
+            this.logError("countSQLite", e);
 
             return -1;
         }
@@ -245,7 +233,9 @@ public abstract class DBManager {
      * @param ids The ids of the entity to delete.
      * @return true if success else false.
      */
-    public boolean deleteSQLite(int ... ids) {
+    public boolean deleteSQLite(int... ids) {
+        this.database.beginTransaction();
+        
         try {
             StringBuilder builder = new StringBuilder();
             String[] whereArgs = new String[ids.length];
@@ -260,12 +250,18 @@ public abstract class DBManager {
                     builder.append(" AND ");
                 }
             }
+            
+            boolean success = this.database.delete(this.table, builder.toString(), whereArgs) != 0; 
 
-            return this.database.delete(this.table, builder.toString(), whereArgs) != 0;
+            this.database.setTransactionSuccessful();
+            
+            return success;
         } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
+            this.logError("deleteSQLite", e);
 
             return false;
+        } finally {
+            this.database.endTransaction();
         }
     }
 
@@ -280,12 +276,12 @@ public abstract class DBManager {
                 try {
                     DBManager.this.createSQLite(response.getJSONObject(i));
                 } catch (JSONException e) {
-                    Log.e(JSON_TAG, e.getMessage());
+                    DBManager.this.logError("importFromMySQL", e);
                 }
             }
 
             HTTPRequestQueueSingleton.getInstance(DBManager.this.context).finishRequest(this.table);
-        });
+        }, null);
     }
 
     /**
@@ -307,11 +303,11 @@ public abstract class DBManager {
                     DBManager.this.updateIndexes(indexes, max[0]);
                 }
             } catch (JSONException e) {
-                Log.e(JSON_TAG, e.getMessage());
+                DBManager.this.logError("importPaginatedFromMySQL", e);
             }
 
             HTTPRequestQueueSingleton.getInstance(DBManager.this.context).finishRequest(this.table);
-        });
+        }, null);
     }
 
     /**
@@ -326,12 +322,13 @@ public abstract class DBManager {
         this.requestString(Request.Method.PUT, url, null, param);
         this.waitForResponse();
     }
-    
+
     /**
      * From a JSON object creates the associated entity into the database.
      * @param entity The JSON object to store into the database.
+     * @return true if success else false.
      */
-    public abstract void createSQLite(@NonNull JSONObject entity);
+    public abstract boolean createSQLite(@NonNull JSONObject entity);
 
     /**
      * From a JSON object updates the associated entity into the database.
@@ -347,15 +344,21 @@ public abstract class DBManager {
      * @param successListener The instance implementing response listener in order to call the associated callback
      * function.
      */
-    public final void requestJsonArray(int method, String url, Response.Listener<JSONArray> successListener) {
-        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(method,
-                url,
-                null,
-                successListener,
-                new OnRequestError());
+    public final void requestJsonArray(int method,
+                                       String url,
+                                       Response.Listener<JSONArray> successListener,
+                                       Response.ErrorListener errorListener) {
+        if (errorListener == null) {
+            errorListener = new OnRequestError();
+        }
 
-        HTTPRequestQueueSingleton.getInstance(this.context).addToRequestQueue(this.table,
-                jsonArrayRequest);
+        JsonArrayRequest jsonArrayRequest = new JsonArrayRequest(method,
+                                                                 url,
+                                                                 null,
+                                                                 successListener,
+                                                                 errorListener);
+
+        HTTPRequestQueueSingleton.getInstance(this.context).addToRequestQueue(this.table, jsonArrayRequest);
     }
 
     /**
@@ -364,18 +367,17 @@ public abstract class DBManager {
      * @param url The url to request.
      * @param successListener The instance implementing response listener in order to call the associated callback.
      * @param params The param to send (POST and PUT requests).
-     *
      */
     public final void requestString(int method,
-                                       String url,
-                                       Response.Listener<String> successListener,
-                                       final Map<String, String> params) {
+                                    String url,
+                                    Response.Listener<String> successListener,
+                                    final Map<String, String> params) {
         if (successListener == null) {
-            successListener = response -> HTTPRequestQueueSingleton.getInstance(DBManager.this.context).finishRequest(this.table);
+            successListener = response -> HTTPRequestQueueSingleton.getInstance(DBManager.this.context)
+                                                                   .finishRequest(this.table);
         }
 
-        StringRequest stringRequest = new StringRequest(method, url, successListener, new OnRequestError())
-        {
+        StringRequest stringRequest = new StringRequest(method, url, successListener, new OnRequestError()) {
             @Override
             protected Map<String, String> getParams() {
                 return params;
@@ -384,7 +386,23 @@ public abstract class DBManager {
 
         HTTPRequestQueueSingleton.getInstance(this.context).addToRequestQueue(this.table, stringRequest);
     }
-    
+
+    /**
+     * Log a formatted error (class name and method name).
+     * @param methodName The name of the current method.
+     * @param error The error raised.
+     */
+    protected void logError(String methodName, Exception error) {
+        Log.e(String.format("[%s:%s] : ", this.getClass().getName(), methodName), error.getMessage());
+    }
+
+    /**
+     * Closes the database.
+     */
+    protected void close() {
+        this.handler.close();
+    }
+
     /**
      * Opens and set the SQLiteDatabase.
      */
@@ -408,13 +426,6 @@ public abstract class DBManager {
     }
 
     /**
-     * Closes the database.
-     */
-    private void close() {
-        this.handler.close();
-    }
-
-    /**
      * Inner class used to manage HTTP request errors while contacting the API.
      */
     protected final class OnRequestError implements Response.ErrorListener {
@@ -427,8 +438,8 @@ public abstract class DBManager {
             String statusCode = (error.networkResponse != null) ? String.valueOf(error.networkResponse.statusCode) :
                     "unexpected";
             String requested = requestQueueSingleton.getLastRequestUrl();
-            Log.e(SERVER_TAG,
-                    "Error " + statusCode + " while contacting the API at request : \n" + requested);
+            Log.e("[OnRequestError:onErrorResponse]",
+                  "Error " + statusCode + " while contacting the API at request : \n" + requested);
         }
     }
 }

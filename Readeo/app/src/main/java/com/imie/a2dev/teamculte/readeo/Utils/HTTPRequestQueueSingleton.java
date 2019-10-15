@@ -133,5 +133,15 @@ public final class HTTPRequestQueueSingleton {
          * Called when the requests from the queue are finished.
          */
         void onRequestsFinished();
+
+        /** 
+         * Called when a request from the queue is finished.
+         */
+        void onRequestFinished();
+
+        /**
+         * Called when a request from the queue encounter an error.
+         */
+        void onRequestError();
     }
 }

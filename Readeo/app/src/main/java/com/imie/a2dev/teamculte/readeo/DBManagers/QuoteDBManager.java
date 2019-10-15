@@ -5,7 +5,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
-import android.util.Log;
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -16,27 +15,24 @@ import com.android.volley.toolbox.StringRequest;
 import com.imie.a2dev.teamculte.readeo.APIManager;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Quote;
 import com.imie.a2dev.teamculte.readeo.Utils.HTTPRequestQueueSingleton;
+import org.joda.time.DateTime;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
 
+import static com.imie.a2dev.teamculte.readeo.DBSchemas.CommonDBSchema.DEFAULT_FORMAT;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.CommonDBSchema.UPDATE;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.QuoteDBSchema.BOOK;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.QuoteDBSchema.ID;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.QuoteDBSchema.QUOTE;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.QuoteDBSchema.TABLE;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.QuoteDBSchema.USER;
-import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.ERROR_TAG;
-import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.JSON_TAG;
-import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.SQLITE_TAG;
 
 /**
  * Manager class used to manage the quote entities from databases.
@@ -60,20 +56,34 @@ public final class QuoteDBManager extends SimpleDBManager {
      * @return true if success else false.
      */
     public boolean createSQLite(@NonNull Quote entity) {
+        this.database.beginTransaction();
+        
         try {
             ContentValues data = new ContentValues();
+            long id;
 
-            data.put(ID, entity.getId());
+            if (entity.getId() != 0) {
+                data.put(ID, entity.getId());
+            }
+
             data.put(USER, entity.getUserId());
             data.put(BOOK, entity.getBookId());
             data.put(QUOTE, entity.getQuote());
-            this.database.insertOrThrow(this.table, null, data);
+
+            id = this.database.insertOrThrow(this.table, null, data);
+            this.database.setTransactionSuccessful();
+
+            if (entity.getId() == 0) {
+                entity.setId((int) id);
+            }
 
             return true;
         } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
+            this.logError("createSQLite", e);
 
             return false;
+        } finally {
+            this.database.endTransaction();
         }
     }
 
@@ -83,22 +93,30 @@ public final class QuoteDBManager extends SimpleDBManager {
      * @return true if success else false.
      */
     public boolean updateSQLite(@NonNull Quote entity) {
+        this.database.beginTransaction();
+        
         try {
             ContentValues data = new ContentValues();
             String whereClause = String.format("%s = ?", ID);
             String[] whereArgs = new String[]{String.valueOf(entity.getId())};
 
             data.put(QUOTE, entity.getQuote());
-            data.put(UPDATE, new Date().toString());
+            data.put(UPDATE, new DateTime().toString(DEFAULT_FORMAT));
+            
+            boolean success = this.database.update(this.table, data, whereClause, whereArgs) != 0;
 
-            return this.database.update(this.table, data, whereClause, whereArgs) != 0;
+            this.database.setTransactionSuccessful();
+            
+            return success;
         } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
+            this.logError("updateSQLite", e);
 
             return false;
+        } finally {
+            this.database.endTransaction();
         }
     }
-    
+
     /**
      * From an id, returns the associated java entity.
      * @param id The id of entity to load from the database.
@@ -138,15 +156,23 @@ public final class QuoteDBManager extends SimpleDBManager {
      * @return True if success else false.
      */
     public boolean deleteUserSQLite(int id) {
+        this.database.beginTransaction();
+        
         try {
             String whereClause = String.format("%s = ?", USER);
             String[] whereArgs = new String[]{String.valueOf(id)};
+            
+            boolean success = this.database.delete(this.table, whereClause, whereArgs) != 0;
 
-            return this.database.delete(this.table, whereClause, whereArgs) != 0;
+            this.database.setTransactionSuccessful();
+            
+            return success;
         } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
+            this.logError("deleteUserSQLite", e);
 
             return false;
+        } finally {
+            this.database.endTransaction();
         }
     }
 
@@ -156,15 +182,50 @@ public final class QuoteDBManager extends SimpleDBManager {
      * @return True if success else false.
      */
     public boolean deleteBookSQLite(int id) {
+        this.database.beginTransaction();
+        
         try {
             String whereClause = String.format("%s = ?", BOOK);
             String[] whereArgs = new String[]{String.valueOf(id)};
 
-            return this.database.delete(this.table, whereClause, whereArgs) != 0;
+            boolean success = this.database.delete(this.table, whereClause, whereArgs) != 0;
+
+            this.database.setTransactionSuccessful();
+
+            return success;
         } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
+            this.logError("deleteBookSQLite", e);
 
             return false;
+        } finally {
+            this.database.endTransaction();
+        }
+    }
+
+    /**
+     * From an id book and id user, returns the associated list of quotes.
+     * @param idUser The id to filter on.
+     * @param idBook The id to filter on.
+     * @return The list of entities if exists else an empty ArrayList.
+     */
+    public List<Quote> loadUserBookSQLite(int idUser, int idBook) {
+        try {
+            ArrayList<Quote> quotes = new ArrayList<>();
+            String[] selectArgs = {String.valueOf(idUser), String.valueOf(idBook)};
+            String query = String.format(this.DOUBLE_QUERY_ALL, this.table, USER, BOOK);
+            Cursor result = this.database.rawQuery(query, selectArgs);
+
+            while (result.moveToNext()) {
+                quotes.add(new Quote(result, false));
+            }
+
+            result.close();
+
+            return quotes;
+        } catch (SQLiteException e) {
+            this.logError("loadSQLite", e);
+
+            return null;
         }
     }
 
@@ -174,15 +235,23 @@ public final class QuoteDBManager extends SimpleDBManager {
      * @return True if success else false.
      */
     private boolean deleteSQLite(int id, String filter) {
+        this.database.beginTransaction();
+        
         try {
             String whereClause = String.format("%s = ?", filter);
             String[] whereArgs = new String[]{String.valueOf(id)};
 
-            return this.database.delete(this.table, whereClause, whereArgs) != 0;
+            boolean success = this.database.delete(this.table, whereClause, whereArgs) != 0;
+
+            this.database.setTransactionSuccessful();
+
+            return success;
         } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
+            this.logError("deleteSQLite", e);
 
             return false;
+        } finally {
+            this.database.endTransaction();
         }
     }
 
@@ -207,7 +276,7 @@ public final class QuoteDBManager extends SimpleDBManager {
 
             return quotes;
         } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
+            this.logError("loadSQLite", e);
 
             return null;
         }
@@ -231,7 +300,7 @@ public final class QuoteDBManager extends SimpleDBManager {
 
             result.close();
         } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
+            this.logError("queryAllSQLite", e);
         }
 
         return quotes;
@@ -270,7 +339,8 @@ public final class QuoteDBManager extends SimpleDBManager {
 
             @Override
             protected VolleyError parseNetworkError(VolleyError volleyError) {
-                HTTPRequestQueueSingleton.getInstance(QuoteDBManager.this.getContext()).finishRequest(QuoteDBManager.this.table);
+                HTTPRequestQueueSingleton.getInstance(QuoteDBManager.this.getContext())
+                                         .finishRequest(QuoteDBManager.this.table);
 
                 return super.parseNetworkError(volleyError);
             }
@@ -283,11 +353,13 @@ public final class QuoteDBManager extends SimpleDBManager {
 
                     if (pattern.matcher(resp).find()) {
                         quote.setId(Integer.valueOf(resp));
+                        QuoteDBManager.this.createSQLite(quote);
                     }
                 } catch (IOException e) {
-                    Log.e(ERROR_TAG, e.getMessage());
+                    QuoteDBManager.this.logError("createMySQL", e);
                 } finally {
-                    HTTPRequestQueueSingleton.getInstance(QuoteDBManager.this.getContext()).finishRequest(QuoteDBManager.this.table);
+                    HTTPRequestQueueSingleton.getInstance(QuoteDBManager.this.getContext())
+                                             .finishRequest(QuoteDBManager.this.table);
                 }
 
                 return super.parseNetworkResponse(response);
@@ -295,7 +367,6 @@ public final class QuoteDBManager extends SimpleDBManager {
         };
 
         HTTPRequestQueueSingleton.getInstance(this.getContext()).addToRequestQueue(this.table, request);
-        this.waitForResponse();
     }
 
     /**
@@ -311,16 +382,15 @@ public final class QuoteDBManager extends SimpleDBManager {
             protected Response<JSONArray> parseNetworkResponse(NetworkResponse response) {
                 try {
                     JSONArray jsonArray = new JSONArray(new String(response.data,
-                            HttpHeaderParser.parseCharset(response.headers)));
+                                                                   HttpHeaderParser.parseCharset(response.headers)));
                     JSONObject object = jsonArray.getJSONObject(0);
 
                     quote.init(object);
-                } catch (JSONException e) {
-                    Log.e(JSON_TAG, e.getMessage());
-                } catch (IOException e) {
-                    Log.e(ERROR_TAG, e.getMessage());
+                } catch (Exception e) {
+                    QuoteDBManager.this.logError("loadMySQL", e);
                 } finally {
-                    HTTPRequestQueueSingleton.getInstance(QuoteDBManager.this.getContext()).finishRequest(QuoteDBManager.this.table);
+                    HTTPRequestQueueSingleton.getInstance(QuoteDBManager.this.getContext())
+                                             .finishRequest(QuoteDBManager.this.table);
                 }
 
                 return super.parseNetworkResponse(response);
@@ -328,7 +398,8 @@ public final class QuoteDBManager extends SimpleDBManager {
 
             @Override
             protected VolleyError parseNetworkError(VolleyError volleyError) {
-                HTTPRequestQueueSingleton.getInstance(QuoteDBManager.this.getContext()).finishRequest(QuoteDBManager.this.table);
+                HTTPRequestQueueSingleton.getInstance(QuoteDBManager.this.getContext())
+                                         .finishRequest(QuoteDBManager.this.table);
 
                 return super.parseNetworkError(volleyError);
             }
@@ -412,7 +483,9 @@ public final class QuoteDBManager extends SimpleDBManager {
     }
 
     @Override
-    public void createSQLite(@NonNull JSONObject entity) {
+    public boolean createSQLite(@NonNull JSONObject entity) {
+        this.database.beginTransaction();
+        
         try {
             ContentValues data = new ContentValues();
 
@@ -420,33 +493,43 @@ public final class QuoteDBManager extends SimpleDBManager {
             data.put(USER, entity.getInt(USER));
             data.put(BOOK, entity.getInt(BOOK));
             data.put(QUOTE, entity.getString(QUOTE));
+            
             this.database.insertOrThrow(this.table, null, data);
-        } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
-        } catch (JSONException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
+            this.database.setTransactionSuccessful();
+            
+            return true;
+        } catch (Exception e) {
+            this.logError("createSQLite", e);
+            
+            return false;
+        } finally {
+            this.database.endTransaction();
         }
     }
 
     @Override
     public boolean updateSQLite(@NonNull JSONObject entity) {
+        this.database.beginTransaction();
+        
         try {
             ContentValues data = new ContentValues();
             String whereClause = String.format("%s = ?", ID);
             String[] whereArgs = new String[]{entity.getString(ID)};
 
             data.put(QUOTE, entity.getString(QUOTE));
-            data.put(UPDATE, new Date().toString());
+            data.put(UPDATE, new DateTime().toString(DEFAULT_FORMAT));
 
-            return this.database.update(this.table, data, whereClause, whereArgs) != 0;
-        } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
+            boolean success = this.database.update(this.table, data, whereClause, whereArgs) != 0;
+
+            this.database.setTransactionSuccessful();
+
+            return success;
+        } catch (Exception e) {
+            this.logError("createSQLite", e);
 
             return false;
-        } catch (JSONException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
-
-            return false;
+        } finally {
+            this.database.endTransaction();
         }
     }
 }

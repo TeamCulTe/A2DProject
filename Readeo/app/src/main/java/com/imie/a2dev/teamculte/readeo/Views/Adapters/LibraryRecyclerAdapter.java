@@ -7,12 +7,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
-import com.imie.a2dev.teamculte.readeo.App;
-import com.imie.a2dev.teamculte.readeo.DBManagers.BookDBManager;
+
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Author;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Book;
 import com.imie.a2dev.teamculte.readeo.R;
-import com.imie.a2dev.teamculte.readeo.Utils.AppUtils;
+
+import com.imie.a2dev.teamculte.readeo.Utils.ManagerHolderUtils;
 import com.nostra13.universalimageloader.core.ImageLoader;
 
 import java.util.List;
@@ -25,7 +25,7 @@ public final class LibraryRecyclerAdapter extends RecyclerView.Adapter<LibraryRe
      * Defines the default book pagination limit.
      */
     public static final int DEFAULT_LIMIT = 100;
-    
+
     /**
      * The list of types to display.
      */
@@ -35,16 +35,14 @@ public final class LibraryRecyclerAdapter extends RecyclerView.Adapter<LibraryRe
      * Stores the listener used to notify when a cell is selected.
      */
     private LibraryAdapterListener listener;
-    
+
     /**
      * LibraryRecyclerAdapter's default constructor.
      */
     public LibraryRecyclerAdapter() {
         super();
-
-        this.books = new BookDBManager(App.getAppContext()).queryAllPaginatedSQLite(DEFAULT_LIMIT, 0);
     }
-    
+
     /**
      * LibraryRecyclerAdapter's constructor.
      * @param books The list of books to set.
@@ -67,7 +65,7 @@ public final class LibraryRecyclerAdapter extends RecyclerView.Adapter<LibraryRe
         Book book = this.books.get(position);
 
         holder.bind(book);
-        
+
         if (position >= this.books.size() / 2) {
             if (this.listener != null) {
                 this.listener.halfReached();
@@ -78,6 +76,16 @@ public final class LibraryRecyclerAdapter extends RecyclerView.Adapter<LibraryRe
     @Override
     public int getItemCount() {
         return this.books.size();
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return position;
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        return position;
     }
 
     /**
@@ -94,8 +102,9 @@ public final class LibraryRecyclerAdapter extends RecyclerView.Adapter<LibraryRe
      */
     public void setListener(LibraryAdapterListener newListener) {
         this.listener = newListener;
+        this.books = ManagerHolderUtils.getInstance().getBookDBManager().queryAllPaginatedSQLite(DEFAULT_LIMIT, 0);
     }
-    
+
     /**
      * Gets the books attribute.
      * @return the value of the attribute.
@@ -103,14 +112,22 @@ public final class LibraryRecyclerAdapter extends RecyclerView.Adapter<LibraryRe
     public List<Book> getBooks() {
         return this.books;
     }
-    
+
     /**
      * Sets the books, insert the header messages and refresh the view.
      * @param books The types to set.
      */
     public void setBooks(List<Book> books) {
         this.books = books;
-        
+        this.notifyDataSetChanged();
+    }
+
+    /**
+     * Updates the books from the list by getting them from the database.
+     */
+    public void updateBooks() {
+        this.books = ManagerHolderUtils.getInstance().getBookDBManager().queryAllPaginatedSQLite(DEFAULT_LIMIT, 0);
+
         this.notifyDataSetChanged();
     }
 
@@ -122,7 +139,7 @@ public final class LibraryRecyclerAdapter extends RecyclerView.Adapter<LibraryRe
          * Stores the content view.
          */
         private View contentView;
-        
+
         /**
          * Displays the book cover.
          */
@@ -165,20 +182,22 @@ public final class LibraryRecyclerAdapter extends RecyclerView.Adapter<LibraryRe
             ImageLoader imageLoader = ImageLoader.getInstance();
             StringBuilder authors = new StringBuilder();
 
-            
+
             // TODO: See if "if" statement is needed here.
-            imageLoader.displayImage(book.getCover(), this.imgCover);
-            
+            if (book.getCover() != null) {
+                imageLoader.displayImage(book.getCover(), this.imgCover);
+            }
+
             this.txtTitle.setText(book.getTitle());
-            
+
             for (Author author : book.getAuthors()) {
                 authors.append(author.getName());
-                
+
                 if (book.getAuthors().indexOf(author) != book.getAuthors().size() - 1) {
                     authors.append("\n");
                 }
             }
-            
+
             if (authors.toString().equals("")) {
                 this.txtAuthor.setText(R.string.not_communicated);
             } else {
@@ -190,7 +209,7 @@ public final class LibraryRecyclerAdapter extends RecyclerView.Adapter<LibraryRe
             } else {
                 this.txtDate.setText(String.valueOf(book.getDatePublished()));
             }
-            
+
             this.contentView.setOnClickListener(view -> {
                 if (LibraryRecyclerAdapter.this.listener != null) {
                     LibraryRecyclerAdapter.this.listener.bookCellSelected(book);
@@ -207,11 +226,12 @@ public final class LibraryRecyclerAdapter extends RecyclerView.Adapter<LibraryRe
          * Called when half of the books are reached (scrolled).
          */
         void halfReached();
-        
+
         /**
          * Called when a cell is selected.
          * @param book The book list type selected.
          */
         void bookCellSelected(Book book);
+
     }
 }

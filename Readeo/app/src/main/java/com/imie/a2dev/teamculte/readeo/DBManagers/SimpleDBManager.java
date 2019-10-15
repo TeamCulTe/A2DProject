@@ -3,14 +3,11 @@ package com.imie.a2dev.teamculte.readeo.DBManagers;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
-import android.util.Log;
 import com.android.volley.Request;
 import com.imie.a2dev.teamculte.readeo.APIManager;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.SQLITE_TAG;
 
 /**
  * Abstract manager class extended by all "simple id entity" managers (with only one id).
@@ -22,10 +19,16 @@ public abstract class SimpleDBManager extends DBManager {
     protected final String SIMPLE_QUERY_ALL_LIKE_START = "SELECT * FROM %s WHERE %s LIKE ?||'%%'";
 
     /**
+     * Defines the default all fields database query with a simple where - like (from start) clause.
+     */
+    protected final String SIMPLE_QUERY_ALL_LIKE_START_PAGINATED = "SELECT * FROM %s WHERE %s LIKE ?||'%%' LIMIT %d " +
+                                                                   "OFFSET %d";
+
+    /**
      * Defines the default field database query with a simple where clause.
      */
     protected final String SIMPLE_QUERY_FIELD = "SELECT %s FROM %s WHERE %s = ?";
-    
+
     /**
      * SimpleDBManager's full filled constructor initializing the handler attribute and opening the database.
      * @param context The associated context.
@@ -55,7 +58,7 @@ public abstract class SimpleDBManager extends DBManager {
 
             return queriedField;
         } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
+            this.logError("getFieldSQLite", e);
 
             return null;
         }
@@ -83,7 +86,7 @@ public abstract class SimpleDBManager extends DBManager {
 
             return this.database.rawQuery(query, selectArgs);
         } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
+            this.logError("loadCursorSQLite", e);
 
             return null;
         }
@@ -96,7 +99,7 @@ public abstract class SimpleDBManager extends DBManager {
     public void deleteTestEntityMySQL(int id) {
         String url = this.baseUrl + APIManager.DELETE;
         Map<String, String> param = new HashMap<>();
-        
+
         param.put(this.ids[0], String.valueOf(id));
         param.put(APIManager.TEST, "1");
 

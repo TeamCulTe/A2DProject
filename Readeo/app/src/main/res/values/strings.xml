@@ -15,7 +15,7 @@
     <string name="author">Author</string>
     <string name="date">Date</string>
     <string name="summary">Summary</string>
-    <string name="quotes_number_replacement">Quotes (%d)</string>
+    <string name="quotes_number_replacement">Quote(s) (%d)</string>
     <string name="review">Review</string>
     <string name="review_s_content">Review\'s content</string>
     <string name="edit_a_review">Edit a review</string>
@@ -33,15 +33,36 @@
     <string name="login_error">The login information are not valid</string>
     <string name="offline_dialog_message">There is not network access, would you like to use the offline mode ?</string>
     <string name="offline_never_connected">You should at least connect once on the app in order to use the 
-        offline mode</string> 
+        offline mode</string>
     <string name="yes">yes</string>
     <string name="no">no</string>
     <string name="account_settings">Account settings</string>
     <string name="form_fields_invalid">The fields contains some error(s) : pseudo or email already taken or 
         missing fields.</string>
+    <string name="form_update_fields">The updates has been taken into account and will be 
+        visible soon.</string>
     <string name="not_available_offline">Feature unavailable while offline</string>
     <string name="account_successfully_created">Account successfully created</string>
     <string name="not_communicated">Not communicated</string>
     <string name="separator">-</string>
     <string name="reading_list_title_replacement">Reading list : %s</string>
+    <string name="publish">Publish</string>
+    <string name="reviews_number_replacement">Review(s) (%d)</string>
+    <string name="no_books_in_book_list">You have no books into this book list.</string>
+    <string name="would_you_like_to_save_the_current_quote">Would you like to save the current quote ?</string>
+    <string name="book_title">Book Title</string>
+    <string name="share_this_review">Share this review</string>
+    <string name="update">Update</string>
+    <string name="old_password">Old password</string>
+    <string name="new_password">New password</string>
+    <string name="password_confirmation_doesnt_match">The password confirmation doesn\'t match
+        .</string>
+    <string name="delete_account_lbl">Delete account</string>
+    <string-array name="book_filters">
+        <item>None</item>
+        <item>Category</item>
+        <item>Author</item>
+        <item>Title</item>
+    </string-array>
+
 </resources>

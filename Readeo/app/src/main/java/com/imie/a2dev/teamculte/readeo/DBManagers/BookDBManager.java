@@ -5,7 +5,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
-import android.util.Log;
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -19,13 +18,12 @@ import com.imie.a2dev.teamculte.readeo.DBSchemas.CategoryDBSchema;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.WriterDBSchema;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Book;
 import com.imie.a2dev.teamculte.readeo.Utils.HTTPRequestQueueSingleton;
+import org.joda.time.DateTime;
 import org.json.JSONArray;
-import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -38,10 +36,8 @@ import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookDBSchema.CATEGORY;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookDBSchema.COVER;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookDBSchema.SUMMARY;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookDBSchema.DATE;
+import static com.imie.a2dev.teamculte.readeo.DBSchemas.CommonDBSchema.DEFAULT_FORMAT;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.CommonDBSchema.UPDATE;
-import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.ERROR_TAG;
-import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.JSON_TAG;
-import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.SQLITE_TAG;
 
 /**
  * Manager class used to manage the book entities from databases.
@@ -65,6 +61,8 @@ public final class BookDBManager extends SimpleDBManager {
      * @return true if success else false.
      */
     public boolean createSQLite(@NonNull Book entity) {
+        this.database.beginTransaction();
+        
         try {
             ContentValues data = new ContentValues();
 
@@ -76,12 +74,15 @@ public final class BookDBManager extends SimpleDBManager {
             data.put(DATE, entity.getDatePublished());
 
             this.database.insertOrThrow(this.table, null, data);
+            this.database.setTransactionSuccessful();
 
             return true;
         } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
+            this.logError("createSQLite", e);
 
             return false;
+        } finally {
+            this.database.endTransaction();
         }
     }
 
@@ -91,6 +92,8 @@ public final class BookDBManager extends SimpleDBManager {
      * @return true if success else false.
      */
     public boolean updateSQLite(@NonNull Book entity) {
+        this.database.beginTransaction();
+        
         try {
             ContentValues data = new ContentValues();
             String whereClause = String.format("%s = ?", ID);
@@ -101,13 +104,19 @@ public final class BookDBManager extends SimpleDBManager {
             data.put(COVER, entity.getCover());
             data.put(SUMMARY, entity.getSummary());
             data.put(DATE, entity.getDatePublished());
-            data.put(UPDATE, new Date().toString());
+            data.put(UPDATE, new DateTime().toString(DEFAULT_FORMAT));
+            
+            boolean success = this.database.update(this.table, data, whereClause, whereArgs) != 0;
 
-            return this.database.update(this.table, data, whereClause, whereArgs) != 0;
+            this.database.setTransactionSuccessful();
+            
+            return success;
         } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
+            this.logError("updateSQLite", e);
 
             return false;
+        } finally {
+            this.database.endTransaction();
         }
     }
 
@@ -133,8 +142,9 @@ public final class BookDBManager extends SimpleDBManager {
      * @return The loaded entities if exists else null.
      */
     public List<Book> loadFieldFilteredSQLite(String field, String filter) {
+        List<Book> books = new ArrayList<>();
+
         try {
-            List<Book> books = new ArrayList<>();
             String[] selectArgs = {filter};
             String query = String.format(this.SIMPLE_QUERY_ALL_LIKE_START, this.table, field);
             Cursor result = this.database.rawQuery(query, selectArgs);
@@ -144,13 +154,40 @@ public final class BookDBManager extends SimpleDBManager {
             }
 
             result.close();
-
-            return books;
         } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
-
-            return null;
+            this.logError("loadFieldFilteredSQLite", e);
         }
+
+        return books;
+    }
+
+    /**
+     * From a string and a field, returns the associated java books where the string matches in the field values 
+     * filtered.
+     * @param field The field to filter on.
+     * @param filter The string that should match.
+     * @param limit The limit to the query.
+     * @param offset The offset of the query.
+     * @return The loaded entities if exists else null.
+     */
+    public List<Book> loadFieldFilteredPaginatedSQLite(String field, String filter, int limit, int offset) {
+        List<Book> books = new ArrayList<>();
+
+        try {
+            String[] selectArgs = {filter};
+            String query = String.format(this.SIMPLE_QUERY_ALL_LIKE_START_PAGINATED, this.table, field, limit, offset);
+            Cursor result = this.database.rawQuery(query, selectArgs);
+
+            while (result.moveToNext()) {
+                books.add(new Book(result, false));
+            }
+
+            result.close();
+        } catch (SQLiteException e) {
+            this.logError("loadFieldFilteredSQLite", e);
+        }
+
+        return books;
     }
 
     /**
@@ -159,18 +196,19 @@ public final class BookDBManager extends SimpleDBManager {
      * @return The loaded entities if exists else null.
      */
     public List<Book> loadCategoryNameFilteredSQLite(String filter) {
+        List<Book> books = new ArrayList<>();
+
         try {
-            List<Book> books = new ArrayList<>();
             String[] selectArgs = {filter};
             String query = String.format("SELECT %s.* FROM %s INNER JOIN %s ON %s.%s = %s.%s WHERE %s LIKE ?||'%%'",
-                    this.table,
-                    this.table,
-                    CategoryDBSchema.TABLE,
-                    this.table,
-                    CATEGORY,
-                    CategoryDBSchema.TABLE,
-                    CategoryDBSchema.ID,
-                    CategoryDBSchema.NAME);
+                                         this.table,
+                                         this.table,
+                                         CategoryDBSchema.TABLE,
+                                         this.table,
+                                         CATEGORY,
+                                         CategoryDBSchema.TABLE,
+                                         CategoryDBSchema.ID,
+                                         CategoryDBSchema.NAME);
             Cursor result = this.database.rawQuery(query, selectArgs);
 
             while (result.moveToNext()) {
@@ -178,13 +216,49 @@ public final class BookDBManager extends SimpleDBManager {
             }
 
             result.close();
-
-            return books;
         } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
-
-            return null;
+            this.logError("loadCategoryNameFilteredSQLite", e);
         }
+
+        return books;
+    }
+
+    /**
+     * From a string, returns the associated java books where the string matches in the category values paginated.
+     * @param filter The string that should match.
+     * @param limit The limit to the query.
+     * @param offset The offset of the query.
+     * @return The loaded entities if exists else null.
+     */
+    public List<Book> loadCategoryNameFilteredPaginatedSQLite(String filter, int limit, int offset) {
+        List<Book> books = new ArrayList<>();
+
+        try {
+            String[] selectArgs = {filter};
+            String query = String.format("SELECT %s.* FROM %s INNER JOIN %s ON %s.%s = %s.%s WHERE %s LIKE ?||'%%' " +
+                                         "LIMIT %d OFFSET %d",
+                                         this.table,
+                                         this.table,
+                                         CategoryDBSchema.TABLE,
+                                         this.table,
+                                         CATEGORY,
+                                         CategoryDBSchema.TABLE,
+                                         CategoryDBSchema.ID,
+                                         CategoryDBSchema.NAME,
+                                         limit,
+                                         offset);
+            Cursor result = this.database.rawQuery(query, selectArgs);
+
+            while (result.moveToNext()) {
+                books.add(new Book(result, false));
+            }
+
+            result.close();
+        } catch (SQLiteException e) {
+            this.logError("loadCategoryNameFilteredPaginatedSQLite", e);
+        }
+
+        return books;
     }
 
     /**
@@ -193,25 +267,26 @@ public final class BookDBManager extends SimpleDBManager {
      * @return The loaded entities if exists else null.
      */
     public List<Book> loadAuthorNameFilteredSQLite(String filter) {
+        List<Book> books = new ArrayList<>();
+
         try {
-            List<Book> books = new ArrayList<>();
             String[] selectArgs = {filter};
             String query = String.format("SELECT %s.* FROM %s INNER JOIN %s ON %s.%s = %s.%s " +
-                            "INNER JOIN %s ON %s.%s = %s.%s WHERE %s.%s LIKE ?||'%%'",
-                    this.table,
-                    this.table,
-                    WriterDBSchema.TABLE,
-                    this.table,
-                    ID,
-                    WriterDBSchema.TABLE,
-                    WriterDBSchema.BOOK,
-                    AuthorDBSchema.TABLE,
-                    AuthorDBSchema.TABLE,
-                    AuthorDBSchema.ID,
-                    WriterDBSchema.TABLE,
-                    WriterDBSchema.AUTHOR,
-                    AuthorDBSchema.TABLE,
-                    AuthorDBSchema.NAME);
+                                         "INNER JOIN %s ON %s.%s = %s.%s WHERE %s.%s LIKE ?||'%%'",
+                                         this.table,
+                                         this.table,
+                                         WriterDBSchema.TABLE,
+                                         this.table,
+                                         ID,
+                                         WriterDBSchema.TABLE,
+                                         WriterDBSchema.BOOK,
+                                         AuthorDBSchema.TABLE,
+                                         AuthorDBSchema.TABLE,
+                                         AuthorDBSchema.ID,
+                                         WriterDBSchema.TABLE,
+                                         WriterDBSchema.AUTHOR,
+                                         AuthorDBSchema.TABLE,
+                                         AuthorDBSchema.NAME);
             Cursor result = this.database.rawQuery(query, selectArgs);
 
             while (result.moveToNext()) {
@@ -219,13 +294,55 @@ public final class BookDBManager extends SimpleDBManager {
             }
 
             result.close();
-
-            return books;
         } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
-
-            return null;
+            this.logError("loadAuthorNameFilteredSQLite", e);
         }
+
+        return books;
+    }
+
+    /**
+     * From a string, returns the associated java books where the string matches in the book writers paginated.
+     * @param filter The string that should match.
+     * @param limit The limit to the query.
+     * @param offset The offset of the query.
+     * @return The loaded entities if exists else null.
+     */
+    public List<Book> loadAuthorNameFilteredPaginatedSQLite(String filter, int limit, int offset) {
+        List<Book> books = new ArrayList<>();
+
+        try {
+            String[] selectArgs = {filter};
+            String query = String.format("SELECT %s.* FROM %s INNER JOIN %s ON %s.%s = %s.%s " +
+                                         "INNER JOIN %s ON %s.%s = %s.%s WHERE %s.%s LIKE ?||'%%' LIMIT %d OFFSET %s",
+                                         this.table,
+                                         this.table,
+                                         WriterDBSchema.TABLE,
+                                         this.table,
+                                         ID,
+                                         WriterDBSchema.TABLE,
+                                         WriterDBSchema.BOOK,
+                                         AuthorDBSchema.TABLE,
+                                         AuthorDBSchema.TABLE,
+                                         AuthorDBSchema.ID,
+                                         WriterDBSchema.TABLE,
+                                         WriterDBSchema.AUTHOR,
+                                         AuthorDBSchema.TABLE,
+                                         AuthorDBSchema.NAME,
+                                         limit,
+                                         offset);
+            Cursor result = this.database.rawQuery(query, selectArgs);
+
+            while (result.moveToNext()) {
+                books.add(new Book(result, false));
+            }
+
+            result.close();
+        } catch (SQLiteException e) {
+            this.logError("loadAuthorNameFilteredSQLite", e);
+        }
+
+        return books;
     }
 
     /**
@@ -247,13 +364,34 @@ public final class BookDBManager extends SimpleDBManager {
     }
 
     /**
+     * From a string filter and a value, returns the associated java books where the value matches in the filter values.
+     * Uses the common filter fields (Author, Category, or inner Book fields) with pagination.
+     * @param filter The filter to filter on (matching to database inner or joined fields).
+     * @param value The string value that should match.
+     * @param limit The limit to the query.
+     * @param offset The offset of the query.
+     * @return The loaded entities if exists else null.
+     */
+    public List<Book> loadFilteredPaginatedSQLite(String filter, String value, int limit, int offset) {
+        switch (filter) {
+            case CategoryDBSchema.NAME:
+                return this.loadCategoryNameFilteredPaginatedSQLite(value, limit, offset);
+            case AuthorDBSchema.NAME:
+                return this.loadAuthorNameFilteredPaginatedSQLite(value, limit, offset);
+            default:
+                return this.loadFieldFilteredPaginatedSQLite(filter, value, limit, offset);
+        }
+    }
+
+    /**
      * From a category id, returns the associated list of books.
      * @param idCategory The id of the category to load books from the database.
      * @return The list of books.
      */
     public List<Book> loadCategorySQLite(int idCategory) {
+        List<Book> books = new ArrayList<>();
+
         try {
-            List<Book> books = new ArrayList<>();
             String[] selectArgs = {String.valueOf(idCategory)};
             String query = String.format(this.SIMPLE_QUERY_ALL, this.table, CATEGORY);
             Cursor result = this.database.rawQuery(query, selectArgs);
@@ -263,13 +401,11 @@ public final class BookDBManager extends SimpleDBManager {
             }
 
             result.close();
-
-            return books;
         } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
-
-            return null;
+            this.logError("loadCategorySQLite", e);
         }
+
+        return books;
     }
 
     /**
@@ -291,7 +427,7 @@ public final class BookDBManager extends SimpleDBManager {
 
             result.close();
         } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
+            this.logError("queryAllSQLite", e);
         }
 
         return books;
@@ -308,7 +444,7 @@ public final class BookDBManager extends SimpleDBManager {
 
         try {
             Cursor result = this.database.rawQuery(String.format(this.QUERY_ALL_PAGINATED, this.table, limit, offset),
-                    null);
+                                                   null);
 
             if (result.getCount() > 0) {
                 do {
@@ -318,7 +454,7 @@ public final class BookDBManager extends SimpleDBManager {
 
             result.close();
         } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
+            this.logError("queryAllPaginatedSQLite", e);
         }
 
         return books;
@@ -358,7 +494,8 @@ public final class BookDBManager extends SimpleDBManager {
 
             @Override
             protected VolleyError parseNetworkError(VolleyError volleyError) {
-                HTTPRequestQueueSingleton.getInstance(BookDBManager.this.getContext()).finishRequest(BookDBManager.this.table);
+                HTTPRequestQueueSingleton.getInstance(BookDBManager.this.getContext())
+                                         .finishRequest(BookDBManager.this.table);
 
                 return super.parseNetworkError(volleyError);
             }
@@ -373,9 +510,10 @@ public final class BookDBManager extends SimpleDBManager {
                         book.setId(Integer.valueOf(resp));
                     }
                 } catch (IOException e) {
-                    Log.e(ERROR_TAG, e.getMessage());
+                    BookDBManager.this.logError("createMySQL", e);
                 } finally {
-                    HTTPRequestQueueSingleton.getInstance(BookDBManager.this.getContext()).finishRequest(BookDBManager.this.table);
+                    HTTPRequestQueueSingleton.getInstance(BookDBManager.this.getContext())
+                                             .finishRequest(BookDBManager.this.table);
                 }
 
                 return super.parseNetworkResponse(response);
@@ -401,18 +539,17 @@ public final class BookDBManager extends SimpleDBManager {
             protected Response<JSONArray> parseNetworkResponse(NetworkResponse response) {
                 try {
                     JSONArray jsonArray = new JSONArray(new String(response.data,
-                            HttpHeaderParser.parseCharset(response.headers)));
+                                                                   HttpHeaderParser.parseCharset(response.headers)));
                     JSONObject object = jsonArray.getJSONObject(0);
-                    
+
                     idCategory[0] = object.getInt(CATEGORY);
-                    
+
                     book.init(object);
-                } catch (JSONException e) {
-                    Log.e(JSON_TAG, e.getMessage());
-                } catch (IOException e) {
-                    Log.e(ERROR_TAG, e.getMessage());
+                } catch (Exception e) {
+                    BookDBManager.this.logError("loadMySQL", e);
                 } finally {
-                    HTTPRequestQueueSingleton.getInstance(BookDBManager.this.getContext()).finishRequest(BookDBManager.this.table);
+                    HTTPRequestQueueSingleton.getInstance(BookDBManager.this.getContext())
+                                             .finishRequest(BookDBManager.this.table);
                 }
 
                 return super.parseNetworkResponse(response);
@@ -420,7 +557,8 @@ public final class BookDBManager extends SimpleDBManager {
 
             @Override
             protected VolleyError parseNetworkError(VolleyError volleyError) {
-                HTTPRequestQueueSingleton.getInstance(BookDBManager.this.getContext()).finishRequest(BookDBManager.this.table);
+                HTTPRequestQueueSingleton.getInstance(BookDBManager.this.getContext())
+                                         .finishRequest(BookDBManager.this.table);
 
                 return super.parseNetworkError(volleyError);
             }
@@ -428,14 +566,15 @@ public final class BookDBManager extends SimpleDBManager {
 
         HTTPRequestQueueSingleton.getInstance(this.getContext()).addToRequestQueue(this.table, request);
         this.waitForResponse();
-        
         book.setCategory(new CategoryDBManager(this.getContext()).loadMySQL(idCategory[0]));
 
         return (book.isEmpty()) ? null : book;
     }
 
     @Override
-    public void createSQLite(@NonNull JSONObject entity) {
+    public boolean createSQLite(@NonNull JSONObject entity) {
+        this.database.beginTransaction();
+        
         try {
             ContentValues data = new ContentValues();
 
@@ -447,15 +586,22 @@ public final class BookDBManager extends SimpleDBManager {
             data.put(DATE, entity.getInt(DATE));
 
             this.database.insertOrThrow(this.table, null, data);
-        } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
-        } catch (JSONException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
+            this.database.setTransactionSuccessful();
+            
+            return true;
+        } catch (Exception e) {
+            this.logError("createSQLite", e);
+            
+            return false;
+        } finally {
+            this.database.endTransaction();
         }
     }
 
     @Override
     public boolean updateSQLite(@NonNull JSONObject entity) {
+        this.database.beginTransaction();
+        
         try {
             ContentValues data = new ContentValues();
             String whereClause = String.format("%s = ?", ID);
@@ -466,16 +612,19 @@ public final class BookDBManager extends SimpleDBManager {
             data.put(COVER, entity.getString(COVER));
             data.put(SUMMARY, entity.getString(SUMMARY));
             data.put(DATE, entity.getInt(DATE));
+            data.put(UPDATE, new DateTime().toString(DEFAULT_FORMAT));
+            
+            boolean success = this.database.update(this.table, data, whereClause, whereArgs) != 0;
+            
+            this.database.setTransactionSuccessful();
 
-            return this.database.update(this.table, data, whereClause, whereArgs) != 0;
-        } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
+            return success;
+        } catch (Exception e) {
+            this.logError("updateSQLite", e);
 
             return false;
-        } catch (JSONException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
-
-            return false;
+        } finally {
+            this.database.endTransaction();
         }
     }
 }

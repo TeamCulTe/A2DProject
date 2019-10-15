@@ -43,7 +43,7 @@ public final class SplashScreenActivity extends AppCompatActivity implements HTT
      * Stores the update progress text.
      */
     private TextView updateProgress;
-    
+
     /**
      * SplashScreenActivity's default constructor.
      */
@@ -56,7 +56,7 @@ public final class SplashScreenActivity extends AppCompatActivity implements HTT
             this.currentManagerPos += 1;
 
             this.updateProgress.setText(String.format(this.getResources().getString(R.string.update_progress),
-                    this.currentManagerPos, this.managers.size()));
+                                                      this.currentManagerPos, this.managers.size()));
             UpdaterUtils.getUpdateFromMySQL(this.managers.get(this.currentManagerPos));
         } else {
             Intent intent = new Intent(this, IndexActivity.class);
@@ -66,41 +66,45 @@ public final class SplashScreenActivity extends AppCompatActivity implements HTT
 
         Log.i("Progress", "[DONE] -> " + HTTPRequestQueueSingleton.getInstance(this).getLastRequestUrl());
     }
-    
+
+    @Override public void onRequestFinished() {
+        // Nothing to do.
+    }
+
+    @Override public void onRequestError() {
+        // Nothing to do.
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
+
         this.setContentView(R.layout.activity_splash_screen);
 
         this.initUpdate();
         this.initView();
     }
-    
+
     private void initView() {
         this.updateProgress = this.findViewById(R.id.txt_current_progress);
-        
+
         this.updateProgress.setText(String.format(this.getResources().getString(R.string.update_progress),
-                this.currentManagerPos, this.managers.size()));
+                                                  this.currentManagerPos, this.managers.size()));
     }
 
     /**
      * Initializes the sync between local and distant db.
      */
     private void initUpdate() {
-        managers.add(new CountryDBManager(this));
-        managers.add(new CityDBManager(this));
-        //managers.add(new AuthorDBManager(this));
-        //managers.add(new CategoryDBManager(this));
-        //managers.add(new BookListTypeDBManager(this));
-        //managers.add(new BookDBManager(this));
-        //managers.add(new WriterDBManager(this));
-        managers.add(new ProfileDBManager(this));
-        managers.add(new UserDBManager(this));
-        managers.add(new QuoteDBManager(this));
-        managers.add(new ReviewDBManager(this));
+        this.managers.add(ManagerHolderUtils.getInstance().getCityDBManager());
+        this.managers.add(ManagerHolderUtils.getInstance().getBookListTypeDBManager());
+        this.managers.add(ManagerHolderUtils.getInstance().getBookListDBManager());
+        this.managers.add(ManagerHolderUtils.getInstance().getQuoteDBManager());
+        this.managers.add(ManagerHolderUtils.getInstance().getReviewDBManager());
+        this.managers.add(ManagerHolderUtils.getInstance().getUserDBManager());
+        this.managers.add(ManagerHolderUtils.getInstance().getProfileDBManager());
 
         HTTPRequestQueueSingleton.getInstance(this).setListener(this);
-        UpdaterUtils.getUpdateFromMySQL(this.managers.get(0));
+        UpdaterUtils.getUpdateFromMySQL(SplashScreenActivity.this.managers.get(0));
     }
 }

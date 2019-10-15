@@ -1,7 +1,6 @@
 package com.imie.a2dev.teamculte.readeo.Entities.DBEntities;
 
 import android.support.annotation.NonNull;
-import android.util.Log;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.UserDBSchema;
 import lombok.Getter;
 import lombok.Setter;
@@ -12,8 +11,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.JSON_TAG;
 
 /**
  * Final class representing a private user of the application (the one connected with all its attribute).
@@ -30,6 +27,11 @@ public final class PrivateUser extends PublicUser {
      * Stores the user's email address.
      */
     private String email;
+
+    /**
+     * Stores the user's key.
+     */
+    private String key;
 
     /**
      * Stores the user's country.
@@ -66,6 +68,7 @@ public final class PrivateUser extends PublicUser {
      * @param pseudo The pseudo to set.
      * @param password The password to set.
      * @param email The email to set.
+     * @param key The key to set.
      * @param profile The profile to set.
      * @param country The country to set.
      * @param city the city to set.
@@ -75,6 +78,7 @@ public final class PrivateUser extends PublicUser {
     public PrivateUser(String pseudo,
                        String password,
                        String email,
+                       String key,
                        Profile profile,
                        Country country,
                        City city,
@@ -84,6 +88,7 @@ public final class PrivateUser extends PublicUser {
 
         this.password = password;
         this.email = email;
+        this.key = key;
         this.country = country;
         this.city = city;
         this.bookLists = bookLists;
@@ -96,6 +101,7 @@ public final class PrivateUser extends PublicUser {
      * @param pseudo The pseudo to set.
      * @param password The password to set.
      * @param email The email to set.
+     * @param key The key to set.
      * @param profile The profile to set.
      * @param country The country to set.
      * @param city the city to set.
@@ -106,6 +112,7 @@ public final class PrivateUser extends PublicUser {
                        String pseudo,
                        String password,
                        String email,
+                       String key,
                        Profile profile,
                        Country country,
                        City city,
@@ -115,6 +122,7 @@ public final class PrivateUser extends PublicUser {
 
         this.password = password;
         this.email = email;
+        this.key = key;
         this.country = country;
         this.city = city;
         this.bookLists = bookLists;
@@ -139,8 +147,9 @@ public final class PrivateUser extends PublicUser {
             this.pseudo = object.getString(UserDBSchema.PSEUDO);
             this.password = object.getString(UserDBSchema.PASSWORD);
             this.email = object.getString(UserDBSchema.EMAIL);
+            //this.key = object.getString(UserDBSchema.KEY);
         } catch (JSONException e) {
-            Log.e(JSON_TAG, e.getMessage());
+            this.logError("init", e);
         }
     }
 }

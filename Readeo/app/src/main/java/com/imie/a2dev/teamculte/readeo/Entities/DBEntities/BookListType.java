@@ -4,15 +4,11 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
-import android.util.Log;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.BookListTypeDBSchema;
 import lombok.Getter;
 import lombok.Setter;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.JSON_TAG;
-import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.SQLITE_TAG;
 
 /**
  * Final class representing a book list type from the application.
@@ -87,7 +83,7 @@ public final class BookListType extends DBEntity {
     public BookListType(ContentValues contentValues) {
         this.init(contentValues);
     }
-    
+
     /**
      * Initializes the book list type from a ContentValues object.
      * @param contentValues The ContentValues object.
@@ -97,7 +93,7 @@ public final class BookListType extends DBEntity {
         this.name = contentValues.getAsString(BookListTypeDBSchema.NAME);
         this.image = contentValues.getAsString(BookListTypeDBSchema.IMAGE);
     }
-    
+
     /**
      * Initializes the book list type from a JSON response object.
      * @param object The JSON response from the API.
@@ -108,7 +104,7 @@ public final class BookListType extends DBEntity {
             this.name = object.getString(BookListTypeDBSchema.NAME);
             this.image = object.getString(BookListTypeDBSchema.IMAGE);
         } catch (JSONException e) {
-            Log.e(JSON_TAG, e.getMessage());
+            this.logError("init", e);
         }
     }
 
@@ -127,7 +123,7 @@ public final class BookListType extends DBEntity {
                 result.close();
             }
         } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
+            this.logError("init", e);
         }
     }
 }

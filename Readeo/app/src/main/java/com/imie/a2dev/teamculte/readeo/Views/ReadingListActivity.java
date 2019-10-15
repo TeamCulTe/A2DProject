@@ -1,10 +1,9 @@
 package com.imie.a2dev.teamculte.readeo.Views;
 
-import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import com.imie.a2dev.teamculte.readeo.DBSchemas.BookListTypeDBSchema;
-import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.BookListType;
+import com.imie.a2dev.teamculte.readeo.DBSchemas.BookListDBSchema;
+import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.BookList;
 import com.imie.a2dev.teamculte.readeo.R;
 
 /**
@@ -13,32 +12,32 @@ import com.imie.a2dev.teamculte.readeo.R;
  */
 public final class ReadingListActivity extends AppCompatActivity {
     /**
-     * Stores the type of the current book list.
+     * Stores the current book list.
      */
-    private BookListType type;
+    private BookList bookList;
 
     /**
-     * Gets the type attribute.
-     * @return The BookListType value of type attribute.
+     * Gets the bookList attribute.
+     * @return The BookList value of bookList attribute.
      */
-    public BookListType getType() {
-        return this.type;
+    public BookList getBookList() {
+        return this.bookList;
     }
 
     /**
-     * Sets the type attribute.
-     * @param newType The new BookListType value to set.
+     * Sets the bookList attribute.
+     * @param newBookList The new BookList value to set.
      */
-    public void setType(BookListType newType) {
-        this.type = newType;
+    public void setBookList(BookList newBookList) {
+        this.bookList = newBookList;
     }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        this.type = (BookListType) this.getIntent().getSerializableExtra(BookListTypeDBSchema.TABLE);
-        
+        this.bookList = (BookList) this.getIntent().getSerializableExtra(BookListDBSchema.TABLE);
+
         this.setContentView(R.layout.activity_reading_list);
     }
 }

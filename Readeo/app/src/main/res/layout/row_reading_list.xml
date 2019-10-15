@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout 
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/constraint_content"
+    style="@style/listElementStyle"
     android:layout_width="match_parent"
     android:layout_height="wrap_content">
 
@@ -75,7 +75,7 @@
             android:layout_marginTop="8dp"
             android:layout_marginEnd="8dp"
             android:text="@string/edit_a_review"
-            android:textColor="@color/blue_link"
+            android:textColor="@color/violet"
             app:layout_constraintBottom_toTopOf="@+id/txt_edit_quote"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
@@ -91,7 +91,7 @@
             android:layout_marginEnd="8dp"
             android:layout_marginBottom="8dp"
             android:text="@string/edit_a_quote"
-            android:textColor="@color/blue_link"
+            android:textColor="@color/violet"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
@@ -101,6 +101,7 @@
 
     <ImageButton
         android:id="@+id/img_btn_delete"
+        style="@style/buttonStyle"
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_marginTop="8dp"

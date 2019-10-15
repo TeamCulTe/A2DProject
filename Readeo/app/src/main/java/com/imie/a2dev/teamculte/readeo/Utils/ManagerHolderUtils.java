@@ -14,22 +14,79 @@ import com.imie.a2dev.teamculte.readeo.DBManagers.ReviewDBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.UserDBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.WriterDBManager;
 
+/**
+ * Class used to hold all the manager classes.
+ */
 public final class ManagerHolderUtils {
+
+    /**
+     * Stores the instance (using singleton pattern).
+     */
     private static ManagerHolderUtils instance;
-    
+
+    /**
+     * Stores the AuthorDBManager.
+     */
     private final AuthorDBManager authorDBManager;
+
+    /**
+     * Stores the BookDBManager.
+     */
     private final BookDBManager bookDBManager;
+
+    /**
+     * Stores the BookListDBManager.
+     */
     private final BookListDBManager bookListDBManager;
+
+    /**
+     * Stores the BookListTypeDBManager.
+     */
     private final BookListTypeDBManager bookListTypeDBManager;
+
+    /**
+     * Stores the CategoryDBManager.
+     */
     private final CategoryDBManager categoryDBManager;
+
+    /**
+     * Stores the CityDBManager.
+     */
     private final CityDBManager cityDBManager;
+
+    /**
+     * Stores the CountryDBManager.
+     */
     private final CountryDBManager countryDBManager;
+
+    /**
+     * Stores the ProfileDBManager.
+     */
     private final ProfileDBManager profileDBManager;
+
+    /**
+     * Stores the QuoteDBManager.
+     */
     private final QuoteDBManager quoteDBManager;
+
+    /**
+     * Stores the ReviewDBManager.
+     */
     private final ReviewDBManager reviewDBManager;
+
+    /**
+     * Stores the UserDBManager.
+     */
     private final UserDBManager userDBManager;
+
+    /**
+     * Stores the WriterDBManager.
+     */
     private final WriterDBManager writerDBManager;
-    
+
+    /**
+     * Default constructor.
+     */
     private ManagerHolderUtils() {
         this.authorDBManager = new AuthorDBManager(App.getAppContext());
         this.bookDBManager = new BookDBManager(App.getAppContext());
@@ -44,7 +101,11 @@ public final class ManagerHolderUtils {
         this.userDBManager = new UserDBManager(App.getAppContext());
         this.writerDBManager = new WriterDBManager(App.getAppContext());
     }
-    
+
+    /**
+     * Singleton pattern method used to init and get the instance if not initialized else just get.
+     * @return The ManagerHolderUtils instance.
+     */
     public static ManagerHolderUtils getInstance() {
         if (ManagerHolderUtils.instance == null) {
             ManagerHolderUtils.instance = new ManagerHolderUtils();
@@ -148,4 +209,5 @@ public final class ManagerHolderUtils {
     public WriterDBManager getWriterDBManager() {
         return this.writerDBManager;
     }
+    
 }

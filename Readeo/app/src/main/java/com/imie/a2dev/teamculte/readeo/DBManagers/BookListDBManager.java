@@ -5,7 +5,6 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
-import android.util.Log;
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -22,7 +21,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,9 +30,7 @@ import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookListDBSchema.BOOK;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookListDBSchema.TABLE;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookListDBSchema.TYPE;
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.BookListDBSchema.USER;
-import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.ERROR_TAG;
-import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.JSON_TAG;
-import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.SQLITE_TAG;
+import static com.imie.a2dev.teamculte.readeo.DBSchemas.CommonDBSchema.UPDATE;
 
 /**
  * Manager class used to manage the book list entities from databases.
@@ -58,6 +54,8 @@ public final class BookListDBManager extends RelationDBManager {
      * @return true if success else false.
      */
     public boolean createSQLite(@NonNull BookList entity) {
+        this.database.beginTransaction();
+        
         try {
             ContentValues data;
 
@@ -71,11 +69,15 @@ public final class BookListDBManager extends RelationDBManager {
                 this.database.insertOrThrow(this.table, null, data);
             }
 
+            this.database.setTransactionSuccessful();
+
             return true;
         } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
+            this.logError("createSQLite", e);
 
             return false;
+        } finally {
+            this.database.endTransaction();
         }
     }
 
@@ -85,14 +87,22 @@ public final class BookListDBManager extends RelationDBManager {
      * @return true if success else false.
      */
     public boolean updateSQLite(@NonNull BookList entity) {
+        this.database.beginTransaction();
+        
         try {
             this.deleteSQLite(entity.getId(), entity.getType().getId());
+            
+            boolean success = this.createSQLite(entity);
 
-            return this.createSQLite(entity);
+            this.database.setTransactionSuccessful();
+
+            return success;
         } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
+            this.logError("updateSQLite", e);
 
             return false;
+        } finally {
+            this.database.endTransaction();
         }
     }
 
@@ -106,19 +116,19 @@ public final class BookListDBManager extends RelationDBManager {
         Cursor cursor = this.database.rawQuery(query, new String[]{String.valueOf(idUser)});
         BookList bookList;
         Map<String, BookList> userBookLists = new HashMap<>();
-        
+
         if (cursor == null || cursor.getCount() == 0) {
             return null;
         }
-        
+
         while (cursor.moveToNext()) {
             bookList = new BookList(cursor, false);
 
             userBookLists.put(bookList.getType().getName(), bookList);
         }
-        
+
         cursor.close();
-        
+
         return userBookLists;
     }
 
@@ -135,7 +145,7 @@ public final class BookListDBManager extends RelationDBManager {
         if (cursor == null || cursor.getCount() == 0) {
             return null;
         }
-        
+
         return new BookList(cursor);
     }
 
@@ -151,7 +161,7 @@ public final class BookListDBManager extends RelationDBManager {
             param.put(USER, String.valueOf(bookList.getId()));
             param.put(TYPE, String.valueOf(bookList.getType().getId()));
             param.put(BOOK, String.valueOf(book.getId()));
-            
+
             super.requestString(Request.Method.POST, url, null, param);
         }
     }
@@ -190,7 +200,7 @@ public final class BookListDBManager extends RelationDBManager {
             protected Response<JSONArray> parseNetworkResponse(NetworkResponse response) {
                 try {
                     JSONArray jsonArray = new JSONArray(new String(response.data,
-                            HttpHeaderParser.parseCharset(response.headers)));
+                                                                   HttpHeaderParser.parseCharset(response.headers)));
 
                     bookList.init(jsonArray);
 
@@ -200,7 +210,7 @@ public final class BookListDBManager extends RelationDBManager {
                             try {
                                 bookIds.add(jsonArray.getJSONObject(i).getInt(BookListDBSchema.BOOK));
                             } catch (JSONException e) {
-                                Log.e(JSON_TAG, e.getMessage());
+                                BookListDBManager.this.logError("loadMySQL", e);
                             }
                         }
                     }
@@ -209,15 +219,14 @@ public final class BookListDBManager extends RelationDBManager {
                         try {
                             typeId[0] = jsonArray.getJSONObject(0).getInt(BookListDBSchema.TYPE);
                         } catch (JSONException e) {
-                            Log.e(JSON_TAG, e.getMessage());
+                            BookListDBManager.this.logError("loadMySQL", e);
                         }
                     }
-                } catch (JSONException e) {
-                    Log.e(JSON_TAG, e.getMessage());
-                } catch (IOException e) {
-                    Log.e(ERROR_TAG, e.getMessage());
+                } catch (Exception e) {
+                    BookListDBManager.this.logError("loadMySQL", e);
                 } finally {
-                    HTTPRequestQueueSingleton.getInstance(BookListDBManager.this.getContext()).finishRequest(BookListDBManager.this.table);
+                    HTTPRequestQueueSingleton.getInstance(BookListDBManager.this.getContext()).finishRequest(
+                            BookListDBManager.this.table);
                 }
 
                 return super.parseNetworkResponse(response);
@@ -225,7 +234,8 @@ public final class BookListDBManager extends RelationDBManager {
 
             @Override
             protected VolleyError parseNetworkError(VolleyError volleyError) {
-                HTTPRequestQueueSingleton.getInstance(BookListDBManager.this.getContext()).finishRequest(BookListDBManager.this.table);
+                HTTPRequestQueueSingleton.getInstance(BookListDBManager.this.getContext()).finishRequest(
+                        BookListDBManager.this.table);
 
                 return super.parseNetworkError(volleyError);
             }
@@ -271,31 +281,32 @@ public final class BookListDBManager extends RelationDBManager {
         if (bookLists.size() == 0) {
             final List<Integer> typeIds = new ArrayList<>();
             String url = this.baseUrl + APIManager.READ + USER + "=" + idUser;
-            JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null, null, new OnRequestError()) {
+            JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null, null,
+                                                            new OnRequestError()) {
                 @Override
                 protected Response<JSONArray> parseNetworkResponse(NetworkResponse response) {
                     try {
                         int idType;
-                        
+
                         JSONArray jsonArray = new JSONArray(new String(response.data,
-                                HttpHeaderParser.parseCharset(response.headers)));
+                                                                       HttpHeaderParser
+                                                                               .parseCharset(response.headers)));
                         int previous = 0;
 
                         for (int i = 0; i < jsonArray.length(); i++) {
                             idType = jsonArray.getJSONObject(i).getInt(BookListDBSchema.TYPE);
-                                
-                                if (idType != previous) {
-                                    typeIds.add(idType);
 
-                                    previous = idType;
-                                }
+                            if (idType != previous) {
+                                typeIds.add(idType);
+
+                                previous = idType;
+                            }
                         }
-                    } catch (JSONException e) {
-                        Log.e(JSON_TAG, e.getMessage());
-                    } catch (IOException e) {
-                        Log.e(ERROR_TAG, e.getMessage());
+                    } catch (Exception e) {
+                        BookListDBManager.this.logError("loadUserMySQL", e);
                     } finally {
-                        HTTPRequestQueueSingleton.getInstance(BookListDBManager.this.getContext()).finishRequest(BookListDBManager.this.table);
+                        HTTPRequestQueueSingleton.getInstance(BookListDBManager.this.getContext()).finishRequest(
+                                BookListDBManager.this.table);
                     }
 
                     return super.parseNetworkResponse(response);
@@ -303,7 +314,8 @@ public final class BookListDBManager extends RelationDBManager {
 
                 @Override
                 protected VolleyError parseNetworkError(VolleyError volleyError) {
-                    HTTPRequestQueueSingleton.getInstance(BookListDBManager.this.getContext()).finishRequest(BookListDBManager.this.table);
+                    HTTPRequestQueueSingleton.getInstance(BookListDBManager.this.getContext()).finishRequest(
+                            BookListDBManager.this.table);
 
                     return super.parseNetworkError(volleyError);
                 }
@@ -388,7 +400,9 @@ public final class BookListDBManager extends RelationDBManager {
     }
 
     @Override
-    public void createSQLite(@NonNull JSONObject entity) {
+    public boolean createSQLite(@NonNull JSONObject entity) {
+        this.database.beginTransaction();
+        
         try {
             ContentValues data = new ContentValues();
 
@@ -397,10 +411,15 @@ public final class BookListDBManager extends RelationDBManager {
             data.put(TYPE, entity.getInt(TYPE));
 
             this.database.insertOrThrow(this.table, null, data);
-        } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
-        } catch (JSONException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
+            this.database.setTransactionSuccessful();
+            
+            return true;
+        } catch (Exception e) {
+            this.logError("createSQLite", e);
+            
+            return false;
+        } finally {
+            this.database.endTransaction();
         }
     }
 

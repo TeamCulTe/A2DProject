@@ -4,15 +4,11 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
-import android.util.Log;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.CityDBSchema;
 import lombok.Getter;
 import lombok.Setter;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.JSON_TAG;
-import static com.imie.a2dev.teamculte.readeo.Utils.TagUtils.SQLITE_TAG;
 
 /**
  * Final class representing a city from the application.
@@ -97,7 +93,7 @@ public final class City extends DBEntity {
             this.id = object.getInt(CityDBSchema.ID);
             this.name = object.getString(CityDBSchema.NAME);
         } catch (JSONException e) {
-            Log.e(JSON_TAG, e.getMessage());
+            this.logError("init", e);
         }
     }
 
@@ -115,7 +111,7 @@ public final class City extends DBEntity {
                 result.close();
             }
         } catch (SQLiteException e) {
-            Log.e(SQLITE_TAG, e.getMessage());
+            this.logError("init", e);
         }
     }
 }

@@ -8,9 +8,10 @@ import com.imie.a2dev.teamculte.readeo.DBSchemas.CategoryDBSchema;
  * Enum used to represent the possible book filter keys from library.
  */
 public enum BookFilterKey {
-    CATEGORY (CategoryDBSchema.NAME),
-    AUTHOR (AuthorDBSchema.NAME),
-    TITLE (BookDBSchema.TITLE);
+    NONE("None"),
+    CATEGORY ("Category"),
+    AUTHOR ("Author"),
+    TITLE ("Title");
 
     /**
      * Stores the filter key's associated database field.
@@ -31,5 +32,60 @@ public enum BookFilterKey {
      */
     public String getName() {
         return this.name;
+    }
+
+    /**
+     * Gets the associated filter column name.
+     * @return The filter column name associated to the enum.
+     */
+    public String getFilterCol() {
+        String filterCol = null;
+
+        switch (this) {
+            case CATEGORY:
+                filterCol = CategoryDBSchema.NAME;
+
+                break;
+            case AUTHOR:
+                filterCol = AuthorDBSchema.NAME;
+
+                break;
+            case TITLE:
+                filterCol = BookDBSchema.TITLE;
+
+                break;
+            default:
+                break;
+        }
+
+        return filterCol;
+    }
+
+    /**
+     * Gets a book filter key from a string value.
+     * @param name The value used to get the associated book filter key.
+     * @return The associated book filter key.
+     */
+    public static BookFilterKey fromName(String name) {
+        BookFilterKey bookFilterKey = null;
+
+        switch (name) {
+            case "Title":
+                bookFilterKey = BookFilterKey.TITLE;
+
+                break;
+            case "Author":
+                bookFilterKey = BookFilterKey.AUTHOR;
+
+                break;
+            case "Category":
+                bookFilterKey = BookFilterKey.CATEGORY;
+
+                break;
+            default:
+                break;
+        }
+
+        return bookFilterKey;
     }
 }
