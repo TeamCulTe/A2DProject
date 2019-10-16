@@ -189,8 +189,10 @@ public final class EditQuoteDialogFragment extends DialogFragment implements Vie
         this.quote.setQuote(this.editTxtQuote.getText().toString());
 
         if (!this.newQuote) {
+            this.manager.updateMySQL(this.quote);
             this.manager.updateSQLite(this.quote);
         } else {
+            this.manager.createMySQL(this.quote);
             this.manager.createSQLite(this.quote);
             this.book.getQuotes().add(this.quote);
             this.adapter.getItems().add(this.quote);

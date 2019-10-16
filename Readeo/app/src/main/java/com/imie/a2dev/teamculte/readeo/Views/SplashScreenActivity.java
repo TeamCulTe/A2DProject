@@ -52,12 +52,13 @@ public final class SplashScreenActivity extends AppCompatActivity implements HTT
 
     @Override
     public void onRequestsFinished() {
-        if (this.currentManagerPos + 1 < this.managers.size()) {
-            this.currentManagerPos += 1;
+        if (this.currentManagerPos < this.managers.size()) {
 
             this.updateProgress.setText(String.format(this.getResources().getString(R.string.update_progress),
                                                       this.currentManagerPos, this.managers.size()));
             UpdaterUtils.getUpdateFromMySQL(this.managers.get(this.currentManagerPos));
+
+            ++this.currentManagerPos;
         } else {
             Intent intent = new Intent(this, IndexActivity.class);
 

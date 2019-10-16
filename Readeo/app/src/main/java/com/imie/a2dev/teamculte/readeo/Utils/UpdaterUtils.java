@@ -10,6 +10,7 @@ import com.imie.a2dev.teamculte.readeo.APIManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.DBManager;
 
 import com.imie.a2dev.teamculte.readeo.DBSchemas.CommonDBSchema;
+
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
@@ -34,7 +35,7 @@ public final class UpdaterUtils {
      * Defines the default error tag for this class.
      */
     private static final String ERR_TAG = "[UpdaterUtils:%s] : ";
-    
+
     /**
      * Defines the update key from sync maps.
      */
@@ -53,7 +54,8 @@ public final class UpdaterUtils {
     /**
      * Stores the associated date and time formatter.
      */
-    private static final DateTimeFormatter FORMATTER = DateTimeFormat.forPattern(CommonDBSchema.DEFAULT_FORMAT);
+    private static final DateTimeFormatter FORMATTER = DateTimeFormat
+            .forPattern(CommonDBSchema.DEFAULT_FORMAT);
 
     /**
      * From a json update response (ids and last update date), gets the values and returns them into a list of
@@ -62,7 +64,8 @@ public final class UpdaterUtils {
      * @param manager The associated DBManager.
      * @return The result into a list of UpdateDataElements.
      */
-    public static List<UpdateDataElement> getUpdateFieldsFromJSON(JSONArray result, DBManager manager) {
+    public static List<UpdateDataElement> getUpdateFieldsFromJSON(JSONArray result,
+                                                                  DBManager manager) {
         JSONObject elt;
 
         List<UpdateDataElement> data = new ArrayList<>();
@@ -77,7 +80,8 @@ public final class UpdaterUtils {
                 }
 
                 try {
-                    data.add(new UpdateDataElement(idsToAdd, FORMATTER.parseDateTime(elt.getString(UPDATE))));
+                    data.add(new UpdateDataElement(idsToAdd,
+                                                   FORMATTER.parseDateTime(elt.getString(UPDATE))));
                 } catch (Exception e) {
                     Log.e(String.format(ERR_TAG, "getUpdateFieldsFromJSON"), e.getMessage());
                 }
@@ -92,24 +96,28 @@ public final class UpdaterUtils {
     }
 
     /**
-     * Gets the list of MySQL ids and last update fields in order to check which entities needs to be updated, then 
+     * Gets the list of MySQL ids and last update fields in order to check which entities needs to be updated, then
      * compare and perform the update.
      * @param manager The associated DBManager.
      */
     public static void getUpdateFromMySQL(final DBManager manager) {
-        final List<UpdateDataElement> updateFieldsSQLite = UpdaterUtils.getUpdateFieldsSQLite(manager);
+        final List<UpdateDataElement> updateFieldsSQLite = UpdaterUtils
+                .getUpdateFieldsSQLite(manager);
 
         manager.requestJsonArray(Request.Method.GET, manager.getBaseUrl() + APIManager.READ_UPDATE,
-                response -> {
-                    List<UpdateDataElement> fieldsMySQL = UpdaterUtils.getUpdateFieldsFromJSON(response, manager);
-                    Map<String, List<int[]>> syncDataMap = UpdaterUtils.getSyncData(updateFieldsSQLite, fieldsMySQL);
+                                 response -> {
+                                     List<UpdateDataElement> fieldsMySQL = UpdaterUtils
+                                             .getUpdateFieldsFromJSON(response, manager);
+                                     Map<String, List<int[]>> syncDataMap = UpdaterUtils
+                                             .getSyncData(updateFieldsSQLite, fieldsMySQL);
 
-                    UpdaterUtils.performDbUpdates(syncDataMap, manager);
+                                     UpdaterUtils.performDbUpdates(syncDataMap, manager);
 
-                    HTTPRequestQueueSingleton.getInstance(manager.getContext()).finishRequest(manager.getTable());
-                }, null);
+                                     HTTPRequestQueueSingleton.getInstance(manager.getContext())
+                                                              .finishRequest(manager.getTable());
+                                 }, null);
     }
-    
+
     /**
      * Gets the list of id(s) / last_update from the SQLite database.
      * @param manager The associated DBManager.
@@ -119,18 +127,18 @@ public final class UpdaterUtils {
         try {
             int idsNumber = manager.getIds().length;
             StringBuilder builder = new StringBuilder("SELECT ");
-            
+
             for (int i = 0; i < idsNumber; i++) {
                 builder.append(manager.getIds()[i]);
                 builder.append(", ");
             }
-            
+
             builder.append(UPDATE);
             builder.append(" FROM ");
             builder.append(manager.getTable());
             builder.append(" ORDER BY ");
             builder.append(manager.getIds()[0]);
-            
+
             Cursor result = manager.getDatabase().rawQuery(builder.toString(), null);
             List<UpdateDataElement> data = new ArrayList<>();
 
@@ -143,7 +151,8 @@ public final class UpdaterUtils {
 
                 try {
                     data.add(new UpdateDataElement(idsToAdd,
-                                                   FORMATTER.parseDateTime(result.getString(result.getColumnIndex(UPDATE)))));
+                                                   FORMATTER.parseDateTime(result.getString(
+                                                           result.getColumnIndex(UPDATE)))));
                 } catch (Exception e) {
                     Log.e(String.format(ERR_TAG, "getUpdateFieldsSQLite"), e.getMessage());
                 }
@@ -164,7 +173,8 @@ public final class UpdaterUtils {
      * @param syncDataMap The map containing the elements.
      * @param manager The associated DBManager.
      */
-    public static void performDbUpdates(Map<String, List<int[]>> syncDataMap, final DBManager manager) {
+    public static void performDbUpdates(Map<String, List<int[]>> syncDataMap,
+                                        final DBManager manager) {
         String url;
 
         if (syncDataMap != null) {
@@ -211,21 +221,23 @@ public final class UpdaterUtils {
      * @param distant The distant elements list.
      * @return The map of elements (create, update, delete).
      */
-    private static Map<String, List<int[]>> getSyncData(List<UpdateDataElement> local, List<UpdateDataElement> distant) {
-        if (distant.size() == 0 || (local.size() != 0 && local.get(0).size() != distant.get(0).size())) {
+    private static Map<String, List<int[]>> getSyncData(List<UpdateDataElement> local,
+                                                        List<UpdateDataElement> distant) {
+        if (distant.size() == 0 ||
+            (local.size() != 0 && local.get(0).size() != distant.get(0).size())) {
             return null;
         }
-        
+
         if (local.size() == 0) {
-            local.add(new UpdateDataElement(new int[distant.size()], new DateTime()));
+            local.add(new UpdateDataElement(distant.get(0).getIds().length));
         }
-        
+
         boolean same;
         UpdateDataElement localElement;
         UpdateDataElement distantElement;
 
         final int syncIdNb = distant.get(0).size();
-        final UpdateDataElement element = new UpdateDataElement();
+        final UpdateDataElement element = new UpdateDataElement(syncIdNb);
         Map<String, List<int[]>> syncDataMap = new HashMap<>();
         ArrayList<int[]> toCreateData = new ArrayList<>();
         ArrayList<int[]> toUpdateData = new ArrayList<>();
@@ -242,17 +254,20 @@ public final class UpdaterUtils {
                 if (localElement.getId(k) != distantElement.getId(k)) {
                     // If the id from distant is higher than the local one, element has to be deleted (unless we
                     // reached the last local element, which means it should be created).
-                    if (distantElement.getId(k) > localElement.getId(k) && localElement.getId(0) != 0) {
+                    if (distantElement.getId(k) > localElement.getId(k) &&
+                        localElement.getId(0) != -1) {
                         element.setIds(Arrays.copyOfRange(localElement.getIds(), 0, syncIdNb));
 
-                        if (!toCreateData.stream().anyMatch(a -> Arrays.equals(a, element.getIds()))) {
+                        if (!toCreateData.stream().anyMatch(a -> Arrays.equals(a,
+                                                                               element.getIds()))) {
                             toDeleteData.add(element.getIds());
                         }
-                        
+
                     } else {
                         element.setIds(Arrays.copyOfRange(distantElement.getIds(), 0, syncIdNb));
 
-                        if (!toDeleteData.stream().anyMatch(a -> Arrays.equals(a, element.getIds()))) {
+                        if (!toDeleteData.stream().anyMatch(a -> Arrays.equals(a,
+                                                                               element.getIds()))) {
                             toCreateData.add(element.getIds());
                         }
                     }
@@ -269,11 +284,11 @@ public final class UpdaterUtils {
                     toUpdateData.add(Arrays.copyOfRange(distantElement.getIds(), 0, syncIdNb));
                 }
             }
-            
+
             i = (i + 1 == distant.size() && j + 1 < local.size()) ? i - 1 : i;
             j = (j + 1 == local.size()) && i + 1 < distant.size() ? j - 1 : j;
         }
-        
+
         syncDataMap.put(TO_CREATE_KEY, toCreateData);
         syncDataMap.put(TO_UPDATE_KEY, toUpdateData);
         syncDataMap.put(TO_DELETE_KEY, toDeleteData);
@@ -282,7 +297,7 @@ public final class UpdaterUtils {
     }
 
     /**
-     * Builds the update url to contact the API depending on the manager given in parameter. 
+     * Builds the update url to contact the API depending on the manager given in parameter.
      * @param manager The associated manager.
      * @param updateElts The update elements (ids).
      * @return The update url that can be used to contact the API.
@@ -290,7 +305,7 @@ public final class UpdaterUtils {
     private static String buildUpdateUrl(DBManager manager, int[] updateElts) {
         StringBuilder builder = new StringBuilder(manager.getBaseUrl() + APIManager.READ);
         int idsNb = manager.getIds().length;
-        
+
         if (idsNb != updateElts.length) {
             Log.e(String.format(ERR_TAG, "buildUpdateUrl"),
                   "The number of id fields from the manager differs from the update " +
@@ -301,7 +316,7 @@ public final class UpdaterUtils {
             builder.append(manager.getIds()[i]);
             builder.append("=");
             builder.append(String.valueOf(updateElts[i]));
-            
+
             if (i < (idsNb - 1)) {
                 builder.append("&");
             }

@@ -57,7 +57,7 @@ public final class LogInFragment extends Fragment implements View.OnClickListene
 
         this.init(view);
         this.email.setText("blabla@bla.fr");
-        this.password.setText("DaDa1234");
+        this.password.setText("DaDa12345");
 
         return view;
     }

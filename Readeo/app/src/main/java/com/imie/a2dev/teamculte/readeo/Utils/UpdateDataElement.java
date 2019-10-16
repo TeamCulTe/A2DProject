@@ -25,6 +25,19 @@ public final class UpdateDataElement {
     private DateTime dateUpdated;
 
     /**
+     * UpdateDataElement constructor initializing the values with -1.
+     * @param idNb The number of ids (size of ids).
+     */
+    public UpdateDataElement(int idNb) {
+        this.ids = new int[idNb];
+        this.dateUpdated = new DateTime();
+        
+        for (int i = 0; i < idNb; ++i) {
+            this.ids[i] = -1;
+        }
+    }
+
+    /**
      * Gets the id at specified position.
      * @param pos The position of the id to get.
      * @return The id or -1 if pos > last index.

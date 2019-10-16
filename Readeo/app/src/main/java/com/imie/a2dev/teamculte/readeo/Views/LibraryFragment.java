@@ -37,11 +37,6 @@ public final class LibraryFragment extends Fragment implements View.OnClickListe
     private EditText editSearch;
 
     /**
-     * Stores the library recycler.
-     */
-    private RecyclerView recyclerLibrary;
-
-    /**
      * Stores the library recycler's adapter.
      */
     private LibraryRecyclerAdapter adapter;
@@ -158,8 +153,9 @@ public final class LibraryFragment extends Fragment implements View.OnClickListe
     private void init(View view) {
         this.spinnerFilter = view.findViewById(R.id.spinner_filter);
         this.editSearch = view.findViewById(R.id.edit_search);
-        this.recyclerLibrary = view.findViewById(R.id.recycler_library);
         this.adapter = new LibraryRecyclerAdapter();
+
+        RecyclerView recyclerLibrary = view.findViewById(R.id.recycler_library);
 
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this.getContext(),
                                                           R.layout.row_simple_spinner_item,
@@ -167,8 +163,8 @@ public final class LibraryFragment extends Fragment implements View.OnClickListe
 
         this.spinnerFilter.setAdapter(adapter);
         this.adapter.setListener(this);
-        this.recyclerLibrary.setLayoutManager(new LinearLayoutManager(this.getContext()));
-        this.recyclerLibrary.setAdapter(this.adapter);
+        recyclerLibrary.setLayoutManager(new LinearLayoutManager(this.getContext()));
+        recyclerLibrary.setAdapter(this.adapter);
         view.findViewById(R.id.img_btn_search).setOnClickListener(this);
     }
 }

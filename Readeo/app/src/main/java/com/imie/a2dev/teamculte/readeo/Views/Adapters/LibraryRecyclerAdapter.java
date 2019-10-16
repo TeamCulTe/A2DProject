@@ -27,7 +27,7 @@ public final class LibraryRecyclerAdapter extends RecyclerView.Adapter<LibraryRe
     public static final int DEFAULT_LIMIT = 100;
 
     /**
-     * The list of types to display.
+     * The list of books to display.
      */
     private List<Book> books;
 
@@ -132,7 +132,7 @@ public final class LibraryRecyclerAdapter extends RecyclerView.Adapter<LibraryRe
     }
 
     /**
-     * ViewHolder class used to display the book list types.
+     * ViewHolder class used to display the book.
      */
     protected final class LibraryViewHolder extends RecyclerView.ViewHolder {
         /**
@@ -176,15 +176,14 @@ public final class LibraryRecyclerAdapter extends RecyclerView.Adapter<LibraryRe
 
         /**
          * Binds the data to the view.
-         * @param book The book list type used to bind.
+         * @param book The book used to bind.
          */
         private void bind(Book book) {
             ImageLoader imageLoader = ImageLoader.getInstance();
             StringBuilder authors = new StringBuilder();
 
 
-            // TODO: See if "if" statement is needed here.
-            if (book.getCover() != null) {
+            if (!book.getCover().isEmpty()) {
                 imageLoader.displayImage(book.getCover(), this.imgCover);
             }
 
@@ -229,7 +228,7 @@ public final class LibraryRecyclerAdapter extends RecyclerView.Adapter<LibraryRe
 
         /**
          * Called when a cell is selected.
-         * @param book The book list type selected.
+         * @param book The book selected.
          */
         void bookCellSelected(Book book);
 

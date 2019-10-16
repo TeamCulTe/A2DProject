@@ -9,15 +9,22 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
+import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Book;
+import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.BookList;
+import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.PrivateUser;
 import com.imie.a2dev.teamculte.readeo.R;
 import com.imie.a2dev.teamculte.readeo.Utils.HTTPRequestQueueSingleton;
+import com.imie.a2dev.teamculte.readeo.Utils.ManagerHolderUtils;
+import com.imie.a2dev.teamculte.readeo.Utils.PreferencesUtils;
 
 /**
  * Fragment displaying the delete account dialog.
  */
-public final class DeleteAccountDialogFragment extends DialogFragment implements View.OnClickListener,
-                                                                                 HTTPRequestQueueSingleton.HTTPRequestQueueListener {
+public final class DeleteAccountDialogFragment extends DialogFragment
+        implements View.OnClickListener,
+                   HTTPRequestQueueSingleton.HTTPRequestQueueListener {
     /**
      * Stores the password text edit.
      */
@@ -36,7 +43,8 @@ public final class DeleteAccountDialogFragment extends DialogFragment implements
     }
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                             Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.dialog_fragment_delete_account, container, false);
 
@@ -73,15 +81,31 @@ public final class DeleteAccountDialogFragment extends DialogFragment implements
     }
 
     @Override public void onRequestFinished() {
-        
+        this.deleteUser();
+        this.getActivity().finishAffinity();
     }
 
     @Override public void onRequestError() {
-
+        this.getActivity().runOnUiThread(() -> {
+            Toast.makeText(this.getContext(), R.string.login_error, Toast.LENGTH_SHORT).show();
+            DeleteAccountDialogFragment.this.progressLoading.setVisibility(View.GONE);
+        });
     }
 
     @Override
     public void onClick(View view) {
+        if (this.editTxtPassword.getText().toString().isEmpty()) {
+            Toast.makeText(this.getContext(), R.string.need_password_for_account_deletion,
+                           Toast.LENGTH_SHORT).show();
+        } else {
+            this.progressLoading.setVisibility(View.VISIBLE);
+
+            ManagerHolderUtils.getInstance().getUserDBManager()
+                              .loadMySQL(PreferencesUtils.loadUser().getEmail(),
+                                         this.editTxtPassword
+                                                 .getText()
+                                                 .toString(), this);
+        }
     }
 
     /**
@@ -91,8 +115,40 @@ public final class DeleteAccountDialogFragment extends DialogFragment implements
     private void init(View view) {
         this.editTxtPassword = view.findViewById(R.id.edit_txt_password);
         this.progressLoading = view.findViewById(R.id.progress_loading);
-        
+
         view.findViewById(R.id.btn_delete).setOnClickListener(this);
+    }
+
+    /**
+     * Deletes the current user and associated data.
+     */
+    private void deleteUser() {
+        PrivateUser user = PreferencesUtils.loadUser();
+
+        user.setPassword(this.editTxtPassword.getText().toString());
+
+        ManagerHolderUtils.getInstance().getBookListDBManager().deleteUserMySQL(user.getId());
+
+        for (BookList bookList : user.getBookLists().values()) {
+            for (Book book : bookList.getBooks()) {
+                ManagerHolderUtils.getInstance().getBookListDBManager().deleteSQLite(user.getId(),
+                                                                                     bookList.getType()
+                                                                                             .getId(),
+                                                                                     book.getId());
+            }
+        }
+
+        ManagerHolderUtils.getInstance().getQuoteDBManager().deleteUserMySQL(user.getId());
+        ManagerHolderUtils.getInstance().getReviewDBManager().deleteUserMySQL(user.getId());
+        
+        ManagerHolderUtils.getInstance().getQuoteDBManager().deleteUserSQLite(user.getId());
+        ManagerHolderUtils.getInstance().getReviewDBManager().deleteUserSQLite(user.getId());
+
+        ManagerHolderUtils.getInstance().getUserDBManager().deleteMySQL(user);
+        ManagerHolderUtils.getInstance().getUserDBManager().deleteSQLite(user.getId());
+        
+        ManagerHolderUtils.getInstance().getProfileDBManager().deleteMySQL(user.getProfile().getId());
+        ManagerHolderUtils.getInstance().getProfileDBManager().deleteSQLite(user.getProfile().getId());
     }
 
 }

@@ -55,9 +55,13 @@
     <string name="update">Update</string>
     <string name="old_password">Old password</string>
     <string name="new_password">New password</string>
+    <string name="need_password_for_account_deletion">The password is required for the account 
+        deletion.</string>
     <string name="password_confirmation_doesnt_match">The password confirmation doesn\'t match
         .</string>
+    <string name="no_profile_description">No profile description</string>
     <string name="delete_account_lbl">Delete account</string>
+    <string name="search_for_a_user">Search for a user</string>
     <string-array name="book_filters">
         <item>None</item>
         <item>Category</item>

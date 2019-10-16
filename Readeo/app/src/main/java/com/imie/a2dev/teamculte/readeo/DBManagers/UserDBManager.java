@@ -221,6 +221,33 @@ public final class UserDBManager extends SimpleDBManager {
     }
 
     /**
+     * Queries all the users from the database paginated.
+     * @param limit The limit index.
+     * @param offset The offset.
+     * @return The list of users.
+     */
+    public List<PublicUser> queryAllPaginatedSQLite(int limit, int offset) {
+        List<PublicUser> books = new ArrayList<>();
+
+        try {
+            Cursor result = this.database.rawQuery(String.format(this.QUERY_ALL_PAGINATED, this.table, limit, offset),
+                                                   null);
+
+            if (result.getCount() > 0) {
+                do {
+                    books.add(new PublicUser(result, false));
+                } while (result.moveToNext());
+            }
+
+            result.close();
+        } catch (SQLiteException e) {
+            this.logError("queryAllPaginatedSQLite", e);
+        }
+
+        return books;
+    }
+
+    /**
      * From the API, query the list of all public users from the MySQL database in order to stores it into the SQLite
      * database.
      */

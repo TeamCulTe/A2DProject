@@ -17,6 +17,7 @@ import com.imie.a2dev.teamculte.readeo.DBSchemas.BookListDBSchema;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.BookList;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.BookListType;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.PrivateUser;
+import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Profile;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.PublicUser;
 import com.imie.a2dev.teamculte.readeo.R;
 import com.imie.a2dev.teamculte.readeo.Utils.PreferencesUtils;
@@ -25,34 +26,35 @@ import com.imie.a2dev.teamculte.readeo.Views.Adapters.BookListTypeRecyclerAdapte
 import java.util.Map;
 
 /**
- * A simple {@link Fragment} subclass.
+ * Fragment displaying a user profile.
  */
 public final class ProfileFragment extends Fragment implements BookListTypeRecyclerAdapter.BookListTypeAdapterListener,
                                                                View.OnClickListener {
-    /**
-     * Defines if the fragment is a public profile or not.
-     */
-    private boolean isPublic = false;
-
     /**
      * Stores the displayed user.
      */
     private PublicUser user;
 
     /**
-     * Stores the recycler displaying the book list types.
-     */
-    private RecyclerView recyclerBookListTypes;
-
-    /**
-     * Stores the recycler's adapter.
-     */
-    private BookListTypeRecyclerAdapter adapter;
-
-    /**
      * ProfileFragment's default constructor.
      */
     public ProfileFragment() {
+    }
+
+    /**
+     * Gets the user attribute.
+     * @return The PublicUser value of user attribute.
+     */
+    public PublicUser getUser() {
+        return this.user;
+    }
+
+    /**
+     * Sets the user attribute.
+     * @param newUser The new PublicUser value to set.
+     */
+    public void setUser(PublicUser newUser) {
+        this.user = newUser;
     }
 
     @Override
@@ -102,30 +104,41 @@ public final class ProfileFragment extends Fragment implements BookListTypeRecyc
      * @param view The fragment's view.
      */
     private void init(View view) {
-        this.recyclerBookListTypes = view.findViewById(R.id.recycler_reading_lists);
-        this.adapter = new BookListTypeRecyclerAdapter(new BookListTypeDBManager(this.getContext()).queryAllSQLite());
+        PrivateUser user = PreferencesUtils.loadUser();
+        RecyclerView recyclerBookListTypes = view.findViewById(R.id.recycler_reading_lists);
 
-        LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this.getContext());
+        if (this.user == null) {
+            this.user = user;
+        }
 
-        this.adapter.setSelectable(false);
-        this.adapter.setListener(this);
-        this.recyclerBookListTypes.setAdapter(adapter);
-        linearLayoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
-        this.recyclerBookListTypes.setLayoutManager(linearLayoutManager);
-
-        if (this.isPublic) {
-            view.findViewById(R.id.btn_account_settings).setVisibility(View.INVISIBLE);
-        } else {
+        if (this.user.getPseudo().equals(user.getPseudo())) {
             view.findViewById(R.id.btn_account_settings).setOnClickListener(this);
 
-            this.user = PreferencesUtils.loadUser();
+            BookListTypeRecyclerAdapter adapter = new BookListTypeRecyclerAdapter(
+                    new BookListTypeDBManager(this.getContext()).queryAllSQLite());
+            LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this.getContext());
+
+            adapter.setSelectable(false);
+            adapter.setListener(this);
+            recyclerBookListTypes.setAdapter(adapter);
+            linearLayoutManager.setOrientation(LinearLayoutManager.HORIZONTAL);
+            recyclerBookListTypes.setLayoutManager(linearLayoutManager);
+        } else {
+            view.findViewById(R.id.btn_account_settings).setVisibility(View.INVISIBLE);
+            recyclerBookListTypes.setVisibility(View.INVISIBLE);
         }
 
         // TODO : Checking if avatar path given else, apply default avatar image.
         //((ImageView) view.findViewById(R.id.img_avatar)).setImageResource();
 
-        if (this.user.getProfile() != null && this.user.getProfile().getDescription() != null) {
-            ((TextView) view.findViewById(R.id.txt_description)).setText(this.user.getProfile().getDescription());
+        String description;
+                
+        if (this.user.getProfile() != null && !this.user.getProfile().getDescription().isEmpty()) {
+            description = this.user.getProfile().getDescription();
+        } else {
+            description = this.getString(R.string.no_profile_description);
         }
+        
+        ((TextView) view.findViewById(R.id.txt_description)).setText(description);
     }
 }

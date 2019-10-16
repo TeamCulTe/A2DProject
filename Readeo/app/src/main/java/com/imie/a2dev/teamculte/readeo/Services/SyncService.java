@@ -23,7 +23,7 @@ public final class SyncService extends Service implements HTTPRequestQueueSingle
     /**
      * Stores the current manager position.
      */
-    private int currentManagerPos;
+    private int currentManagerPos = 0;
 
     /**
      * SyncService's default constructor.
@@ -76,10 +76,12 @@ public final class SyncService extends Service implements HTTPRequestQueueSingle
     }
 
     @Override public void onRequestsFinished() {
-        if (++this.currentManagerPos < this.managers.size()) {
+        if (this.currentManagerPos < this.managers.size()) {
 
             UpdaterUtils.getUpdateFromMySQL(this.managers.get(this.currentManagerPos));
             Log.i("Progress", "[DONE] -> " + HTTPRequestQueueSingleton.getInstance(this).getLastRequestUrl());
+            
+            ++this.currentManagerPos;
         } else {
             this.currentManagerPos = 0;
             

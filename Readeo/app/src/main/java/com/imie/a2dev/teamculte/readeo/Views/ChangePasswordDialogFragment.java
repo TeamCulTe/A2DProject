@@ -1,6 +1,5 @@
 package com.imie.a2dev.teamculte.readeo.Views;
 
-import android.app.Activity;
 import android.app.Dialog;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
@@ -39,11 +38,6 @@ public final class ChangePasswordDialogFragment extends DialogFragment
      * Stores the confirmation text edit.
      */
     private EditText editTxtConfirmPassword;
-
-    /**
-     * Stores the error text field.
-     */
-    private TextView txtError;
 
     /**
      * Stores the progress loading bar.
@@ -105,15 +99,13 @@ public final class ChangePasswordDialogFragment extends DialogFragment
 
     @Override public void onRequestError() {
         this.getActivity().runOnUiThread(() -> {
-            ChangePasswordDialogFragment.this.txtError.setVisibility(View.VISIBLE);
+            Toast.makeText(this.getContext(), R.string.login_error, Toast.LENGTH_SHORT).show();
             ChangePasswordDialogFragment.this.progressLoading.setVisibility(View.GONE);
         });
     }
 
     @Override
     public void onClick(View view) {
-        this.txtError.setVisibility(View.GONE);
-        
         if (!this.editTxtNewPassword.getText().toString()
                                     .equals(this.editTxtConfirmPassword.getText().toString())) {
             Toast.makeText(this.getContext(), R.string.password_confirmation_doesnt_match,
@@ -138,7 +130,6 @@ public final class ChangePasswordDialogFragment extends DialogFragment
         this.editTxtOldPassword = view.findViewById(R.id.edit_txt_old_password);
         this.editTxtNewPassword = view.findViewById(R.id.edit_txt_new_password);
         this.editTxtConfirmPassword = view.findViewById(R.id.edit_txt_confirm_password);
-        this.txtError = view.findViewById(R.id.txt_error);
         this.progressLoading = view.findViewById(R.id.progress_loading);
 
         view.findViewById(R.id.btn_update).setOnClickListener(this);
