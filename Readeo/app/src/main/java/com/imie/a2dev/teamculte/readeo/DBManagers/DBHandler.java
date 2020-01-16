@@ -2,6 +2,9 @@ package com.imie.a2dev.teamculte.readeo.DBManagers;
 
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteOpenHelper;
+import android.util.Log;
+
 import com.imie.a2dev.teamculte.readeo.App;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.AuthorDBSchema;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.BookDBSchema;
@@ -17,6 +20,11 @@ import com.imie.a2dev.teamculte.readeo.DBSchemas.UserDBSchema;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.WriterDBSchema;
 import com.readystatesoftware.sqliteasset.SQLiteAssetHelper;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+
 /**
  * Class used to manage database structure (tables, upgrades...).
  */
@@ -30,16 +38,14 @@ public final class DBHandler extends SQLiteAssetHelper {
      * Defines the drop statement.
      */
     private static final String DROP_STATEMENT = "DROP TABLE IF EXISTS %s;";
-
-    /**
-     * Using singleton pattern, stores the instance.
-     */
-    private static DBHandler instance;
-
     /**
      * Defines the database version.
      */
     private static final int VERSION = 1;
+    /**
+     * Using singleton pattern, stores the instance.
+     */
+    private static DBHandler instance;
 
     /**
      * DBHandler's constructor.
@@ -52,85 +58,20 @@ public final class DBHandler extends SQLiteAssetHelper {
         super(context, name, factory, version);
     }
 
+    public static DBHandler getInstance() {
+        if (DBHandler.instance == null) {
+            DBHandler.instance = new DBHandler(App.getAppContext(), DBManager.dbFileName, null, VERSION);
+        }
+
+        return DBHandler.instance;
+    }
+
     @Override
     protected void finalize() throws Throwable {
         this.close();
         super.finalize();
     }
     
-    public static DBHandler getInstance() {
-        if (DBHandler.instance == null) {
-            DBHandler.instance = new DBHandler(App.getAppContext(), DBManager.dbFileName, null, VERSION);
-        }
-        
-        return DBHandler.instance;
-    }
-
-    /**
-     * Creates the database.
-     * @param db The database object.
-     */
-    public void create(SQLiteDatabase db) {
-        //Author table
-        db.execSQL(AuthorDBSchema.AUTHOR_TABLE_STATEMENT);
-        db.execSQL(String.format(INDEX_STATEMENT, AuthorDBSchema.NAME, AuthorDBSchema.TABLE, AuthorDBSchema.NAME));
-
-        //BookListType table
-        db.execSQL(BookListTypeDBSchema.BOOK_LIST_TYPE_TABLE_STATEMENT);
-        db.execSQL(String.format(INDEX_STATEMENT,
-                                 BookListTypeDBSchema.NAME,
-                                 BookListTypeDBSchema.TABLE,
-                                 BookListTypeDBSchema.NAME));
-
-        //Category table
-        db.execSQL(CategoryDBSchema.CATEGORY_TABLE_STATEMENT);
-        db.execSQL(String.format(INDEX_STATEMENT,
-                                 CategoryDBSchema.NAME,
-                                 CategoryDBSchema.TABLE,
-                                 CategoryDBSchema.NAME));
-
-        //Book table
-        db.execSQL(BookDBSchema.BOOK_TABLE_STATEMENT);
-        db.execSQL(String.format(INDEX_STATEMENT, BookDBSchema.TITLE, BookDBSchema.TABLE, BookDBSchema.TITLE));
-
-        //City table
-        db.execSQL(CityDBSchema.CITY_TABLE_STATEMENT);
-        db.execSQL(String.format(INDEX_STATEMENT,
-                                 CityDBSchema.NAME,
-                                 CityDBSchema.TABLE,
-                                 CityDBSchema.NAME));
-
-        //Country table
-        db.execSQL(CountryDBSchema.COUNTRY_TABLE_STATEMENT);
-        db.execSQL(String.format(INDEX_STATEMENT,
-                                 CountryDBSchema.NAME,
-                                 CountryDBSchema.TABLE,
-                                 CountryDBSchema.NAME));
-
-        //Profile table
-        db.execSQL(ProfileDBSchema.PROFILE_TABLE_STATEMENT);
-
-        //Quote table
-        db.execSQL(QuoteDBSchema.QUOTE_TABLE_STATEMENT);
-
-        //Review table
-        db.execSQL(ReviewDBSchema.REVIEW_TABLE_STATEMENT);
-
-        //User table
-        db.execSQL(UserDBSchema.USER_TABLE_STATEMENT);
-        db.execSQL(String.format(INDEX_STATEMENT, UserDBSchema.PSEUDO, UserDBSchema.TABLE, UserDBSchema.PSEUDO));
-        db.execSQL(UserDBSchema.USER_TRIGGER_STATEMENT);
-
-        //Writer table
-        db.execSQL(WriterDBSchema.WRITER_TABLE_STATEMENT);
-
-        //BookListType table
-        db.execSQL(BookListTypeDBSchema.BOOK_LIST_TYPE_TABLE_STATEMENT);
-
-        //BookList table
-        db.execSQL(BookListDBSchema.BOOK_LIST_TABLE_STATEMENT);
-    }
-
     @Override
     public void onUpgrade(SQLiteDatabase db, int i, int i1) {
         db.execSQL(String.format(DROP_STATEMENT, AuthorDBSchema.TABLE));
@@ -147,5 +88,26 @@ public final class DBHandler extends SQLiteAssetHelper {
         db.execSQL(String.format(DROP_STATEMENT, WriterDBSchema.TABLE));
 
         this.onCreate(db);
+    }
+
+    public void copyDatabase(String databaseName) {
+        try {
+            InputStream myinput = App.getAppContext().getAssets().open("databases/" + databaseName);
+            String outfilename = App.getAppContext().getDatabasePath(DBManager.getDbFileName()).getAbsolutePath();
+            OutputStream myoutput = new FileOutputStream(outfilename);
+
+            byte[] buffer = new byte[1024];
+            int length;
+
+            while ((length = myinput.read(buffer)) > 0) {
+                myoutput.write(buffer, 0, length);
+            }
+
+            myoutput.flush();
+            myoutput.close();
+            myinput.close();
+        } catch (IOException e) {
+            Log.e(String.format("[%s:%s] : ", this.getClass().getName(), "copyTestDatabase"), e.getMessage());
+        }
     }
 }

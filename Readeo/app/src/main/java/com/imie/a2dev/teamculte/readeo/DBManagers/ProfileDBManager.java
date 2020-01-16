@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
+
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -15,6 +16,7 @@ import com.android.volley.toolbox.StringRequest;
 import com.imie.a2dev.teamculte.readeo.APIManager;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Profile;
 import com.imie.a2dev.teamculte.readeo.Utils.HTTPRequestQueueSingleton;
+
 import org.joda.time.DateTime;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -55,25 +57,20 @@ public final class ProfileDBManager extends SimpleDBManager {
      * @return true if success else false.
      */
     public boolean createSQLite(@NonNull Profile entity) {
-        this.database.beginTransaction();
-        
         try {
             ContentValues data = new ContentValues();
 
             data.put(ID, entity.getId());
             data.put(AVATAR, entity.getAvatar());
             data.put(DESCRIPTION, entity.getDescription());
-            
+
             this.database.insertOrThrow(this.table, null, data);
-            this.database.setTransactionSuccessful();
 
             return true;
         } catch (SQLiteException e) {
             this.logError("createSQLite", e);
 
             return false;
-        } finally {
-            this.database.endTransaction();
         }
     }
 
@@ -83,8 +80,6 @@ public final class ProfileDBManager extends SimpleDBManager {
      * @return true if success else false.
      */
     public boolean updateSQLite(@NonNull Profile entity) {
-        this.database.beginTransaction();
-        
         try {
             ContentValues data = new ContentValues();
             String whereClause = String.format("%s = ?", ID);
@@ -93,18 +88,12 @@ public final class ProfileDBManager extends SimpleDBManager {
             data.put(AVATAR, entity.getAvatar());
             data.put(DESCRIPTION, entity.getDescription());
             data.put(UPDATE, new DateTime().toString(DEFAULT_FORMAT));
-            
-            boolean success = this.database.update(this.table, data, whereClause, whereArgs) != 0;
 
-            this.database.setTransactionSuccessful();
-            
-            return success;
+            return this.database.update(this.table, data, whereClause, whereArgs) != 0;
         } catch (SQLiteException e) {
             this.logError("updateSQLite", e);
 
             return false;
-        } finally {
-            this.database.endTransaction();
         }
     }
 
@@ -295,6 +284,19 @@ public final class ProfileDBManager extends SimpleDBManager {
     }
 
     /**
+     * Soft deletes a profile entity in MySQL database.
+     * @param id The id of the entity to delete.
+     */
+    public void softDeleteMySQL(int id) {
+        String url = this.baseUrl + APIManager.SOFT_DELETE;
+        Map<String, String> param = new HashMap<>();
+
+        param.put(ID, String.valueOf(id));
+
+        super.requestString(Request.Method.PUT, url, null, param);
+    }
+
+    /**
      * Restores a profile entity in MySQL database.
      * @param id The id of the entity to restore.
      */
@@ -315,35 +317,35 @@ public final class ProfileDBManager extends SimpleDBManager {
         this.deleteMySQL(profile.getId());
     }
 
+    /**
+     * Soft deletes a profile entity in MySQL database.
+     * @param profile The profile to delete.
+     */
+    public void softDeleteMySQL(Profile profile) {
+        this.softDeleteMySQL(profile.getId());
+    }
+
     @Override
     public boolean createSQLite(@NonNull JSONObject entity) {
-        this.database.beginTransaction();
-        
         try {
             ContentValues data = new ContentValues();
 
             data.put(ID, entity.getInt(ID));
             data.put(AVATAR, entity.getString(AVATAR));
             data.put(DESCRIPTION, entity.getString(DESCRIPTION));
-            data.put(UPDATE, entity.getString(UPDATE));
-            
+
             this.database.insertOrThrow(this.table, null, data);
-            this.database.setTransactionSuccessful();
-            
+
             return true;
         } catch (Exception e) {
             this.logError("createSQLite", e);
-            
+
             return false;
-        } finally {
-            this.database.endTransaction();
         }
     }
 
     @Override
     public boolean updateSQLite(@NonNull JSONObject entity) {
-        this.database.beginTransaction();
-        
         try {
             ContentValues data = new ContentValues();
             String whereClause = String.format("%s = ?", ID);
@@ -352,18 +354,12 @@ public final class ProfileDBManager extends SimpleDBManager {
             data.put(AVATAR, entity.getString(AVATAR));
             data.put(DESCRIPTION, entity.getString(DESCRIPTION));
             data.put(UPDATE, new DateTime().toString(DEFAULT_FORMAT));
-            
-            boolean success = this.database.update(this.table, data, whereClause, whereArgs) != 0;
 
-            this.database.setTransactionSuccessful();
-            
-            return success;
+            return this.database.update(this.table, data, whereClause, whereArgs) != 0;
         } catch (Exception e) {
             this.logError("updateSQLite", e);
 
             return false;
-        } finally {
-            this.database.endTransaction();
         }
     }
 }

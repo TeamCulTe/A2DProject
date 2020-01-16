@@ -14,6 +14,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.TextView;
+
 import com.imie.a2dev.teamculte.readeo.DBManagers.QuoteDBManager;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Book;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.PrivateUser;
@@ -133,7 +134,7 @@ public final class EditQuoteDialogFragment extends DialogFragment implements Vie
         if (view.getId() == R.id.btn_publish) {
             this.save();
         }
-        
+
         this.initNewQuote();
     }
 

@@ -5,6 +5,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
 import com.imie.a2dev.teamculte.readeo.DBManagers.UserDBManager;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.PublicUser;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Quote;
@@ -37,7 +38,7 @@ public final class QuoteListAdapter {
     }
 
     /**
-     * Initializes the container's view elements according to the list of quotes. 
+     * Initializes the container's view elements according to the list of quotes.
      */
     public void initList(LinearLayout container) {
         for (Quote quote : this.items) {

@@ -5,10 +5,12 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
+
 import com.android.volley.Request;
 import com.imie.a2dev.teamculte.readeo.APIManager;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Author;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Book;
+
 import org.json.JSONObject;
 
 import java.util.ArrayList;
@@ -43,8 +45,6 @@ public final class WriterDBManager extends RelationDBManager {
      * @return true if success else false.
      */
     public boolean createSQLiteBook(@NonNull Book entity) {
-        this.database.beginTransaction();
-        
         try {
             ContentValues data;
 
@@ -55,19 +55,14 @@ public final class WriterDBManager extends RelationDBManager {
 
                 data.put(BOOK, idBook);
                 data.put(AUTHOR, author.getId());
-                
+
                 this.database.insertOrThrow(this.table, null, data);
             }
-            
-            this.database.setTransactionSuccessful();
-
             return true;
         } catch (SQLiteException e) {
             this.logError("createSQLiteBook", e);
 
             return false;
-        } finally {
-            this.database.endTransaction();
         }
     }
 
@@ -132,23 +127,15 @@ public final class WriterDBManager extends RelationDBManager {
      * @return True if success else false.
      */
     public boolean deleteSQLite(int idAuthor, int idBook) {
-        this.database.beginTransaction();
-        
         try {
             String whereClause = String.format("%s = ? AND %s = ?", AUTHOR, BOOK);
             String[] whereArgs = new String[]{String.valueOf(idAuthor), String.valueOf(idBook)};
 
-            boolean success = this.database.delete(this.table, whereClause, whereArgs) != 0;
-
-            this.database.setTransactionSuccessful();
-
-            return success;
+            return this.database.delete(this.table, whereClause, whereArgs) != 0;
         } catch (SQLiteException e) {
             this.logError("deleteSQLite", e);
 
             return false;
-        } finally {
-            this.database.endTransaction();
         }
     }
 
@@ -158,23 +145,15 @@ public final class WriterDBManager extends RelationDBManager {
      * @return True if success else false.
      */
     public boolean deleteSQLite(int id, String filter) {
-        this.database.beginTransaction();
-        
         try {
             String whereClause = String.format("%s = ?", filter);
             String[] whereArgs = new String[]{String.valueOf(id)};
 
-            boolean success = this.database.delete(this.table, whereClause, whereArgs) != 0;
-
-            this.database.setTransactionSuccessful();
-
-            return success;
+            return this.database.delete(this.table, whereClause, whereArgs) != 0;
         } catch (SQLiteException e) {
             this.logError("deleteSQLite", e);
 
             return false;
-        } finally {
-            this.database.endTransaction();
         }
     }
 
@@ -184,23 +163,15 @@ public final class WriterDBManager extends RelationDBManager {
      * @return True if success else false.
      */
     public boolean deleteAuthorSQLite(int id) {
-        this.database.beginTransaction();
-        
         try {
             String whereClause = String.format("%s = ?", AUTHOR);
             String[] whereArgs = new String[]{String.valueOf(id)};
 
-            boolean success = this.database.delete(this.table, whereClause, whereArgs) != 0;
-
-            this.database.setTransactionSuccessful();
-
-            return success;
+            return this.database.delete(this.table, whereClause, whereArgs) != 0;
         } catch (SQLiteException e) {
             this.logError("deleteAuthorSQLite", e);
 
             return false;
-        } finally {
-            this.database.endTransaction();
         }
     }
 
@@ -210,23 +181,15 @@ public final class WriterDBManager extends RelationDBManager {
      * @return True if success else false.
      */
     public boolean deleteBookSQLite(int id) {
-        this.database.beginTransaction();
-        
         try {
             String whereClause = String.format("%s = ?", BOOK);
             String[] whereArgs = new String[]{String.valueOf(id)};
 
-            boolean success = this.database.delete(this.table, whereClause, whereArgs) != 0;
-
-            this.database.setTransactionSuccessful();
-
-            return success;
+            return this.database.delete(this.table, whereClause, whereArgs) != 0;
         } catch (SQLiteException e) {
             this.logError("deleteBookSQLite", e);
 
             return false;
-        } finally {
-            this.database.endTransaction();  
         }
     }
 
@@ -267,30 +230,24 @@ public final class WriterDBManager extends RelationDBManager {
 
         param.put(APIManager.TEST, "1");
 
-        super.requestString(Request.Method.DELETE, url, null, param);
+        super.requestString(Request.Method.PUT, url, null, param);
     }
 
     @Override
     public boolean createSQLite(@NonNull JSONObject entity) {
-        this.database.beginTransaction();
-        
         try {
             ContentValues data = new ContentValues();
 
             data.put(AUTHOR, entity.getInt(AUTHOR));
             data.put(BOOK, entity.getInt(BOOK));
-            data.put(UPDATE, entity.getString(UPDATE));
-            
+
             this.database.insertOrThrow(this.table, null, data);
-            this.database.setTransactionSuccessful();
-            
+
             return true;
         } catch (Exception e) {
             this.logError("createSQLite", e);
-            
+
             return false;
-        } finally {
-            this.database.endTransaction();
         }
     }
 

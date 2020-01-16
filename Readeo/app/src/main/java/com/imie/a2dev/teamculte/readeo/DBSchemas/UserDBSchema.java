@@ -49,32 +49,29 @@ public abstract class UserDBSchema {
      * Defines the user's key field.
      */
     public static final String KEY = "api_key";
-
-    /**
-     * Defines the book list type name field max size.
-     */
-    private static final int PSEUDO_SIZE = 50;
-
-    /**
-     * Defines the user create table statement.
-     */
-    public static final String USER_TABLE_STATEMENT = String.format("CREATE TABLE IF NOT EXISTS %s (%s INTEGER " +
-                    "PRIMARY KEY, %s TEXT(%s) UNIQUE NOT NULL, %s INTEGER NOT NULL, %s DATETIME NOT NULL DEFAULT %s, " +
-                    "CONSTRAINT User_Profile_FK FOREIGN KEY (%s) REFERENCES Profile(%s));",
-            TABLE,
-            ID,
-            PSEUDO,
-            PSEUDO_SIZE,
-            PROFILE,
-            CommonDBSchema.UPDATE,
-            CommonDBSchema.UPDATE_DEFAULT,
-            PROFILE,
-            ProfileDBSchema.ID);
-
     /**
      * Stores the trigger statement on user table when deleting in order to delete the other user occurrences.
      */
     public static final String USER_TRIGGER_STATEMENT = "CREATE TRIGGER IF NOT EXISTS user_trigger BEFORE DELETE ON " +
-            "User FOR EACH ROW BEGIN DELETE FROM Quote WHERE Quote.id_user = OLD.id_user; DELETE FROM Review WHERE " +
-            "Review.id_user = OLD.id_user; DELETE FROM Profile WHERE Profile.id_profile = OLD.id_profile; END;";
+                                                        "User FOR EACH ROW BEGIN DELETE FROM Quote WHERE Quote.id_user = OLD.id_user; DELETE FROM Review WHERE " +
+                                                        "Review.id_user = OLD.id_user; DELETE FROM Profile WHERE Profile.id_profile = OLD.id_profile; END;";
+    /**
+     * Defines the book list type name field max size.
+     */
+    private static final int PSEUDO_SIZE = 50;
+    /**
+     * Defines the user create table statement.
+     */
+    public static final String USER_TABLE_STATEMENT = String.format("CREATE TABLE IF NOT EXISTS %s (%s INTEGER " +
+                                                                    "PRIMARY KEY, %s TEXT(%s) UNIQUE NOT NULL, %s INTEGER NOT NULL, %s DATETIME NOT NULL DEFAULT %s, " +
+                                                                    "CONSTRAINT User_Profile_FK FOREIGN KEY (%s) REFERENCES Profile(%s));",
+                                                                    TABLE,
+                                                                    ID,
+                                                                    PSEUDO,
+                                                                    PSEUDO_SIZE,
+                                                                    PROFILE,
+                                                                    CommonDBSchema.UPDATE,
+                                                                    CommonDBSchema.UPDATE_DEFAULT,
+                                                                    PROFILE,
+                                                                    ProfileDBSchema.ID);
 }

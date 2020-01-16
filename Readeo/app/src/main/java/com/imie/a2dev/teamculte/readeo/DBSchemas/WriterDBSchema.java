@@ -24,18 +24,18 @@ public abstract class WriterDBSchema {
      * Defines the writer create table statement.
      */
     public static final String WRITER_TABLE_STATEMENT = String.format("CREATE TABLE IF NOT EXISTS %s (%s INTEGER " +
-                    "NOT NULL, %s INTEGER NOT NULL, %s DATETIME NOT NULL DEFAULT %s, CONSTRAINT Writer_PK PRIMARY KEY" +
-                    " (%s, %s), CONSTRAINT Writer_Author_FK FOREIGN KEY (%s) REFERENCES Author(%s), " +
-                    "CONSTRAINT Writer_Book_FK FOREIGN KEY (%s) REFERENCES Book(%s));",
-            TABLE,
-            AUTHOR,
-            BOOK,
-            CommonDBSchema.UPDATE,
-            CommonDBSchema.UPDATE_DEFAULT,
-            AUTHOR,
-            BOOK,
-            AUTHOR,
-            AuthorDBSchema.ID,
-            BOOK,
-            BookDBSchema.ID);
+                                                                      "NOT NULL, %s INTEGER NOT NULL, %s DATETIME NOT NULL DEFAULT %s, CONSTRAINT Writer_PK PRIMARY KEY" +
+                                                                      " (%s, %s), CONSTRAINT Writer_Author_FK FOREIGN KEY (%s) REFERENCES Author(%s), " +
+                                                                      "CONSTRAINT Writer_Book_FK FOREIGN KEY (%s) REFERENCES Book(%s));",
+                                                                      TABLE,
+                                                                      AUTHOR,
+                                                                      BOOK,
+                                                                      CommonDBSchema.UPDATE,
+                                                                      CommonDBSchema.UPDATE_DEFAULT,
+                                                                      AUTHOR,
+                                                                      BOOK,
+                                                                      AUTHOR,
+                                                                      AuthorDBSchema.ID,
+                                                                      BOOK,
+                                                                      BookDBSchema.ID);
 }

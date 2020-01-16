@@ -34,18 +34,18 @@ public abstract class QuoteDBSchema {
      * Defines the quote create table statement.
      */
     public static final String QUOTE_TABLE_STATEMENT = String.format("CREATE TABLE IF NOT EXISTS %s (%s INTEGER " +
-                    "PRIMARY KEY, %s INTEGER NOT NULL, %s INTEGER NOT NULL, %s TEXT NOT NULL, %s DATETIME NOT NULL " +
-                    "DEFAULT %s, CONSTRAINT Quote_User_FK FOREIGN KEY (%s) REFERENCES User(%s), " +
-                    "CONSTRAINT Quote_Book_FK FOREIGN KEY (%s) REFERENCES Book(%s));",
-            TABLE,
-            ID,
-            USER,
-            BOOK,
-            QUOTE,
-            CommonDBSchema.UPDATE,
-            CommonDBSchema.UPDATE_DEFAULT,
-            USER,
-            UserDBSchema.ID,
-            BOOK,
-            BookDBSchema.ID);
+                                                                     "PRIMARY KEY, %s INTEGER NOT NULL, %s INTEGER NOT NULL, %s TEXT NOT NULL, %s DATETIME NOT NULL " +
+                                                                     "DEFAULT %s, CONSTRAINT Quote_User_FK FOREIGN KEY (%s) REFERENCES User(%s), " +
+                                                                     "CONSTRAINT Quote_Book_FK FOREIGN KEY (%s) REFERENCES Book(%s));",
+                                                                     TABLE,
+                                                                     ID,
+                                                                     USER,
+                                                                     BOOK,
+                                                                     QUOTE,
+                                                                     CommonDBSchema.UPDATE,
+                                                                     CommonDBSchema.UPDATE_DEFAULT,
+                                                                     USER,
+                                                                     UserDBSchema.ID,
+                                                                     BOOK,
+                                                                     BookDBSchema.ID);
 }

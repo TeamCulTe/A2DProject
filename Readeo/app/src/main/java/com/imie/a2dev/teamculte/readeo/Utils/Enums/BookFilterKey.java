@@ -9,9 +9,9 @@ import com.imie.a2dev.teamculte.readeo.DBSchemas.CategoryDBSchema;
  */
 public enum BookFilterKey {
     NONE("None"),
-    CATEGORY ("Category"),
-    AUTHOR ("Author"),
-    TITLE ("Title");
+    CATEGORY("Category"),
+    AUTHOR("Author"),
+    TITLE("Title");
 
     /**
      * Stores the filter key's associated database field.
@@ -24,6 +24,34 @@ public enum BookFilterKey {
      */
     BookFilterKey(String name) {
         this.name = name;
+    }
+
+    /**
+     * Gets a book filter key from a string value.
+     * @param name The value used to get the associated book filter key.
+     * @return The associated book filter key.
+     */
+    public static BookFilterKey fromName(String name) {
+        BookFilterKey bookFilterKey = null;
+
+        switch (name) {
+            case "Title":
+                bookFilterKey = BookFilterKey.TITLE;
+
+                break;
+            case "Author":
+                bookFilterKey = BookFilterKey.AUTHOR;
+
+                break;
+            case "Category":
+                bookFilterKey = BookFilterKey.CATEGORY;
+
+                break;
+            default:
+                break;
+        }
+
+        return bookFilterKey;
     }
 
     /**
@@ -59,33 +87,5 @@ public enum BookFilterKey {
         }
 
         return filterCol;
-    }
-
-    /**
-     * Gets a book filter key from a string value.
-     * @param name The value used to get the associated book filter key.
-     * @return The associated book filter key.
-     */
-    public static BookFilterKey fromName(String name) {
-        BookFilterKey bookFilterKey = null;
-
-        switch (name) {
-            case "Title":
-                bookFilterKey = BookFilterKey.TITLE;
-
-                break;
-            case "Author":
-                bookFilterKey = BookFilterKey.AUTHOR;
-
-                break;
-            case "Category":
-                bookFilterKey = BookFilterKey.CATEGORY;
-
-                break;
-            default:
-                break;
-        }
-
-        return bookFilterKey;
     }
 }

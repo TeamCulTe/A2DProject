@@ -6,9 +6,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/grey_anthracite"
-    tools:context=".Views.LogInFragment"
     android:focusable="true"
-    android:focusableInTouchMode="true">
+    android:focusableInTouchMode="true"
+    tools:context=".Views.LogInFragment">
 
     <android.support.v7.widget.RecyclerView
         android:id="@+id/recycler_users"

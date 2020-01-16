@@ -204,7 +204,7 @@ public final class SignInFragment extends Fragment implements View.OnClickListen
         InputError error;
 
         this.hideErrorMessages();
-        
+
         // TODO : See if using listener pattern here.
 
         error = InputUtils.validatePseudo(this.editPseudo.getText().toString(), null);
@@ -259,7 +259,7 @@ public final class SignInFragment extends Fragment implements View.OnClickListen
         CityDBManager cityDBManager = new CityDBManager(this.getContext());
         ProfileDBManager profileDBManager = new ProfileDBManager(this.getContext());
         UserDBManager userDBManager = new UserDBManager(this.getContext());
-        
+
         String pseudo = this.editPseudo.getText().toString();
         String email = this.editEmail.getText().toString();
         String password = this.editPassword.getText().toString();

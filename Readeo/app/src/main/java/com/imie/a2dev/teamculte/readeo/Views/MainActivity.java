@@ -40,10 +40,10 @@ public final class MainActivity extends AppCompatActivity {
 
         Intent intent = new Intent(this, SyncService.class);
         PendingIntent pIntent = PendingIntent.getService(this, 0, intent, 0);
-        AlarmManager alarm = (AlarmManager)getSystemService(Context.ALARM_SERVICE);
-        
+        AlarmManager alarm = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+
         alarm.cancel(pIntent);
-        alarm.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(),200000, pIntent);     
+        alarm.setRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), 200000, pIntent);
     }
 
     @Override

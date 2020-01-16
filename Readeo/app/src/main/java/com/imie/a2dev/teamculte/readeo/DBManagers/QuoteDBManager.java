@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
+
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -15,6 +16,7 @@ import com.android.volley.toolbox.StringRequest;
 import com.imie.a2dev.teamculte.readeo.APIManager;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Quote;
 import com.imie.a2dev.teamculte.readeo.Utils.HTTPRequestQueueSingleton;
+
 import org.joda.time.DateTime;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -56,8 +58,6 @@ public final class QuoteDBManager extends SimpleDBManager {
      * @return true if success else false.
      */
     public boolean createSQLite(@NonNull Quote entity) {
-        this.database.beginTransaction();
-        
         try {
             ContentValues data = new ContentValues();
             long id;
@@ -71,8 +71,6 @@ public final class QuoteDBManager extends SimpleDBManager {
             data.put(QUOTE, entity.getQuote());
 
             id = this.database.insertOrThrow(this.table, null, data);
-            this.database.setTransactionSuccessful();
-
             if (entity.getId() == 0) {
                 entity.setId((int) id);
             }
@@ -82,8 +80,6 @@ public final class QuoteDBManager extends SimpleDBManager {
             this.logError("createSQLite", e);
 
             return false;
-        } finally {
-            this.database.endTransaction();
         }
     }
 
@@ -93,8 +89,6 @@ public final class QuoteDBManager extends SimpleDBManager {
      * @return true if success else false.
      */
     public boolean updateSQLite(@NonNull Quote entity) {
-        this.database.beginTransaction();
-        
         try {
             ContentValues data = new ContentValues();
             String whereClause = String.format("%s = ?", ID);
@@ -102,18 +96,12 @@ public final class QuoteDBManager extends SimpleDBManager {
 
             data.put(QUOTE, entity.getQuote());
             data.put(UPDATE, new DateTime().toString(DEFAULT_FORMAT));
-            
-            boolean success = this.database.update(this.table, data, whereClause, whereArgs) != 0;
 
-            this.database.setTransactionSuccessful();
-            
-            return success;
+            return this.database.update(this.table, data, whereClause, whereArgs) != 0;
         } catch (SQLiteException e) {
             this.logError("updateSQLite", e);
 
             return false;
-        } finally {
-            this.database.endTransaction();
         }
     }
 
@@ -156,23 +144,15 @@ public final class QuoteDBManager extends SimpleDBManager {
      * @return True if success else false.
      */
     public boolean deleteUserSQLite(int id) {
-        this.database.beginTransaction();
-        
         try {
             String whereClause = String.format("%s = ?", USER);
             String[] whereArgs = new String[]{String.valueOf(id)};
-            
-            boolean success = this.database.delete(this.table, whereClause, whereArgs) != 0;
 
-            this.database.setTransactionSuccessful();
-            
-            return success;
+            return this.database.delete(this.table, whereClause, whereArgs) != 0;
         } catch (SQLiteException e) {
             this.logError("deleteUserSQLite", e);
 
             return false;
-        } finally {
-            this.database.endTransaction();
         }
     }
 
@@ -182,23 +162,15 @@ public final class QuoteDBManager extends SimpleDBManager {
      * @return True if success else false.
      */
     public boolean deleteBookSQLite(int id) {
-        this.database.beginTransaction();
-        
         try {
             String whereClause = String.format("%s = ?", BOOK);
             String[] whereArgs = new String[]{String.valueOf(id)};
 
-            boolean success = this.database.delete(this.table, whereClause, whereArgs) != 0;
-
-            this.database.setTransactionSuccessful();
-
-            return success;
+            return this.database.delete(this.table, whereClause, whereArgs) != 0;
         } catch (SQLiteException e) {
             this.logError("deleteBookSQLite", e);
 
             return false;
-        } finally {
-            this.database.endTransaction();
         }
     }
 
@@ -235,23 +207,15 @@ public final class QuoteDBManager extends SimpleDBManager {
      * @return True if success else false.
      */
     private boolean deleteSQLite(int id, String filter) {
-        this.database.beginTransaction();
-        
         try {
             String whereClause = String.format("%s = ?", filter);
             String[] whereArgs = new String[]{String.valueOf(id)};
 
-            boolean success = this.database.delete(this.table, whereClause, whereArgs) != 0;
-
-            this.database.setTransactionSuccessful();
-
-            return success;
+            return this.database.delete(this.table, whereClause, whereArgs) != 0;
         } catch (SQLiteException e) {
             this.logError("deleteSQLite", e);
 
             return false;
-        } finally {
-            this.database.endTransaction();
         }
     }
 
@@ -439,11 +403,36 @@ public final class QuoteDBManager extends SimpleDBManager {
     }
 
     /**
+     * Soft deletes a quote entity in MySQL database.
+     * @param id The id of the entity to delete.
+     */
+    public void softDeleteMySQL(int id) {
+        String url = this.baseUrl + APIManager.SOFT_DELETE;
+        Map<String, String> param = new HashMap<>();
+
+        param.put(ID, String.valueOf(id));
+
+        super.requestString(Request.Method.PUT, url, null, param);
+    }
+
+    /**
      * Deletes all quote entities in MySQL database from a specific user.
      * @param idUser The id of the user.
      */
     public void deleteUserMySQL(int idUser) {
         String url = this.baseUrl + APIManager.DELETE;
+        Map<String, String> param = new HashMap<>();
+
+        param.put(USER, String.valueOf(idUser));
+        super.requestString(Request.Method.PUT, url, null, param);
+    }
+
+    /**
+     * Soft deletes all quote entities in MySQL database from a specific user.
+     * @param idUser The id of the user.
+     */
+    public void softDeleteUserMySQL(int idUser) {
+        String url = this.baseUrl + APIManager.SOFT_DELETE;
         Map<String, String> param = new HashMap<>();
 
         param.put(USER, String.valueOf(idUser));
@@ -482,10 +471,16 @@ public final class QuoteDBManager extends SimpleDBManager {
         this.deleteMySQL(quote.getId());
     }
 
+    /**
+     * Soft deletes a quote entity in MySQL database.
+     * @param quote The quote to delete.
+     */
+    public void softDeleteMySQL(Quote quote) {
+        this.softDeleteMySQL(quote.getId());
+    }
+
     @Override
     public boolean createSQLite(@NonNull JSONObject entity) {
-        this.database.beginTransaction();
-        
         try {
             ContentValues data = new ContentValues();
 
@@ -493,24 +488,19 @@ public final class QuoteDBManager extends SimpleDBManager {
             data.put(USER, entity.getInt(USER));
             data.put(BOOK, entity.getInt(BOOK));
             data.put(QUOTE, entity.getString(QUOTE));
-            
+
             this.database.insertOrThrow(this.table, null, data);
-            this.database.setTransactionSuccessful();
-            
+
             return true;
         } catch (Exception e) {
             this.logError("createSQLite", e);
-            
+
             return false;
-        } finally {
-            this.database.endTransaction();
         }
     }
 
     @Override
     public boolean updateSQLite(@NonNull JSONObject entity) {
-        this.database.beginTransaction();
-        
         try {
             ContentValues data = new ContentValues();
             String whereClause = String.format("%s = ?", ID);
@@ -519,17 +509,11 @@ public final class QuoteDBManager extends SimpleDBManager {
             data.put(QUOTE, entity.getString(QUOTE));
             data.put(UPDATE, new DateTime().toString(DEFAULT_FORMAT));
 
-            boolean success = this.database.update(this.table, data, whereClause, whereArgs) != 0;
-
-            this.database.setTransactionSuccessful();
-
-            return success;
+            return this.database.update(this.table, data, whereClause, whereArgs) != 0;
         } catch (Exception e) {
             this.logError("createSQLite", e);
 
             return false;
-        } finally {
-            this.database.endTransaction();
         }
     }
 }

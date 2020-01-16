@@ -6,6 +6,7 @@ import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.BookListType;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Category;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.PrivateUser;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.PublicUser;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.After;
@@ -78,42 +79,26 @@ public final class BookListDBManagerTest extends CommonDBManagerTest {
      */
     private BookListDBManager manager = new BookListDBManager(this.context);
 
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-    }
-
-    @After
-    public void tearDown() {
-        this.context.deleteDatabase(TEST_DB);
-
-        if (this.testedMySQL) {
-            this.deleteMySQLTestEntities();
-
-            this.testedMySQL = false;
-        }
-    }
-
     @Test
     public void testEntityCreateSQLite() {
         BookDBManager bookDBManager = new BookDBManager(this.context);
-        BookListType type = new BookListTypeDBManager(this.context).loadMySQL(TEST_TYPE);
+        BookListType type = new BookListTypeDBManager(this.context).loadSQLite(TEST_TYPE);
         ArrayList<Book> books = new ArrayList<>();
-        
+
         for (int id : TEST_BOOKS) {
             books.add(bookDBManager.loadSQLite(id));
         }
-        
+
         BookList bookList = new BookList(TEST_USER, type, books);
-        
+
         this.manager.createSQLite(bookList);
-        
+
         BookList created = this.manager.loadSQLite(TEST_USER, TEST_TYPE);
-        
+
         assertNotNull(created);
         assertEquals(bookList.getId(), created.getId());
         assertEquals(bookList.getType().getId(), created.getType().getId());
-        
+
         for (int i = 0; i < created.getBooks().size(); i++) {
             assertEquals(bookList.getBooks().get(i).getId(), created.getBooks().get(i).getId());
         }
@@ -127,7 +112,7 @@ public final class BookListDBManagerTest extends CommonDBManagerTest {
             jsonObject.put(USER, TEST_USER);
             jsonObject.put(TYPE, TEST_TYPE);
             jsonObject.put(BOOK, id);
-            
+
             this.manager.createSQLite(jsonObject);
         }
 
@@ -147,17 +132,17 @@ public final class BookListDBManagerTest extends CommonDBManagerTest {
     @Test
     public void testUpdateSQLite() {
         BookList loaded = this.manager.loadSQLite(TEST_USER_LOAD, TEST_TYPE_LOAD);
-        
+
         assertNotNull(loaded);
-        
+
         int bookNb = loaded.getBooks().size();
-        
+
         loaded.getBooks().remove(0);
-        
+
         this.manager.updateSQLite(loaded);
-        
+
         loaded = this.manager.loadSQLite(TEST_USER_LOAD, TEST_TYPE_LOAD);
-        
+
         assertNotNull(loaded);
         assertEquals(bookNb - 1, loaded.getBooks().size());
     }
@@ -165,19 +150,19 @@ public final class BookListDBManagerTest extends CommonDBManagerTest {
     @Test
     public void testLoadSQLite() {
         BookList loaded = this.manager.loadSQLite(TEST_USER_LOAD, TEST_TYPE_LOAD);
-        
+
         assertNotNull(loaded);
-        assertEquals(TEST_BOOK_NUMBER ,loaded.getBooks().size());
+        assertEquals(TEST_BOOK_NUMBER, loaded.getBooks().size());
     }
 
     @Test
     public void testUserLoadSQLite() {
         Map<String, BookList> bookLists = this.manager.loadUserSQLite(TEST_USER_LOAD);
-        
+
         assertNotNull(bookLists);
         assertEquals(TEST_USER_BOOKLIST_NUMBER, bookLists.size());
     }
-    
+
     @Test
     public void testCreateEntityMySQL() {
         this.testedMySQL = true;
@@ -255,7 +240,7 @@ public final class BookListDBManagerTest extends CommonDBManagerTest {
         assertNotNull(toRestore);
 
         for (Book book : toRestore.getBooks()) {
-            this.manager.deleteMySQL(toRestore.getId(), book.getId(), toRestore.getType().getId());
+            this.manager.softDeleteMySQL(toRestore.getId(), book.getId(), toRestore.getType().getId());
         }
 
         this.manager.waitForResponse();
@@ -295,10 +280,20 @@ public final class BookListDBManagerTest extends CommonDBManagerTest {
     }
 
     @Test
+    public void testSoftDeleteUserMySQL() {
+        assertNotNull(this.initUserTestEntitiesMySQL());
+
+        this.manager.softDeleteUserMySQL(MYSQL_TEST_ID);
+        Map<String, BookList> bookLists = this.manager.loadUserMySQL(MYSQL_TEST_ID);
+
+        assertNull(bookLists);
+    }
+
+    @Test
     public void testRestoreUserMySQL() {
         assertNotNull(this.initUserTestEntitiesMySQL());
 
-        this.manager.deleteUserMySQL(MYSQL_TEST_ID);
+        this.manager.softDeleteUserMySQL(MYSQL_TEST_ID);
         this.manager.waitForResponse();
 
         assertNull(this.manager.loadUserMySQL(MYSQL_TEST_ID));
@@ -361,7 +356,7 @@ public final class BookListDBManagerTest extends CommonDBManagerTest {
             String testString = "testString" + String.valueOf(i);
 
             books.add(bookDBManagerTest.initTestEntityMySQL(testId, testString, testString, testString, 3000,
-                    category));
+                                                            category));
         }
 
         return this.initTestEntityMySQL(user.getId(), type, books);
@@ -381,18 +376,18 @@ public final class BookListDBManagerTest extends CommonDBManagerTest {
 
         for (int i = 0; i < TEST_TYPES_NUMBER; i++) {
             int testTypeId = MYSQL_TEST_ID - i;
-            String testTypeName = "testString" + String.valueOf(i);
-            String testTypeImage = "testImage" + String.valueOf(i);
+            String testTypeName = "testString" + i;
+            String testTypeImage = "testImage" + i;
             type = new BookListTypeDBManagerTest().initTestEntityMySQL(testTypeId, testTypeName, testTypeImage);
 
             books = new ArrayList<>();
 
             for (int j = 0; j < TEST_BOOK_PER_TYPE; j++) {
                 int testId = testTypeId - j;
-                String testString = testTypeName + String.valueOf(j);
+                String testString = testTypeName + j;
 
                 books.add(bookDBManagerTest.initTestEntityMySQL(testId, testString, testString, testString, 3000,
-                        category));
+                                                                category));
             }
 
             this.initTestEntityMySQL(user.getId(), type, books);

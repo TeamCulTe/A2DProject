@@ -14,11 +14,11 @@ public abstract class CommonDBSchema {
     /**
      * Stores the default lat update column value.
      */
-    public static String UPDATE_DEFAULT = "datetime('now','localtime')";
+    public static String UPDATE_DEFAULT = "CURRENT_TIMESTAMP";
 
     /**
      * Stores the default date time format.
      */
     public static String DEFAULT_FORMAT = "yyyy-MM-dd HH:mm:ss";
-    
+
 }

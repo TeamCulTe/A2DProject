@@ -1,9 +1,8 @@
 package com.imie.a2dev.teamculte.readeo.Utils;
 
+import org.joda.time.DateTime;
 import org.junit.Before;
 import org.junit.Test;
-
-import java.util.Date;
 
 import static org.junit.Assert.*;
 
@@ -12,24 +11,21 @@ import static org.junit.Assert.*;
  */
 public class UpdateDataElementTest {
     /**
-     * Stores the test element.
-     */
-    private UpdateDataElement element;
-
-    /**
      * Defines the number of ids.
      */
     private final int idsNumber = 2;
-
     /**
      * Defines the first id.
      */
     private final int firstId = 1;
-
     /**
      * Defines the second id.
      */
     private final int secondId = 2;
+    /**
+     * Stores the test element.
+     */
+    private UpdateDataElement element;
 
     @Before
     public void setUp() throws Exception {
@@ -37,7 +33,7 @@ public class UpdateDataElementTest {
         ids[0] = this.firstId;
         ids[1] = this.secondId;
 
-        this.element = new UpdateDataElement(ids, new Date());
+        this.element = new UpdateDataElement(ids, new DateTime());
     }
 
     @Test

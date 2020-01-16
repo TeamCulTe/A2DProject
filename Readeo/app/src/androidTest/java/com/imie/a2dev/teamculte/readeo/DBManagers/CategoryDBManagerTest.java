@@ -2,6 +2,7 @@ package com.imie.a2dev.teamculte.readeo.DBManagers;
 
 import com.imie.a2dev.teamculte.readeo.APIManager;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Category;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.After;
@@ -25,22 +26,6 @@ public final class CategoryDBManagerTest extends CommonDBManagerTest {
      * Stores the associated manager used to interact with the database.
      */
     private CategoryDBManager manager = new CategoryDBManager(this.context);
-
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-    }
-
-    @After
-    public void tearDown() {
-        this.context.deleteDatabase(TEST_DB);
-
-        if (this.testedMySQL) {
-            this.deleteMySQLTestEntities();
-
-            this.testedMySQL = false;
-        }
-    }
 
     @Test
     public void testEntityCreateSQLite() {
@@ -104,7 +89,7 @@ public final class CategoryDBManagerTest extends CommonDBManagerTest {
         Category category = this.initTestEntityMySQL();
 
         this.manager.importFromMySQL(APIManager.API_URL + APIManager.CATEGORIES + APIManager.READ + APIManager.START
-                + "=" + TEST_START + "&" + APIManager.END + "=" + TEST_END);
+                                     + "=" + TEST_START + "&" + APIManager.END + "=" + TEST_END);
 
         this.manager.waitForResponse();
 

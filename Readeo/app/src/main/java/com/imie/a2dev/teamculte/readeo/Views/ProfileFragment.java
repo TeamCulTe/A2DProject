@@ -11,6 +11,7 @@ import android.view.ViewGroup;
 
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.imie.a2dev.teamculte.readeo.DBManagers.BookListDBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.BookListTypeDBManager;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.BookListDBSchema;
@@ -69,7 +70,7 @@ public final class ProfileFragment extends Fragment implements BookListTypeRecyc
 
     @Override public void onResume() {
         super.onResume();
-        
+
         this.init(this.getView());
     }
 
@@ -132,13 +133,13 @@ public final class ProfileFragment extends Fragment implements BookListTypeRecyc
         //((ImageView) view.findViewById(R.id.img_avatar)).setImageResource();
 
         String description;
-                
+
         if (this.user.getProfile() != null && !this.user.getProfile().getDescription().isEmpty()) {
             description = this.user.getProfile().getDescription();
         } else {
             description = this.getString(R.string.no_profile_description);
         }
-        
+
         ((TextView) view.findViewById(R.id.txt_description)).setText(description);
     }
 }

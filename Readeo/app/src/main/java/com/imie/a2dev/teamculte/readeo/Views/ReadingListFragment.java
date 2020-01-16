@@ -126,7 +126,7 @@ public final class ReadingListFragment extends Fragment
          * Stores the fragment's title.
          */
         TextView txtTitle = view.findViewById(R.id.txt_title);
-        
+
         this.recyclerBooks = view.findViewById(R.id.recycler_books);
         this.adapter = new ReadingListRecyclerAdapter(this.bookList.getBooks());
         ArrayAdapter<String> adapter = new ArrayAdapter<>(this.getContext(),

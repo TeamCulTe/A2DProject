@@ -80,11 +80,11 @@ public final class SyncService extends Service implements HTTPRequestQueueSingle
 
             UpdaterUtils.getUpdateFromMySQL(this.managers.get(this.currentManagerPos));
             Log.i("Progress", "[DONE] -> " + HTTPRequestQueueSingleton.getInstance(this).getLastRequestUrl());
-            
+
             ++this.currentManagerPos;
         } else {
             this.currentManagerPos = 0;
-            
+
             Log.i("ServiceEnded", "The sync service ended.");
         }
     }

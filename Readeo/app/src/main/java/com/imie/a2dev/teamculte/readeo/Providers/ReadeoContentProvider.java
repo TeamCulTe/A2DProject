@@ -7,6 +7,7 @@ import android.database.Cursor;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+
 import com.imie.a2dev.teamculte.readeo.DBManagers.AuthorDBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.DBManager;
 
@@ -30,7 +31,7 @@ public abstract class ReadeoContentProvider extends ContentProvider {
     protected DBManager manager;
 
     /**
-     * Stores the associated table. 
+     * Stores the associated table.
      */
     protected String table;
 
@@ -38,7 +39,7 @@ public abstract class ReadeoContentProvider extends ContentProvider {
     public boolean onCreate() {
         return (this.manager != null && this.table != null);
     }
-    
+
     @Nullable
     @Override
     public Cursor query(@NonNull Uri uri,
@@ -48,7 +49,7 @@ public abstract class ReadeoContentProvider extends ContentProvider {
                         @Nullable String sortOrder) {
         if (this.getContext() != null && this.manager != null) {
             final Cursor cursor = this.manager.getDatabase().query(this.table, projection, selection, selectionArgs,
-                    null, null, sortOrder);
+                                                                   null, null, sortOrder);
 
             cursor.setNotificationUri(getContext().getContentResolver(), uri);
             return cursor;
@@ -105,7 +106,7 @@ public abstract class ReadeoContentProvider extends ContentProvider {
 
             return count;
         }
-        
+
         throw new IllegalArgumentException("Failed to update row into " + uri);
     }
 }

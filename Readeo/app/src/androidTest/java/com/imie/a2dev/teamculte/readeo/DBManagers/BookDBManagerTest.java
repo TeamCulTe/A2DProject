@@ -4,6 +4,7 @@ import com.imie.a2dev.teamculte.readeo.APIManager;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.CategoryDBSchema;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Book;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Category;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.After;
@@ -49,26 +50,11 @@ public final class BookDBManagerTest extends CommonDBManagerTest {
      */
     private BookDBManager manager = new BookDBManager(this.context);
 
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-    }
-
-    @After
-    public void tearDown() {
-        this.context.deleteDatabase(TEST_DB);
-
-        if (this.testedMySQL) {
-            this.deleteMySQLTestEntities();
-
-            this.testedMySQL = false;
-        }
-    }
-
     @Test
     public void testEntityCreateSQLite() {
         Category category = new CategoryDBManager(this.context).loadSQLite(TEST_CATEGORY);
-        Book toCreate = new Book(MYSQL_TEST_ID, TEST_TITLE, null, TEST_COVER, TEST_SUMMARY, TEST_DATE, category, null, null);
+        Book toCreate = new Book(MYSQL_TEST_ID, TEST_TITLE, null, TEST_COVER, TEST_SUMMARY, TEST_DATE, category, null,
+                                 null);
 
         assertTrue(this.manager.createSQLite(toCreate));
         assertEquals(ENTITY_NB + 1, this.manager.countSQLite());
@@ -238,11 +224,11 @@ public final class BookDBManagerTest extends CommonDBManagerTest {
         CategoryDBManager categoryDBManager = new CategoryDBManager(this.context);
 
         categoryDBManager.importFromMySQL(APIManager.API_URL + APIManager.CATEGORIES +
-                APIManager.READ + CategoryDBSchema.ID + "=" + book.getCategory().getId());
+                                          APIManager.READ + CategoryDBSchema.ID + "=" + book.getCategory().getId());
         categoryDBManager.waitForResponse();
 
         this.manager.importFromMySQL(APIManager.API_URL + APIManager.BOOKS + APIManager.READ + ID + "=" +
-                MYSQL_TEST_ID);
+                                     MYSQL_TEST_ID);
         this.manager.waitForResponse();
 
         Book imported = this.manager.loadSQLite(MYSQL_TEST_ID);

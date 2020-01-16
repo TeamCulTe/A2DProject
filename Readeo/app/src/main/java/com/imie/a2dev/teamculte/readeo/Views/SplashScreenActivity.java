@@ -5,6 +5,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.widget.TextView;
+
 import com.imie.a2dev.teamculte.readeo.DBManagers.AuthorDBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.BookDBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.BookListTypeDBManager;
@@ -28,7 +29,8 @@ import java.util.List;
 /**
  * Displays the app splash screen and synchronise the databases.
  */
-public final class SplashScreenActivity extends AppCompatActivity implements HTTPRequestQueueSingleton.HTTPRequestQueueListener {
+public final class SplashScreenActivity extends AppCompatActivity
+        implements HTTPRequestQueueSingleton.HTTPRequestQueueListener {
     /**
      * Stores the list of DBManagers used to update the app db.
      */

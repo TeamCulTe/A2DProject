@@ -9,6 +9,7 @@ import static org.junit.Assert.assertTrue;
 
 import com.imie.a2dev.teamculte.readeo.APIManager;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Author;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.After;
@@ -24,13 +25,15 @@ public final class AuthorDBManagerTest extends CommonDBManagerTest {
     /**
      * Stores the associated manager used to interact with the database.
      */
-    private AuthorDBManager manager = new AuthorDBManager(this.context);
+    private AuthorDBManager manager;
 
     @Before
     public void setUp() throws Exception {
         super.setUp();
+        
+        this.manager = new AuthorDBManager(this.context);
     }
-
+    
     @After
     public void tearDown() {
         this.context.deleteDatabase(TEST_DB);
@@ -105,7 +108,7 @@ public final class AuthorDBManagerTest extends CommonDBManagerTest {
         Author author = this.initTestEntityMySQL();
 
         this.manager.importFromMySQL(APIManager.API_URL + APIManager.AUTHORS + APIManager.READ + APIManager.START +
-                "=" + TEST_START + "&" + APIManager.END + "=" + TEST_END);
+                                     "=" + TEST_START + "&" + APIManager.END + "=" + TEST_END);
 
         this.manager.waitForResponse();
 
@@ -131,9 +134,9 @@ public final class AuthorDBManagerTest extends CommonDBManagerTest {
         Author created = this.initTestEntityMySQL();
 
         assertNotNull(created);
-        
+
         Author loaded = this.manager.loadMySQL(created.getId());
-        
+
         assertNotNull(loaded);
         assertEquals(created.getId(), loaded.getId());
         assertEquals(created.getName(), loaded.getName());
@@ -201,6 +204,7 @@ public final class AuthorDBManagerTest extends CommonDBManagerTest {
     /**
      * Deletes all the test entities from MySQL database.
      */
+    @Override
     protected void deleteMySQLTestEntities() {
         this.manager.deleteMySQLTestEntities();
     }

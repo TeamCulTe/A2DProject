@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
 import com.imie.a2dev.teamculte.readeo.DBManagers.BookListDBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.BookListTypeDBManager;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Author;
@@ -34,8 +35,9 @@ import java.util.List;
 /**
  * Fragment displaying a specific book info and giving the ability to add it into the user book lists.
  */
-public final class BookDialogFragment extends DialogFragment implements BookListTypeRecyclerAdapter.BookListTypeAdapterListener,
-                                                                        View.OnClickListener {
+public final class BookDialogFragment extends DialogFragment
+        implements BookListTypeRecyclerAdapter.BookListTypeAdapterListener,
+                   View.OnClickListener {
     /**
      * Stores the displayed book.
      */
@@ -134,11 +136,13 @@ public final class BookDialogFragment extends DialogFragment implements BookList
     @Override
     public void onClick(View view) {
         if (view.getId() == R.id.txt_reviews) {
-            int visibility = (BookDialogFragment.this.reviewList.getVisibility() == View.GONE) ? View.VISIBLE : View.GONE;
+            int visibility = (BookDialogFragment.this.reviewList.getVisibility() ==
+                              View.GONE) ? View.VISIBLE : View.GONE;
 
             BookDialogFragment.this.reviewList.setVisibility(visibility);
         } else if (view.getId() == R.id.txt_quotes) {
-            int visibility = (BookDialogFragment.this.quoteList.getVisibility() == View.GONE) ? View.VISIBLE : View.GONE;
+            int visibility = (BookDialogFragment.this.quoteList.getVisibility() ==
+                              View.GONE) ? View.VISIBLE : View.GONE;
 
             BookDialogFragment.this.quoteList.setVisibility(visibility);
         }

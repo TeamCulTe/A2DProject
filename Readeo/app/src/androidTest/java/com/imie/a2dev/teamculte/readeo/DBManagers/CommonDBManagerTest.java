@@ -2,8 +2,12 @@ package com.imie.a2dev.teamculte.readeo.DBManagers;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
+
+import com.imie.a2dev.teamculte.readeo.App;
+
 import org.junit.After;
 import org.junit.Before;
+import org.junit.BeforeClass;
 
 /**
  * Abstract class extended by all database test classes.
@@ -44,8 +48,10 @@ public abstract class CommonDBManagerTest {
     public void setUp() throws Exception {
         DBManager.setDbFileName(TEST_DB);
     }
+    
+    /**
+     * Deletes all the test entities from MySQL database.
+     */
+    protected abstract void deleteMySQLTestEntities();
 
-    @After
-    public void tearDown() throws Exception {
-    }
 }

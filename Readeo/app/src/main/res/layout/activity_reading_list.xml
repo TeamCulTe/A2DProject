@@ -7,9 +7,9 @@
     tools:context=".Views.ReadingListActivity">
 
     <fragment
-        android:name="com.imie.a2dev.teamculte.readeo.Views.ReadingListFragment"
-        tools:layout="@layout/fragment_reading_list"
         android:id="@+id/content_fragment"
+        android:name="com.imie.a2dev.teamculte.readeo.Views.ReadingListFragment"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        tools:layout="@layout/fragment_reading_list" />
 </android.support.constraint.ConstraintLayout>

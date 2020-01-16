@@ -1,9 +1,11 @@
 package com.imie.a2dev.teamculte.readeo.Utils;
 
 import android.content.Context;
+
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.toolbox.Volley;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -57,13 +59,25 @@ public final class HTTPRequestQueueSingleton {
     }
 
     /**
+     * Gets the instance attribute if exists else calls the constructor.
+     * @return The instance.
+     */
+    public static synchronized HTTPRequestQueueSingleton getInstance(Context context) {
+        if (HTTPRequestQueueSingleton.instance == null) {
+            HTTPRequestQueueSingleton.instance = new HTTPRequestQueueSingleton(context);
+        }
+
+        return HTTPRequestQueueSingleton.instance;
+    }
+
+    /**
      * Called when a request is finished, simply decrement the value of pending requests to the associated manager.
      * Calls the listener method if set.
      * @param sender The associated manager.
      */
     public void finishRequest(String sender) {
         if (this.requestsPending.containsKey(sender)) {
-            int requestNumber = (this.requestsPending.get(sender) - 1 > 0) ? this.requestsPending.get(sender) - 1 : 0 ;
+            int requestNumber = (this.requestsPending.get(sender) - 1 > 0) ? this.requestsPending.get(sender) - 1 : 0;
 
             this.requestsPending.put(sender, requestNumber);
 
@@ -80,18 +94,6 @@ public final class HTTPRequestQueueSingleton {
      */
     public boolean hasRequestPending(String sender) {
         return (this.requestsPending.containsKey(sender) && this.requestsPending.get(sender) != 0);
-    }
-
-    /**
-     * Gets the instance attribute if exists else calls the constructor.
-     * @return The instance.
-     */
-    public static synchronized HTTPRequestQueueSingleton getInstance(Context context) {
-        if (HTTPRequestQueueSingleton.instance == null) {
-            HTTPRequestQueueSingleton.instance = new HTTPRequestQueueSingleton(context);
-        }
-
-        return HTTPRequestQueueSingleton.instance;
     }
 
     /**
@@ -134,7 +136,7 @@ public final class HTTPRequestQueueSingleton {
          */
         void onRequestsFinished();
 
-        /** 
+        /**
          * Called when a request from the queue is finished.
          */
         void onRequestFinished();

@@ -4,9 +4,12 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
+
 import com.imie.a2dev.teamculte.readeo.DBSchemas.QuoteDBSchema;
+
 import lombok.Getter;
 import lombok.Setter;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -137,12 +140,12 @@ public final class Quote extends DBEntity {
             this.bookId = result.getInt(result.getColumnIndexOrThrow(QuoteDBSchema.BOOK));
             this.userId = result.getInt(result.getColumnIndexOrThrow(QuoteDBSchema.USER));
             this.quote = result.getString(result.getColumnIndexOrThrow(QuoteDBSchema.QUOTE));
-
+        } catch (SQLiteException e) {
+            this.logError("init", e);
+        } finally {
             if (close) {
                 result.close();
             }
-        } catch (SQLiteException e) {
-            this.logError("init", e);
         }
     }
 }

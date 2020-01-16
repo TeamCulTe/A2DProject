@@ -16,13 +16,13 @@ public class ProfileActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
+
         setContentView(R.layout.activity_profile);
 
         FragmentManager fragmentManager = this.getSupportFragmentManager();
         FragmentTransaction transaction = fragmentManager.beginTransaction();
         ProfileFragment fragment = new ProfileFragment();
-        
+
         fragment.setUser((PublicUser) this.getIntent().getSerializableExtra(UserDBSchema.TABLE));
 
         transaction.replace(R.id.content_fragment, fragment);

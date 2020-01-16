@@ -91,7 +91,7 @@ public final class ManagerHolderUtils {
         this.authorDBManager = new AuthorDBManager(App.getAppContext());
         this.bookDBManager = new BookDBManager(App.getAppContext());
         this.bookListDBManager = new BookListDBManager(App.getAppContext());
-        this.bookListTypeDBManager  = new BookListTypeDBManager(App.getAppContext());
+        this.bookListTypeDBManager = new BookListTypeDBManager(App.getAppContext());
         this.categoryDBManager = new CategoryDBManager(App.getAppContext());
         this.cityDBManager = new CityDBManager(App.getAppContext());
         this.countryDBManager = new CountryDBManager(App.getAppContext());
@@ -110,7 +110,7 @@ public final class ManagerHolderUtils {
         if (ManagerHolderUtils.instance == null) {
             ManagerHolderUtils.instance = new ManagerHolderUtils();
         }
-        
+
         return ManagerHolderUtils.instance;
     }
 
@@ -209,5 +209,5 @@ public final class ManagerHolderUtils {
     public WriterDBManager getWriterDBManager() {
         return this.writerDBManager;
     }
-    
+
 }

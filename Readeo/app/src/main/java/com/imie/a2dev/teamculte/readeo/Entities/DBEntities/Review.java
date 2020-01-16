@@ -3,10 +3,13 @@ package com.imie.a2dev.teamculte.readeo.Entities.DBEntities;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
+
 import com.imie.a2dev.teamculte.readeo.DBSchemas.ReviewDBSchema;
+
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.Setter;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -41,7 +44,7 @@ public final class Review extends DBEntity {
 
     /**
      * Review's nearly full filled constructor.
-     * @param id  The id of the associated book.
+     * @param id The id of the associated book.
      * @param userId The id of the user to set.
      */
     public Review(int id, int userId) {
@@ -53,7 +56,7 @@ public final class Review extends DBEntity {
 
     /**
      * Review's full filled constructor, providing all attributes values.
-     * @param id  The id of the associated book.
+     * @param id The id of the associated book.
      * @param userId The id of the user to set.
      * @param review The review to set.
      * @param shared The value defining if the review is shared or not.
@@ -136,12 +139,12 @@ public final class Review extends DBEntity {
             this.userId = result.getInt(result.getColumnIndexOrThrow(ReviewDBSchema.USER));
             this.review = result.getString(result.getColumnIndexOrThrow(ReviewDBSchema.REVIEW));
             this.shared = true;
-
+        } catch (SQLiteException e) {
+            this.logError("init", e);
+        } finally {
             if (close) {
                 result.close();
             }
-        } catch (SQLiteException e) {
-            this.logError("init", e);
         }
     }
 }

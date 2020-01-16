@@ -4,12 +4,15 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
+
 import com.imie.a2dev.teamculte.readeo.App;
 import com.imie.a2dev.teamculte.readeo.DBManagers.BookDBManager;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.BookListDBSchema;
 import com.imie.a2dev.teamculte.readeo.DBManagers.BookListTypeDBManager;
+
 import lombok.Getter;
 import lombok.Setter;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -35,7 +38,7 @@ public final class BookList extends DBEntity {
     /**
      * Stores the books associated to the book list.
      */
-    private List<Book> books =  new ArrayList<>();
+    private List<Book> books = new ArrayList<>();
 
     /**
      * BookList's default constructor.
@@ -103,7 +106,7 @@ public final class BookList extends DBEntity {
     public BookList(Cursor result, boolean closed) {
         this.books = new ArrayList<>();
 
-        this.init(result,  closed);
+        this.init(result, closed);
     }
 
     @Override
@@ -122,12 +125,12 @@ public final class BookList extends DBEntity {
             do {
                 this.getBooks().add(bookDBManager.loadSQLite(result.getInt(result.getColumnIndex(BOOK))));
             } while (result.moveToNext() && result.getInt(result.getColumnIndex(TYPE)) == this.getType().getId());
-
+        } catch (SQLiteException e) {
+            this.logError("init", e);
+        } finally {
             if (close) {
                 result.close();
             }
-        } catch (SQLiteException e) {
-            this.logError("init", e);
         }
     }
 

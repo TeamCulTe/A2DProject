@@ -99,6 +99,11 @@ public abstract class APIManager {
     public static final String DELETE = "delete.php";
 
     /**
+     * Stores the soft delete script file name / mapping.
+     */
+    public static final String SOFT_DELETE = "soft_delete.php";
+
+    /**
      * Stores the restore script file name / mapping.
      */
     public static final String RESTORE = "restore.php";

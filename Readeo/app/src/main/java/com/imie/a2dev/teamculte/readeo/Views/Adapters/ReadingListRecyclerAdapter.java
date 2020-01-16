@@ -8,6 +8,7 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Author;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Book;
 import com.imie.a2dev.teamculte.readeo.R;
@@ -18,7 +19,8 @@ import java.util.List;
 /**
  * Custom adapter used to display the books from the reading list.
  */
-public final class ReadingListRecyclerAdapter extends RecyclerView.Adapter<ReadingListRecyclerAdapter.ReadingListViewHolder> {
+public final class ReadingListRecyclerAdapter
+        extends RecyclerView.Adapter<ReadingListRecyclerAdapter.ReadingListViewHolder> {
     /**
      * The list of types to display.
      */
@@ -30,7 +32,7 @@ public final class ReadingListRecyclerAdapter extends RecyclerView.Adapter<Readi
     private ReadingListAdapterListener listener;
 
     /**
-     *     public ReadingListRecyclerAdapter(List<Book> books) {'s constructor.
+     * public ReadingListRecyclerAdapter(List<Book> books) {'s constructor.
      * @param books The list of books to set.
      */
     public ReadingListRecyclerAdapter(List<Book> books) {
@@ -74,7 +76,8 @@ public final class ReadingListRecyclerAdapter extends RecyclerView.Adapter<Readi
     }
 
     @Override
-    public ReadingListRecyclerAdapter.ReadingListViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public ReadingListRecyclerAdapter.ReadingListViewHolder onCreateViewHolder(@NonNull ViewGroup parent,
+                                                                               int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.row_reading_list, parent, false);
 
         return new ReadingListViewHolder(view);
@@ -88,6 +91,35 @@ public final class ReadingListRecyclerAdapter extends RecyclerView.Adapter<Readi
     @Override
     public int getItemCount() {
         return this.books.size();
+    }
+
+    /**
+     * Interface used to notify the listener when a type cell is selected.
+     */
+    public interface ReadingListAdapterListener {
+        /**
+         * Called when a cell is selected.
+         * @param book The book list type selected.
+         */
+        void bookCellSelected(Book book);
+
+        /**
+         * Called when a delete button is clicked.
+         * @param book The associated book.
+         */
+        void deleteButtonClicked(Book book);
+
+        /**
+         * Called when the edit review button is clicked.
+         * @param book The associated book.
+         */
+        void editReviewButtonClick(Book book);
+
+        /**
+         * Called when the edit quote button is clicked.
+         * @param book The associated book.
+         */
+        void editQuoteButtonClick(Book book);
     }
 
     /**
@@ -208,34 +240,5 @@ public final class ReadingListRecyclerAdapter extends RecyclerView.Adapter<Readi
                 }
             });
         }
-    }
-
-    /**
-     * Interface used to notify the listener when a type cell is selected.
-     */
-    public interface ReadingListAdapterListener {
-        /**
-         * Called when a cell is selected.
-         * @param book The book list type selected.
-         */
-        void bookCellSelected(Book book);
-
-        /**
-         * Called when a delete button is clicked.
-         * @param book The associated book.
-         */
-        void deleteButtonClicked(Book book);
-
-        /**
-         * Called when the edit review button is clicked.
-         * @param book The associated book.
-         */
-        void editReviewButtonClick(Book book);
-
-        /**
-         * Called when the edit quote button is clicked.
-         * @param book The associated book.
-         */
-        void editQuoteButtonClick(Book book);
     }
 }

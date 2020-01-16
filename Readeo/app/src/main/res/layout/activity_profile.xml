@@ -10,6 +10,6 @@
         android:id="@+id/content_fragment"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:layout="@layout/fragment_profile"
-        android:orientation="vertical" />
+        android:orientation="vertical"
+        tools:layout="@layout/fragment_profile" />
 </android.support.constraint.ConstraintLayout>

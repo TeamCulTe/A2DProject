@@ -4,9 +4,11 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
+
 import com.imie.a2dev.teamculte.readeo.App;
 import com.imie.a2dev.teamculte.readeo.DBManagers.ProfileDBManager;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.UserDBSchema;
+
 import lombok.Getter;
 import lombok.Setter;
 
@@ -106,12 +108,12 @@ public class PublicUser extends DBEntity {
             this.pseudo = result.getString(result.getColumnIndexOrThrow(UserDBSchema.PSEUDO));
             this.profile = new ProfileDBManager(App.getAppContext()).loadSQLite(
                     result.getInt(result.getColumnIndexOrThrow(UserDBSchema.PROFILE)));
-
+        } catch (SQLiteException e) {
+            this.logError("init", e);
+        } finally {
             if (close) {
                 result.close();
             }
-        } catch (SQLiteException e) {
-            this.logError("init", e);
         }
     }
 }

@@ -13,17 +13,20 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.Toast;
+
 import com.imie.a2dev.teamculte.readeo.DBManagers.UserDBManager;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.PrivateUser;
 import com.imie.a2dev.teamculte.readeo.R;
 import com.imie.a2dev.teamculte.readeo.Utils.AppUtils;
 import com.imie.a2dev.teamculte.readeo.Utils.HTTPRequestQueueSingleton;
+import com.imie.a2dev.teamculte.readeo.Utils.ManagerHolderUtils;
 import com.imie.a2dev.teamculte.readeo.Utils.PreferencesUtils;
 
 /**
  * Fragment displaying the login screen, giving the ability for the user to perform usual log in actions.
  */
-public final class LogInFragment extends Fragment implements View.OnClickListener, HTTPRequestQueueSingleton.HTTPRequestQueueListener {
+public final class LogInFragment extends Fragment
+        implements View.OnClickListener, HTTPRequestQueueSingleton.HTTPRequestQueueListener {
     /**
      * Stores the email text edit.
      */
@@ -71,27 +74,22 @@ public final class LogInFragment extends Fragment implements View.OnClickListene
                 break;
             case R.id.txt_no_account:
                 if (AppUtils.isOnline(this.getActivity())) {
-                    FragmentManager fragmentManager = this.getActivity().getSupportFragmentManager();
+                    FragmentManager fragmentManager = this.getActivity()
+                                                          .getSupportFragmentManager();
                     FragmentTransaction transaction = fragmentManager.beginTransaction();
 
                     transaction.replace(R.id.content_fragment, new SignInFragment());
                     transaction.addToBackStack(null);
                     transaction.commit();
                 } else {
-                    Toast.makeText(this.getContext(), R.string.not_available_offline, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(this.getContext(), R.string.not_available_offline,
+                                   Toast.LENGTH_SHORT).show();
                 }
 
                 break;
             case R.id.btn_sign_in:
                 this.progressLoading.setVisibility(View.VISIBLE);
-
-                if (this.validateData()) {
-                    Intent intent = new Intent(this.getContext(), MainActivity.class);
-
-                    this.getActivity().startActivity(intent);
-                } else {
-                    Toast.makeText(this.getContext(), R.string.login_error, Toast.LENGTH_SHORT).show();
-                }
+                this.validateData();
 
                 break;
             default:
@@ -131,7 +129,8 @@ public final class LogInFragment extends Fragment implements View.OnClickListene
      */
     private void offlineBehaviour() {
         if (PreferencesUtils.loadUser() == null) {
-            Toast.makeText(this.getContext(), R.string.offline_never_connected, Toast.LENGTH_LONG).show();
+            Toast.makeText(this.getContext(), R.string.offline_never_connected, Toast.LENGTH_LONG)
+                 .show();
         } else {
             AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this.getContext());
 
@@ -151,43 +150,42 @@ public final class LogInFragment extends Fragment implements View.OnClickListene
     }
 
     /**
-     * Checks the login info to connect the user.
-     * @return True if success else false.
+     * Checks the login info to connect the user and start the associated actions.
      */
-    private boolean validateData() {
-        boolean valid = false;
-
+    private void validateData() {
         if (this.offline) {
             PrivateUser internal = PreferencesUtils.loadUser();
 
             if (internal != null) {
-                valid = true;
+                Intent intent = new Intent(this.getContext(), MainActivity.class);
+
+                this.getActivity().startActivity(intent);
             }
         } else {
-            PrivateUser loaded = new UserDBManager(this.getContext()).loadMySQL(this.email.getText().toString(),
-                                                                                this.password.getText().toString(),
-                                                                                null);
-
-            if (loaded != null) {
-                PreferencesUtils.saveUser(loaded);
-
-                valid = true;
-            }
+            ManagerHolderUtils.getInstance().getUserDBManager()
+                              .loadMySQL(this.email.getText().toString(),
+                                         this.password.getText().toString(),
+                                         this);
         }
-
-        return valid;
     }
 
     @Override
     public void onRequestsFinished() {
-        this.progressLoading.setVisibility(View.GONE);
     }
 
     @Override public void onRequestFinished() {
-        // Nothing to do.
+        this.getActivity().runOnUiThread(() -> {
+            Intent intent = new Intent(this.getContext(), MainActivity.class);
+
+            this.getActivity().startActivity(intent);
+        });
     }
 
     @Override public void onRequestError() {
-        // Nothing to do.
+        this.getActivity().runOnUiThread(() -> {
+            Toast.makeText(this.getContext(),
+                           R.string.login_error,
+                           Toast.LENGTH_SHORT).show();
+        });
     }
 }

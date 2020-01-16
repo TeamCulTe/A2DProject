@@ -132,6 +132,23 @@ public final class LibraryRecyclerAdapter extends RecyclerView.Adapter<LibraryRe
     }
 
     /**
+     * Interface used to notify the listener when a type cell is selected.
+     */
+    public interface LibraryAdapterListener {
+        /**
+         * Called when half of the books are reached (scrolled).
+         */
+        void halfReached();
+
+        /**
+         * Called when a cell is selected.
+         * @param book The book selected.
+         */
+        void bookCellSelected(Book book);
+
+    }
+
+    /**
      * ViewHolder class used to display the book.
      */
     protected final class LibraryViewHolder extends RecyclerView.ViewHolder {
@@ -215,22 +232,5 @@ public final class LibraryRecyclerAdapter extends RecyclerView.Adapter<LibraryRe
                 }
             });
         }
-    }
-
-    /**
-     * Interface used to notify the listener when a type cell is selected.
-     */
-    public interface LibraryAdapterListener {
-        /**
-         * Called when half of the books are reached (scrolled).
-         */
-        void halfReached();
-
-        /**
-         * Called when a cell is selected.
-         * @param book The book selected.
-         */
-        void bookCellSelected(Book book);
-
     }
 }

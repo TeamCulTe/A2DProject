@@ -3,6 +3,7 @@ package com.imie.a2dev.teamculte.readeo.DBManagers;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
+
 import com.android.volley.Request;
 import com.imie.a2dev.teamculte.readeo.APIManager;
 
@@ -47,15 +48,16 @@ public abstract class RelationDBManager extends DBManager {
 
     /**
      * Deletes the test entity in MySQL database.
-     * @param firstId The first part of the id of the test entity to delete.
-     * @param secId The second part of the id of the test entity to delete.
+     * @param ids The ids of the test entity to delete.
      */
-    public void deleteTestEntityMySQL(int firstId, int secId) {
+    public void deleteTestEntityMySQL(int... ids) {
         String url = this.baseUrl + APIManager.DELETE;
         Map<String, String> param = new HashMap<>();
 
-        param.put(this.ids[0], String.valueOf(firstId));
-        param.put(this.ids[1], String.valueOf(secId));
+        for (int i = 0; i < ids.length; ++i) {
+            param.put(this.ids[i], String.valueOf(ids[i]));
+        }
+        
         param.put(APIManager.TEST, "1");
 
         super.requestString(Request.Method.PUT, url, null, param);

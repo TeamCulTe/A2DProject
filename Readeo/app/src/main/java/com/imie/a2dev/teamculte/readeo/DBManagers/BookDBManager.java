@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
+
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -18,6 +19,7 @@ import com.imie.a2dev.teamculte.readeo.DBSchemas.CategoryDBSchema;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.WriterDBSchema;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Book;
 import com.imie.a2dev.teamculte.readeo.Utils.HTTPRequestQueueSingleton;
+
 import org.joda.time.DateTime;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -61,8 +63,6 @@ public final class BookDBManager extends SimpleDBManager {
      * @return true if success else false.
      */
     public boolean createSQLite(@NonNull Book entity) {
-        this.database.beginTransaction();
-        
         try {
             ContentValues data = new ContentValues();
 
@@ -74,15 +74,12 @@ public final class BookDBManager extends SimpleDBManager {
             data.put(DATE, entity.getDatePublished());
 
             this.database.insertOrThrow(this.table, null, data);
-            this.database.setTransactionSuccessful();
 
             return true;
         } catch (SQLiteException e) {
             this.logError("createSQLite", e);
 
             return false;
-        } finally {
-            this.database.endTransaction();
         }
     }
 
@@ -92,8 +89,6 @@ public final class BookDBManager extends SimpleDBManager {
      * @return true if success else false.
      */
     public boolean updateSQLite(@NonNull Book entity) {
-        this.database.beginTransaction();
-        
         try {
             ContentValues data = new ContentValues();
             String whereClause = String.format("%s = ?", ID);
@@ -105,18 +100,12 @@ public final class BookDBManager extends SimpleDBManager {
             data.put(SUMMARY, entity.getSummary());
             data.put(DATE, entity.getDatePublished());
             data.put(UPDATE, new DateTime().toString(DEFAULT_FORMAT));
-            
-            boolean success = this.database.update(this.table, data, whereClause, whereArgs) != 0;
 
-            this.database.setTransactionSuccessful();
-            
-            return success;
+            return this.database.update(this.table, data, whereClause, whereArgs) != 0;
         } catch (SQLiteException e) {
             this.logError("updateSQLite", e);
 
             return false;
-        } finally {
-            this.database.endTransaction();
         }
     }
 
@@ -162,7 +151,7 @@ public final class BookDBManager extends SimpleDBManager {
     }
 
     /**
-     * From a string and a field, returns the associated java books where the string matches in the field values 
+     * From a string and a field, returns the associated java books where the string matches in the field values
      * filtered.
      * @param field The field to filter on.
      * @param filter The string that should match.
@@ -573,8 +562,6 @@ public final class BookDBManager extends SimpleDBManager {
 
     @Override
     public boolean createSQLite(@NonNull JSONObject entity) {
-        this.database.beginTransaction();
-        
         try {
             ContentValues data = new ContentValues();
 
@@ -586,22 +573,17 @@ public final class BookDBManager extends SimpleDBManager {
             data.put(DATE, entity.getInt(DATE));
 
             this.database.insertOrThrow(this.table, null, data);
-            this.database.setTransactionSuccessful();
-            
+
             return true;
         } catch (Exception e) {
             this.logError("createSQLite", e);
-            
+
             return false;
-        } finally {
-            this.database.endTransaction();
         }
     }
 
     @Override
     public boolean updateSQLite(@NonNull JSONObject entity) {
-        this.database.beginTransaction();
-        
         try {
             ContentValues data = new ContentValues();
             String whereClause = String.format("%s = ?", ID);
@@ -613,18 +595,12 @@ public final class BookDBManager extends SimpleDBManager {
             data.put(SUMMARY, entity.getString(SUMMARY));
             data.put(DATE, entity.getInt(DATE));
             data.put(UPDATE, new DateTime().toString(DEFAULT_FORMAT));
-            
-            boolean success = this.database.update(this.table, data, whereClause, whereArgs) != 0;
-            
-            this.database.setTransactionSuccessful();
 
-            return success;
+            return this.database.update(this.table, data, whereClause, whereArgs) != 0;
         } catch (Exception e) {
             this.logError("updateSQLite", e);
 
             return false;
-        } finally {
-            this.database.endTransaction();
         }
     }
 }

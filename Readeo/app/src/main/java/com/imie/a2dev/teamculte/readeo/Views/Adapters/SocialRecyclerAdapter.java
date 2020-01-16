@@ -135,6 +135,23 @@ public final class SocialRecyclerAdapter extends RecyclerView.Adapter<SocialRecy
     }
 
     /**
+     * Interface used to notify the listener when a type cell is selected.
+     */
+    public interface SocialAdapterListener {
+        /**
+         * Called when half of the users are reached (scrolled).
+         */
+        void halfReached();
+
+        /**
+         * Called when a cell is selected.
+         * @param user The user selected.
+         */
+        void userCellSelected(PublicUser user);
+
+    }
+
+    /**
      * ViewHolder class used to display the users.
      */
     protected final class SocialViewHolder extends RecyclerView.ViewHolder {
@@ -175,7 +192,7 @@ public final class SocialRecyclerAdapter extends RecyclerView.Adapter<SocialRecy
             if (!user.getProfile().getAvatar().isEmpty()) {
                 imageLoader.displayImage(user.getProfile().getAvatar(), this.imgAvatar);
             }
-            
+
             this.txtPseudo.setText(user.getPseudo());
 
             this.contentView.setOnClickListener(view -> {
@@ -184,22 +201,5 @@ public final class SocialRecyclerAdapter extends RecyclerView.Adapter<SocialRecy
                 }
             });
         }
-    }
-
-    /**
-     * Interface used to notify the listener when a type cell is selected.
-     */
-    public interface SocialAdapterListener {
-        /**
-         * Called when half of the users are reached (scrolled).
-         */
-        void halfReached();
-
-        /**
-         * Called when a cell is selected.
-         * @param user The user selected.
-         */
-        void userCellSelected(PublicUser user);
-
     }
 }

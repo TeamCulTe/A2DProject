@@ -4,16 +4,11 @@ PRIORITY : SEE SYNC ERROR MECHANISM.
 
 Review BookDBManager's methods -> Better performances.
 See if excluding the last update fetching in every manager classes (QUERY_ALL).
-Create an updater class in order to avoid too long manager classes.
 Use String builder everywhere -> performances.
 Remove all String.formats (use concat / StringBuilder) -> performances.
-See if working with fixtures and how or just using init test DB.
 See if worth to refactor API -> routes.
-See refactor API (verbs) -> Not updated in manager methods (PUT/POST).
-Refactor test methods.
-See how to securize authors / books ... creation, user loading bby id (negative id?).
-See review sharing mechanism (not used so far).
-See refactor all app + tests methods.
-See if moderation needed (reviews and quotes) if so, add columns.
+Fix unit tests.
+Add security check on userId / token for all API calls.
+Using ManagerHolderUtils instead of instanciating.
 
 /!\ Fix testAuthLoadMySQL

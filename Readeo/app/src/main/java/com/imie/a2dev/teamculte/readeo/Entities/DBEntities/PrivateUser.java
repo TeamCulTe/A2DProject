@@ -1,9 +1,12 @@
 package com.imie.a2dev.teamculte.readeo.Entities.DBEntities;
 
 import android.support.annotation.NonNull;
+
 import com.imie.a2dev.teamculte.readeo.DBSchemas.UserDBSchema;
+
 import lombok.Getter;
 import lombok.Setter;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -147,7 +150,7 @@ public final class PrivateUser extends PublicUser {
             this.pseudo = object.getString(UserDBSchema.PSEUDO);
             this.password = object.getString(UserDBSchema.PASSWORD);
             this.email = object.getString(UserDBSchema.EMAIL);
-            //this.key = object.getString(UserDBSchema.KEY);
+            this.key = object.getString(UserDBSchema.KEY);
         } catch (JSONException e) {
             this.logError("init", e);
         }

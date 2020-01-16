@@ -223,7 +223,7 @@ public final class UpdaterUtils {
      */
     private static Map<String, List<int[]>> getSyncData(List<UpdateDataElement> local,
                                                         List<UpdateDataElement> distant) {
-        if (distant.size() == 0 ||
+        if (distant == null || local == null || distant.size() == 0 ||
             (local.size() != 0 && local.get(0).size() != distant.get(0).size())) {
             return null;
         }

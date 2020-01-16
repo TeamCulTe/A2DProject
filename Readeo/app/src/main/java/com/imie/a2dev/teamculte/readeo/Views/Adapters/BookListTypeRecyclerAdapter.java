@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.BookListType;
 import com.imie.a2dev.teamculte.readeo.R;
 
@@ -16,7 +17,8 @@ import java.util.List;
 /**
  * Custom adapter used to display the book list types from a room.
  */
-public final class BookListTypeRecyclerAdapter extends RecyclerView.Adapter<BookListTypeRecyclerAdapter.BookListTypeViewHolder> {
+public final class BookListTypeRecyclerAdapter
+        extends RecyclerView.Adapter<BookListTypeRecyclerAdapter.BookListTypeViewHolder> {
     /**
      * The list of types to display.
      */
@@ -36,16 +38,16 @@ public final class BookListTypeRecyclerAdapter extends RecyclerView.Adapter<Book
      * Defines if the book list types are selectable or not.
      */
     private boolean selectable = true;
-    
+
     /**
      * BookListTypeRecyclerAdapter's constructor.
      * @param types The list of types to set.
      */
     public BookListTypeRecyclerAdapter(List<BookListType> types) {
         super();
-        
+
         this.types = types;
-        
+
         this.initSelectedList();
     }
 
@@ -63,7 +65,8 @@ public final class BookListTypeRecyclerAdapter extends RecyclerView.Adapter<Book
 
     @NonNull
     @Override
-    public BookListTypeRecyclerAdapter.BookListTypeViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public BookListTypeRecyclerAdapter.BookListTypeViewHolder onCreateViewHolder(@NonNull ViewGroup parent,
+                                                                                 int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.row_book_list_type, parent, false);
 
         return new BookListTypeViewHolder(view);
@@ -73,7 +76,7 @@ public final class BookListTypeRecyclerAdapter extends RecyclerView.Adapter<Book
     public void onBindViewHolder(@NonNull BookListTypeRecyclerAdapter.BookListTypeViewHolder holder, int position) {
         BookListType type = this.types.get(position);
         boolean selected = this.selected.get(position);
-        
+
         holder.bind(type, selected);
     }
 
@@ -104,7 +107,7 @@ public final class BookListTypeRecyclerAdapter extends RecyclerView.Adapter<Book
      */
     public void setTypes(List<BookListType> types) {
         this.types = types;
-        
+
         this.notifyDataSetChanged();
     }
 
@@ -129,10 +132,22 @@ public final class BookListTypeRecyclerAdapter extends RecyclerView.Adapter<Book
      */
     private void initSelectedList() {
         this.selected = new ArrayList<>();
-        
+
         for (int i = 0; i < this.types.size(); i++) {
             this.selected.add(false);
         }
+    }
+
+    /**
+     * Interface used to notify the listener when a type cell is selected.
+     */
+    public interface BookListTypeAdapterListener {
+        /**
+         * Called when a cell is selected.
+         * @param type The book list type selected.
+         * @param selected Defines if is selected or unselected.
+         */
+        void bookListCellSelected(BookListType type, boolean selected);
     }
 
     /**
@@ -143,7 +158,7 @@ public final class BookListTypeRecyclerAdapter extends RecyclerView.Adapter<Book
          * Stores the content view.
          */
         private View contentView;
-        
+
         /**
          * Displays the book list type image.
          */
@@ -180,23 +195,11 @@ public final class BookListTypeRecyclerAdapter extends RecyclerView.Adapter<Book
                 if (BookListTypeRecyclerAdapter.this.selectable) {
                     this.imgType.setSelected(!this.imgType.isSelected());
                 }
-                
+
                 if (BookListTypeRecyclerAdapter.this.listener != null) {
                     BookListTypeRecyclerAdapter.this.listener.bookListCellSelected(type, this.imgType.isSelected());
                 }
             });
         }
-    }
-
-    /**
-     * Interface used to notify the listener when a type cell is selected.
-     */
-    public interface BookListTypeAdapterListener {
-        /**
-         * Called when a cell is selected.
-         * @param type The book list type selected.
-         * @param selected Defines if is selected or unselected.
-         */
-        void bookListCellSelected(BookListType type, boolean selected);
     }
 }

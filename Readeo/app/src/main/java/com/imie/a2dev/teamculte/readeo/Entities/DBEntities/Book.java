@@ -5,14 +5,17 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
+
 import com.imie.a2dev.teamculte.readeo.App;
 import com.imie.a2dev.teamculte.readeo.DBManagers.CategoryDBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.QuoteDBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.ReviewDBManager;
 import com.imie.a2dev.teamculte.readeo.DBManagers.WriterDBManager;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.BookDBSchema;
+
 import lombok.Getter;
 import lombok.Setter;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -166,6 +169,7 @@ public final class Book extends DBEntity {
     public Book(ContentValues contentValues) {
         this.init(contentValues);
     }
+
     /**
      * Initializes the book from a ContentValues object.
      * @param contentValues The ContentValues object.
@@ -216,12 +220,12 @@ public final class Book extends DBEntity {
             this.reviews = new ReviewDBManager(context).loadBookSQLite(this.id);
             this.quotes = new QuoteDBManager(context).loadBookSQLite(this.id);
             this.authors = new WriterDBManager(context).loadAuthorsSQLite(this.id);
-
+        } catch (SQLiteException e) {
+            this.logError("init", e);
+        } finally {
             if (close) {
                 result.close();
             }
-        } catch (SQLiteException e) {
-            this.logError("init", e);
         }
     }
 }

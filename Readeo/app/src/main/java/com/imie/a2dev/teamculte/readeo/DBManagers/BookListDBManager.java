@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
+
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -17,6 +18,7 @@ import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Book;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.BookList;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.BookListType;
 import com.imie.a2dev.teamculte.readeo.Utils.HTTPRequestQueueSingleton;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -54,8 +56,6 @@ public final class BookListDBManager extends RelationDBManager {
      * @return true if success else false.
      */
     public boolean createSQLite(@NonNull BookList entity) {
-        this.database.beginTransaction();
-        
         try {
             ContentValues data;
 
@@ -65,19 +65,14 @@ public final class BookListDBManager extends RelationDBManager {
                 data.put(USER, entity.getId());
                 data.put(TYPE, entity.getType().getId());
                 data.put(BOOK, book.getId());
-                
+
                 this.database.insertOrThrow(this.table, null, data);
             }
-
-            this.database.setTransactionSuccessful();
-
             return true;
         } catch (SQLiteException e) {
             this.logError("createSQLite", e);
 
             return false;
-        } finally {
-            this.database.endTransaction();
         }
     }
 
@@ -87,22 +82,14 @@ public final class BookListDBManager extends RelationDBManager {
      * @return true if success else false.
      */
     public boolean updateSQLite(@NonNull BookList entity) {
-        this.database.beginTransaction();
-        
         try {
             this.deleteSQLite(entity.getId(), entity.getType().getId());
-            
-            boolean success = this.createSQLite(entity);
 
-            this.database.setTransactionSuccessful();
-
-            return success;
+            return this.createSQLite(entity);
         } catch (SQLiteException e) {
             this.logError("updateSQLite", e);
 
             return false;
-        } finally {
-            this.database.endTransaction();
         }
     }
 
@@ -353,6 +340,19 @@ public final class BookListDBManager extends RelationDBManager {
     }
 
     /**
+     * Soft deletes all book lists entities associated to a user in MySQL database.
+     * @param idUser The id of the user.
+     */
+    public void softDeleteUserMySQL(int idUser) {
+        String url = this.baseUrl + APIManager.SOFT_DELETE;
+        Map<String, String> param = new HashMap<>();
+
+        param.put(USER, String.valueOf(idUser));
+
+        super.requestString(Request.Method.PUT, url, null, param);
+    }
+
+    /**
      * Deletes a book list entry in MySQL database.
      * @param idUser The id of the user who owns the book list.
      * @param idBook The id of the book to delete from the book list.
@@ -360,6 +360,23 @@ public final class BookListDBManager extends RelationDBManager {
      */
     public void deleteMySQL(int idUser, int idBook, int idType) {
         String url = this.baseUrl + APIManager.DELETE;
+        Map<String, String> param = new HashMap<>();
+
+        param.put(USER, String.valueOf(idUser));
+        param.put(BOOK, String.valueOf(idBook));
+        param.put(TYPE, String.valueOf(idType));
+
+        super.requestString(Request.Method.PUT, url, null, param);
+    }
+
+    /**
+     * Soft deletes a book list entry in MySQL database.
+     * @param idUser The id of the user who owns the book list.
+     * @param idBook The id of the book to delete from the book list.
+     * @param idType The id of the book list type.
+     */
+    public void softDeleteMySQL(int idUser, int idBook, int idType) {
+        String url = this.baseUrl + APIManager.SOFT_DELETE;
         Map<String, String> param = new HashMap<>();
 
         param.put(USER, String.valueOf(idUser));
@@ -401,8 +418,6 @@ public final class BookListDBManager extends RelationDBManager {
 
     @Override
     public boolean createSQLite(@NonNull JSONObject entity) {
-        this.database.beginTransaction();
-        
         try {
             ContentValues data = new ContentValues();
 
@@ -411,15 +426,12 @@ public final class BookListDBManager extends RelationDBManager {
             data.put(TYPE, entity.getInt(TYPE));
 
             this.database.insertOrThrow(this.table, null, data);
-            this.database.setTransactionSuccessful();
-            
+
             return true;
         } catch (Exception e) {
             this.logError("createSQLite", e);
-            
+
             return false;
-        } finally {
-            this.database.endTransaction();
         }
     }
 

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
+
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -14,6 +15,7 @@ import com.android.volley.toolbox.JsonArrayRequest;
 import com.imie.a2dev.teamculte.readeo.APIManager;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Review;
 import com.imie.a2dev.teamculte.readeo.Utils.HTTPRequestQueueSingleton;
+
 import org.joda.time.DateTime;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -53,8 +55,6 @@ public final class ReviewDBManager extends RelationDBManager {
      * @return true if success else false.
      */
     public boolean createSQLite(@NonNull Review entity) {
-        this.database.beginTransaction();
-        
         try {
             ContentValues data = new ContentValues();
 
@@ -63,15 +63,12 @@ public final class ReviewDBManager extends RelationDBManager {
             data.put(REVIEW, entity.getReview());
 
             this.database.insertOrThrow(this.table, null, data);
-            this.database.setTransactionSuccessful();
 
             return true;
         } catch (SQLiteException e) {
             this.logError("createSQLite", e);
 
             return false;
-        } finally {
-            this.database.endTransaction();
         }
     }
 
@@ -81,8 +78,6 @@ public final class ReviewDBManager extends RelationDBManager {
      * @return true if success else false.
      */
     public boolean updateSQLite(@NonNull Review entity) {
-        this.database.beginTransaction();
-        
         try {
             ContentValues data = new ContentValues();
             String whereClause = String.format("%s = ? AND %s = ?", BOOK, USER);
@@ -91,17 +86,11 @@ public final class ReviewDBManager extends RelationDBManager {
             data.put(REVIEW, entity.getReview());
             data.put(UPDATE, new DateTime().toString(DEFAULT_FORMAT));
 
-            boolean success = this.database.update(this.table, data, whereClause, whereArgs) != 0;
-
-            this.database.setTransactionSuccessful();
-
-            return success;
+            return this.database.update(this.table, data, whereClause, whereArgs) != 0;
         } catch (SQLiteException e) {
             this.logError("updateSQLite", e);
 
             return false;
-        } finally {
-            this.database.endTransaction();
         }
     }
 
@@ -172,23 +161,15 @@ public final class ReviewDBManager extends RelationDBManager {
      * @return True if success else false.
      */
     public boolean deleteUserSQLite(int id) {
-        this.database.beginTransaction();
-        
         try {
             String whereClause = String.format("%s = ?", USER);
             String[] whereArgs = new String[]{String.valueOf(id)};
 
-            boolean success = this.database.delete(this.table, whereClause, whereArgs) != 0;
-
-            this.database.setTransactionSuccessful();
-
-            return success;
+            return this.database.delete(this.table, whereClause, whereArgs) != 0;
         } catch (SQLiteException e) {
             this.logError("deleteUserSQLite", e);
 
             return false;
-        } finally {
-            this.database.endTransaction();
         }
     }
 
@@ -198,23 +179,15 @@ public final class ReviewDBManager extends RelationDBManager {
      * @return True if success else false.
      */
     public boolean deleteBookSQLite(int id) {
-        this.database.beginTransaction();
-        
         try {
             String whereClause = String.format("%s = ?", BOOK);
             String[] whereArgs = new String[]{String.valueOf(id)};
 
-            boolean success = this.database.delete(this.table, whereClause, whereArgs) != 0;
-
-            this.database.setTransactionSuccessful();
-
-            return success;
+            return this.database.delete(this.table, whereClause, whereArgs) != 0;
         } catch (SQLiteException e) {
             this.logError("deleteBookSQLite", e);
 
             return false;
-        } finally {
-            this.database.endTransaction();
         }
     }
 
@@ -386,11 +359,39 @@ public final class ReviewDBManager extends RelationDBManager {
     }
 
     /**
+     * Soft deletes a review entity in MySQL database.
+     * @param idUser The id of the user.
+     * @param idBook The id of the book.
+     */
+    public void softDeleteMySQL(int idUser, int idBook) {
+        String url = this.baseUrl + APIManager.SOFT_DELETE;
+        Map<String, String> param = new HashMap<>();
+
+        param.put(USER, String.valueOf(idUser));
+        param.put(BOOK, String.valueOf(idBook));
+
+        super.requestString(Request.Method.PUT, url, null, param);
+    }
+
+    /**
      * Deletes all reviews entities in MySQL database from a specific user.
      * @param idUser The id of the user.
      */
     public void deleteUserMySQL(int idUser) {
         String url = this.baseUrl + APIManager.DELETE;
+        Map<String, String> param = new HashMap<>();
+
+        param.put(USER, String.valueOf(idUser));
+
+        super.requestString(Request.Method.PUT, url, null, param);
+    }
+
+    /**
+     * Soft deletes all reviews entities in MySQL database from a specific user.
+     * @param idUser The id of the user.
+     */
+    public void softDeleteUserMySQL(int idUser) {
+        String url = this.baseUrl + APIManager.SOFT_DELETE;
         Map<String, String> param = new HashMap<>();
 
         param.put(USER, String.valueOf(idUser));
@@ -435,6 +436,14 @@ public final class ReviewDBManager extends RelationDBManager {
     }
 
     /**
+     * Deletes a review entity in MySQL database.
+     * @param review The review to delete.
+     */
+    public void softDeleteMySQL(Review review) {
+        this.softDeleteMySQL(review.getUserId(), review.getId());
+    }
+
+    /**
      * Deletes the test entity in MySQL database.
      * @param idUser The id of the user who wrote the test review to delete.
      * @param idBook The id of the book.
@@ -448,13 +457,11 @@ public final class ReviewDBManager extends RelationDBManager {
 
         param.put(APIManager.TEST, "1");
 
-        super.requestString(Request.Method.DELETE, url, null, param);
+        super.requestString(Request.Method.PUT, url, null, param);
     }
 
     @Override
     public boolean createSQLite(@NonNull JSONObject entity) {
-        this.database.beginTransaction();
-
         try {
             ContentValues data = new ContentValues();
 
@@ -463,22 +470,17 @@ public final class ReviewDBManager extends RelationDBManager {
             data.put(REVIEW, entity.getString(REVIEW));
 
             this.database.insertOrThrow(this.table, null, data);
-            this.database.setTransactionSuccessful();
 
             return true;
         } catch (Exception e) {
             this.logError("createSQLite", e);
 
             return false;
-        } finally {
-            this.database.endTransaction();
         }
     }
 
     @Override
     public boolean updateSQLite(@NonNull JSONObject entity) {
-        this.database.beginTransaction();
-        
         try {
             ContentValues data = new ContentValues();
             String whereClause = String.format("%s = ? AND %s = ?", USER, BOOK);
@@ -487,17 +489,11 @@ public final class ReviewDBManager extends RelationDBManager {
             data.put(REVIEW, entity.getString(REVIEW));
             data.put(UPDATE, new DateTime().toString(DEFAULT_FORMAT));
 
-            boolean success = this.database.update(this.table, data, whereClause, whereArgs) != 0;
-
-            this.database.setTransactionSuccessful();
-
-            return success;
+            return this.database.update(this.table, data, whereClause, whereArgs) != 0;
         } catch (Exception e) {
             this.logError("updateSQLite", e);
 
             return false;
-        } finally {
-            this.database.endTransaction();
         }
     }
 
@@ -507,23 +503,15 @@ public final class ReviewDBManager extends RelationDBManager {
      * @return True if success else false.
      */
     private boolean deleteSQLite(int id, String filter) {
-        this.database.beginTransaction();
-        
         try {
             String whereClause = String.format("%s = ?", filter);
             String[] whereArgs = new String[]{String.valueOf(id)};
 
-            boolean success = this.database.delete(this.table, whereClause, whereArgs) != 0;
-
-            this.database.setTransactionSuccessful();
-
-            return success;
+            return this.database.delete(this.table, whereClause, whereArgs) != 0;
         } catch (SQLiteException e) {
             this.logError("deleteSQLite", e);
 
             return false;
-        } finally {
-            this.database.endTransaction();
         }
     }
 

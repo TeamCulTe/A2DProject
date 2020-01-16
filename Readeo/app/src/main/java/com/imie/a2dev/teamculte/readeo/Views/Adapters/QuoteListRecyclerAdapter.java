@@ -105,9 +105,20 @@ public final class QuoteListRecyclerAdapter extends RecyclerView.Adapter<QuoteLi
     }
 
     /**
+     * Listener interface used to notify when a quote is selected.
+     */
+    public interface QuoteListRecyclerListener {
+        /**
+         * Called when a quote is selected.
+         * @param quote The selected quote.
+         */
+        void quoteSelected(Quote quote);
+    }
+
+    /**
      * ViewHolder pattern used to feed the view elements.
      */
-    protected final class QuoteListViewHolder  extends RecyclerView.ViewHolder {
+    protected final class QuoteListViewHolder extends RecyclerView.ViewHolder {
         /**
          * Stores the content view.
          */
@@ -141,16 +152,5 @@ public final class QuoteListRecyclerAdapter extends RecyclerView.Adapter<QuoteLi
                 }
             });
         }
-    }
-
-    /**
-     * Listener interface used to notify when a quote is selected.
-     */
-    public interface QuoteListRecyclerListener {
-        /**
-         * Called when a quote is selected.
-         * @param quote The selected quote.
-         */
-        void quoteSelected(Quote quote);
     }
 }

@@ -2,6 +2,7 @@ package com.imie.a2dev.teamculte.readeo.Utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+
 import com.google.gson.Gson;
 import com.imie.a2dev.teamculte.readeo.App;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.BookList;
@@ -20,10 +21,10 @@ public abstract class PreferencesUtils {
      * Stores the default email preference tag.
      */
     public static final String USER_PREF = "Readeo_user";
-    
+
     /**
      * Gets an instance of SharedPreferences.
-     * @return The shared preferences 
+     * @return The shared preferences
      */
     public static SharedPreferences getSharedPrefs() {
         return App.getAppContext().getSharedPreferences(PREFS_LABEL, Context.MODE_PRIVATE);
@@ -43,7 +44,7 @@ public abstract class PreferencesUtils {
      */
     public static void saveUser(PrivateUser user) {
         SharedPreferences.Editor editor = getSharedPrefsEditor();
-        
+
         editor.putString(USER_PREF, new Gson().toJson(user));
         editor.commit();
     }
@@ -56,11 +57,11 @@ public abstract class PreferencesUtils {
         SharedPreferences preferences = getSharedPrefs();
         String jsonUser = preferences.getString(USER_PREF, null);
         PrivateUser user = null;
-        
+
         if (jsonUser != null) {
             user = new Gson().fromJson(jsonUser, PrivateUser.class);
         }
-        
+
         return user;
     }
 
@@ -70,15 +71,15 @@ public abstract class PreferencesUtils {
      */
     public static void updateUserBookList(BookList bookList) {
         PrivateUser user = loadUser();
-        
+
         for (String type : user.getBookLists().keySet()) {
             if (bookList.getType().getName().equals(type)) {
                 user.getBookLists().put(type, bookList);
-                
+
                 break;
             }
         }
-        
+
         saveUser(user);
     }
 }

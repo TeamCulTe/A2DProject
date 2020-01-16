@@ -1,6 +1,7 @@
 package com.imie.a2dev.teamculte.readeo.Providers;
 
 import android.net.Uri;
+
 import com.imie.a2dev.teamculte.readeo.DBManagers.CountryDBManager;
 
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.CountryDBSchema.TABLE;

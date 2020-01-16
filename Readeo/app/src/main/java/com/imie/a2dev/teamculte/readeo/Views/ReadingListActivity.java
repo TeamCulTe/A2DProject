@@ -2,12 +2,13 @@ package com.imie.a2dev.teamculte.readeo.Views;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+
 import com.imie.a2dev.teamculte.readeo.DBSchemas.BookListDBSchema;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.BookList;
 import com.imie.a2dev.teamculte.readeo.R;
 
 /**
- * Activity managing the user's reading lists (displaying the list of books, that can be clicked to display further 
+ * Activity managing the user's reading lists (displaying the list of books, that can be clicked to display further
  * info).
  */
 public final class ReadingListActivity extends AppCompatActivity {

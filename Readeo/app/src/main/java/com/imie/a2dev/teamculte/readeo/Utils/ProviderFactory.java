@@ -25,11 +25,11 @@ public abstract class ProviderFactory {
      */
     public static ReadeoContentProvider getProvider(EntityType type) {
         ReadeoContentProvider provider;
-        
+
         switch (type) {
             case AUTHOR:
                 provider = new AuthorContentProvider();
-                
+
                 break;
             case BOOK:
                 provider = new BookContentProvider();
@@ -69,7 +69,7 @@ public abstract class ProviderFactory {
                 break;
             case WRITER:
                 provider = new WriterContentProvider();
-                
+
                 break;
             default:
                 provider = null;

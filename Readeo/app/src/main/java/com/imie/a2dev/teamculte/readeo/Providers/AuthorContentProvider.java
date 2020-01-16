@@ -1,6 +1,7 @@
 package com.imie.a2dev.teamculte.readeo.Providers;
 
 import android.net.Uri;
+
 import com.imie.a2dev.teamculte.readeo.DBManagers.AuthorDBManager;
 
 import static com.imie.a2dev.teamculte.readeo.DBSchemas.AuthorDBSchema.TABLE;
@@ -18,7 +19,7 @@ public final class AuthorContentProvider extends ReadeoContentProvider {
     public boolean onCreate() {
         this.manager = new AuthorDBManager(this.getContext());
         this.table = TABLE;
-        
+
         return true;
     }
 }

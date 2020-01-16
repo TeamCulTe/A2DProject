@@ -58,7 +58,7 @@ public abstract class DBEntity implements Serializable {
      * @param error The error raised.
      */
     protected void logError(String methodName, Exception error) {
-        Log.e(String.format("[%s:%s] : ", this.getClass().getName(), methodName), error.getMessage());
+        Log.e(String.format("[%s:%s] : ", this.getClass().getName(), methodName), error.getMessage(), error);
     }
 
 }

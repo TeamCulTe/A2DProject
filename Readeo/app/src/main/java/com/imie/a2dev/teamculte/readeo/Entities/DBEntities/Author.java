@@ -4,9 +4,12 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
+
 import com.imie.a2dev.teamculte.readeo.DBSchemas.AuthorDBSchema;
+
 import lombok.Getter;
 import lombok.Setter;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -74,6 +77,7 @@ public final class Author extends DBEntity {
     public Author(ContentValues contentValues) {
         this.init(contentValues);
     }
+
     /**
      * Initializes the author from a ContentValues object.
      * @param contentValues The ContentValues object.
@@ -82,6 +86,7 @@ public final class Author extends DBEntity {
         this.id = contentValues.getAsInteger(AuthorDBSchema.ID);
         this.name = contentValues.getAsString(AuthorDBSchema.NAME);
     }
+
     /**
      * Initializes the author from a JSON response object.
      * @param object The JSON response from the API.
@@ -104,12 +109,12 @@ public final class Author extends DBEntity {
 
             this.id = result.getInt(result.getColumnIndexOrThrow(AuthorDBSchema.ID));
             this.name = result.getString(result.getColumnIndexOrThrow(AuthorDBSchema.NAME));
-
+        } catch (SQLiteException e) {
+            this.logError("init", e);
+        } finally {
             if (close) {
                 result.close();
             }
-        } catch (SQLiteException e) {
-            this.logError("init", e);
         }
     }
 }

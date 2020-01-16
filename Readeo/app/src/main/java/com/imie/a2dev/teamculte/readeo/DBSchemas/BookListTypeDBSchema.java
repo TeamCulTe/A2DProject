@@ -8,22 +8,22 @@ public abstract class BookListTypeDBSchema {
     /**
      * Defines the book list type's table name.
      */
-    public static final String TABLE =  "BookListType";
+    public static final String TABLE = "BookListType";
 
     /**
      * Defines the book list type's id field.
      */
-    public static final String ID =  "id_book_list_type";
+    public static final String ID = "id_book_list_type";
 
     /**
      * Defines the book list type's name field.
      */
-    public static final String NAME =  "name_book_list_type";
+    public static final String NAME = "name_book_list_type";
 
     /**
      * Defines the book list type's image field.
      */
-    public static final String IMAGE =  "image_book_list_type";
+    public static final String IMAGE = "image_book_list_type";
 
     /**
      * Defines the book list type name field max size.
@@ -39,13 +39,13 @@ public abstract class BookListTypeDBSchema {
      * Defines the book list type create table statement.
      */
     public static final String BOOK_LIST_TYPE_TABLE_STATEMENT = String.format("CREATE TABLE IF NOT EXISTS %s (%s " +
-                    "INTEGER PRIMARY KEY, %s TEXT(%s) UNIQUE NOT NULL, %s TEXT(%s), %s DATETIME NOT NULL DEFAULT %s);",
-            TABLE,
-            ID,
-            NAME,
-            NAME_SIZE,
-            IMAGE,
-            IMAGE_SIZE,
-            CommonDBSchema.UPDATE,
-            CommonDBSchema.UPDATE_DEFAULT);
+                                                                              "INTEGER PRIMARY KEY, %s TEXT(%s) UNIQUE NOT NULL, %s TEXT(%s), %s DATETIME NOT NULL DEFAULT %s);",
+                                                                              TABLE,
+                                                                              ID,
+                                                                              NAME,
+                                                                              NAME_SIZE,
+                                                                              IMAGE,
+                                                                              IMAGE_SIZE,
+                                                                              CommonDBSchema.UPDATE,
+                                                                              CommonDBSchema.UPDATE_DEFAULT);
 }

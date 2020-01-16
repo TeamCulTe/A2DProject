@@ -36,8 +36,8 @@ public final class AccountActivity extends AppCompatActivity implements View.OnC
     /**
      * Defines the number of fields to check the validity server side.
      */
-    private static final int CHECKABLE_FIELDS = 2; 
-    
+    private static final int CHECKABLE_FIELDS = 2;
+
     /**
      * Stores the associated user.
      */
@@ -101,22 +101,22 @@ public final class AccountActivity extends AppCompatActivity implements View.OnC
                 ChangePasswordDialogFragment changePasswordDialogFragment = new ChangePasswordDialogFragment();
 
                 changePasswordDialogFragment.show(firstTransaction, "");
-                
+
                 break;
             case R.id.btn_save_changes:
                 this.progressLoading.setVisibility(View.VISIBLE);
-    
+
                 this.validateFields();
-                
+
                 break;
             case R.id.txt_delete_account:
                 FragmentTransaction secondTransaction =
                         this.getSupportFragmentManager().beginTransaction();
                 DeleteAccountDialogFragment deleteAccountDialogFragment =
                         new DeleteAccountDialogFragment();
-                
+
                 deleteAccountDialogFragment.show(secondTransaction, "");
-                
+
                 break;
             default:
 
@@ -165,12 +165,12 @@ public final class AccountActivity extends AppCompatActivity implements View.OnC
      */
     private void validateFields() {
         // TODO: See how to validate the avatar and which fields are required.
-        this.validFields = new boolean[] {false, false};
+        this.validFields = new boolean[]{false, false};
 
         String pseudo = this.pseudo.getText().toString();
         String email = this.email.getText().toString();
         String city = this.city.getText().toString();
-        
+
         if (!pseudo.equals("") && !email.equals("") && !city.equals("")) {
             InputUtils.validatePseudo(pseudo, this);
             InputUtils.validateEmail(email, this);
@@ -231,13 +231,13 @@ public final class AccountActivity extends AppCompatActivity implements View.OnC
                 return;
             }
         }
-                 
+
         this.saveData();
         this.finish();
     }
 
     @Override public void onRequestError() {
-        this.runOnUiThread(()-> {
+        this.runOnUiThread(() -> {
             Toast.makeText(this, R.string.form_fields_invalid, Toast.LENGTH_SHORT).show();
 
             AccountActivity.this.progressLoading.setVisibility(View.GONE);

@@ -34,19 +34,19 @@ public abstract class ReviewDBSchema {
      * Defines the review create table statement.
      */
     public static final String REVIEW_TABLE_STATEMENT = String.format("CREATE TABLE IF NOT EXISTS %s (%s INTEGER NOT " +
-                    "NULL, %s INTEGER NOT NULL, %s TEXT NOT NULL, %s DATETIME NOT NULL DEFAULT %s, CONSTRAINT " +
-                    "Review_PK PRIMARY KEY (%s, %s), CONSTRAINT Review_User_FK FOREIGN KEY (%s) REFERENCES User(%s), " +
-                    "CONSTRAINT Review_Book_FK FOREIGN KEY (%s) REFERENCES Book(%s));",
-            TABLE,
-            USER,
-            BOOK,
-            REVIEW,
-            CommonDBSchema.UPDATE,
-            CommonDBSchema.UPDATE_DEFAULT,
-            USER,
-            BOOK,
-            USER,
-            UserDBSchema.ID,
-            BOOK,
-            BookDBSchema.ID);
+                                                                      "NULL, %s INTEGER NOT NULL, %s TEXT NOT NULL, %s DATETIME NOT NULL DEFAULT %s, CONSTRAINT " +
+                                                                      "Review_PK PRIMARY KEY (%s, %s), CONSTRAINT Review_User_FK FOREIGN KEY (%s) REFERENCES User(%s), " +
+                                                                      "CONSTRAINT Review_Book_FK FOREIGN KEY (%s) REFERENCES Book(%s));",
+                                                                      TABLE,
+                                                                      USER,
+                                                                      BOOK,
+                                                                      REVIEW,
+                                                                      CommonDBSchema.UPDATE,
+                                                                      CommonDBSchema.UPDATE_DEFAULT,
+                                                                      USER,
+                                                                      BOOK,
+                                                                      USER,
+                                                                      UserDBSchema.ID,
+                                                                      BOOK,
+                                                                      BookDBSchema.ID);
 }

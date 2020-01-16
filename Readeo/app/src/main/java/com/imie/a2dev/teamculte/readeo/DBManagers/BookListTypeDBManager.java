@@ -5,6 +5,7 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
+
 import com.android.volley.NetworkResponse;
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -15,6 +16,7 @@ import com.android.volley.toolbox.StringRequest;
 import com.imie.a2dev.teamculte.readeo.APIManager;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.BookListType;
 import com.imie.a2dev.teamculte.readeo.Utils.HTTPRequestQueueSingleton;
+
 import org.joda.time.DateTime;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -55,25 +57,20 @@ public final class BookListTypeDBManager extends SimpleDBManager {
      * @return true if success else false.
      */
     public boolean createSQLite(@NonNull BookListType entity) {
-        this.database.beginTransaction();
-        
         try {
             ContentValues data = new ContentValues();
 
             data.put(ID, entity.getId());
             data.put(NAME, entity.getName());
             data.put(IMAGE, entity.getImage());
-            
+
             this.database.insertOrThrow(this.table, null, data);
-            this.database.setTransactionSuccessful();
 
             return true;
         } catch (SQLiteException e) {
             this.logError("createSQLite", e);
 
             return false;
-        } finally {
-            this.database.endTransaction();
         }
     }
 
@@ -83,8 +80,6 @@ public final class BookListTypeDBManager extends SimpleDBManager {
      * @return true if success else false.
      */
     public boolean updateSQLite(@NonNull BookListType entity) {
-        this.database.beginTransaction();
-        
         try {
             ContentValues data = new ContentValues();
             String whereClause = String.format("%s = ?", ID);
@@ -93,18 +88,12 @@ public final class BookListTypeDBManager extends SimpleDBManager {
             data.put(NAME, entity.getName());
             data.put(IMAGE, entity.getImage());
             data.put(UPDATE, new DateTime().toString(DEFAULT_FORMAT));
-            
-            boolean success = this.database.update(this.table, data, whereClause, whereArgs) != 0;
-            
-            this.database.setTransactionSuccessful();
 
-            return success;
+            return this.database.update(this.table, data, whereClause, whereArgs) != 0;
         } catch (SQLiteException e) {
             this.logError("updateSQLite", e);
 
             return false;
-        } finally {
-            this.database.endTransaction();
         }
     }
 
@@ -252,32 +241,25 @@ public final class BookListTypeDBManager extends SimpleDBManager {
 
     @Override
     public boolean createSQLite(@NonNull JSONObject entity) {
-        this.database.beginTransaction();
-        
         try {
             ContentValues data = new ContentValues();
 
             data.put(ID, entity.getInt(ID));
             data.put(NAME, entity.getString(NAME));
             data.put(IMAGE, entity.getString(IMAGE));
-            
+
             this.database.insertOrThrow(this.table, null, data);
-            this.database.setTransactionSuccessful();
-            
+
             return true;
         } catch (Exception e) {
             this.logError("createSQLite", e);
-            
+
             return false;
-        } finally {
-            this.database.endTransaction();
         }
     }
 
     @Override
     public boolean updateSQLite(@NonNull JSONObject entity) {
-        this.database.beginTransaction();
-        
         try {
             ContentValues data = new ContentValues();
             String whereClause = String.format("%s = ?", ID);
@@ -286,18 +268,12 @@ public final class BookListTypeDBManager extends SimpleDBManager {
             data.put(NAME, entity.getString(NAME));
             data.put(IMAGE, entity.getString(IMAGE));
             data.put(UPDATE, new DateTime().toString(DEFAULT_FORMAT));
-            
-            boolean success = this.database.update(this.table, data, whereClause, whereArgs) != 0;
-            
-            this.database.setTransactionSuccessful();
-            
-            return success;
+
+            return this.database.update(this.table, data, whereClause, whereArgs) != 0;
         } catch (Exception e) {
             this.logError("updateSQLite", e);
 
             return false;
-        } finally {
-            this.database.endTransaction();
         }
     }
 }

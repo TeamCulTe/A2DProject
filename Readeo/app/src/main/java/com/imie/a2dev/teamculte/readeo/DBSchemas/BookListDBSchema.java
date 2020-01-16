@@ -29,23 +29,23 @@ public abstract class BookListDBSchema {
      * Defines the book list create table statement.
      */
     public static final String BOOK_LIST_TABLE_STATEMENT = String.format("CREATE TABLE IF NOT EXISTS %s (%s INTEGER " +
-                    "NOT NULL, %s INTEGER NOT NULL, %s INTEGER NOT NULL, %s DATETIME NOT NULL DEFAULT %s, CONSTRAINT " +
-                    "BookList_PK PRIMARY KEY (%s, %s, %s), CONSTRAINT BookList_User_FK FOREIGN KEY (%s) REFERENCES User" +
-                    "(%s), CONSTRAINT BookList_Book_FK FOREIGN KEY (%s) REFERENCES Book(%s), CONSTRAINT " +
-                    "BookList_BookListType_FK FOREIGN KEY (%s) REFERENCES BookListType(%s));", 
-            TABLE,
-            USER,
-            BOOK,
-            TYPE,
-            CommonDBSchema.UPDATE,
-            CommonDBSchema.UPDATE_DEFAULT,
-            USER,
-            BOOK,
-            TYPE,
-            USER,
-            UserDBSchema.ID,
-            BOOK,
-            BookDBSchema.ID,
-            TYPE,
-            BookListTypeDBSchema.ID);
+                                                                         "NOT NULL, %s INTEGER NOT NULL, %s INTEGER NOT NULL, %s DATETIME NOT NULL DEFAULT %s, CONSTRAINT " +
+                                                                         "BookList_PK PRIMARY KEY (%s, %s, %s), CONSTRAINT BookList_User_FK FOREIGN KEY (%s) REFERENCES User" +
+                                                                         "(%s), CONSTRAINT BookList_Book_FK FOREIGN KEY (%s) REFERENCES Book(%s), CONSTRAINT " +
+                                                                         "BookList_BookListType_FK FOREIGN KEY (%s) REFERENCES BookListType(%s));",
+                                                                         TABLE,
+                                                                         USER,
+                                                                         BOOK,
+                                                                         TYPE,
+                                                                         CommonDBSchema.UPDATE,
+                                                                         CommonDBSchema.UPDATE_DEFAULT,
+                                                                         USER,
+                                                                         BOOK,
+                                                                         TYPE,
+                                                                         USER,
+                                                                         UserDBSchema.ID,
+                                                                         BOOK,
+                                                                         BookDBSchema.ID,
+                                                                         TYPE,
+                                                                         BookListTypeDBSchema.ID);
 }

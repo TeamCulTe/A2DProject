@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.TextView;
+
 import com.imie.a2dev.teamculte.readeo.DBManagers.ReviewDBManager;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Book;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.PrivateUser;

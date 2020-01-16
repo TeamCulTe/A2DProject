@@ -10,6 +10,7 @@ import com.imie.a2dev.teamculte.readeo.DBSchemas.UserDBSchema;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Category;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.PrivateUser;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Review;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.After;
@@ -52,22 +53,6 @@ public final class ReviewDBManagerTest extends CommonDBManagerTest {
      * Stores the associated manager used to interact with the database.
      */
     private ReviewDBManager manager = new ReviewDBManager(this.context);
-
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-    }
-
-    @After
-    public void tearDown() {
-        this.context.deleteDatabase(TEST_DB);
-
-        if (this.testedMySQL) {
-            this.deleteMySQLTestEntities();
-
-            this.testedMySQL = false;
-        }
-    }
 
     @Test
     public void testEntityCreateSQLite() {
@@ -139,6 +124,7 @@ public final class ReviewDBManagerTest extends CommonDBManagerTest {
 
         assertNotNull(loaded);
     }
+
     @Test
     public void testLoadBookSQLite() {
         int bookId = 1;
@@ -196,31 +182,31 @@ public final class ReviewDBManagerTest extends CommonDBManagerTest {
         UserDBManager userDBManager = new UserDBManager(this.context);
 
         categoryDBManager.importFromMySQL(APIManager.API_URL + APIManager.CATEGORIES +
-                APIManager.READ + CategoryDBSchema.ID + "=" + MYSQL_TEST_ID);
+                                          APIManager.READ + CategoryDBSchema.ID + "=" + MYSQL_TEST_ID);
         categoryDBManager.waitForResponse();
 
         bookDBManager.importFromMySQL(APIManager.API_URL + APIManager.BOOKS +
-                APIManager.READ + BookDBSchema.ID + "=" + review.getId());
+                                      APIManager.READ + BookDBSchema.ID + "=" + review.getId());
         bookDBManager.waitForResponse();
 
         countryDBManager.importFromMySQL(APIManager.API_URL + APIManager.COUNTRIES +
-                APIManager.READ + CountryDBSchema.ID + "=" + MYSQL_TEST_ID);
+                                         APIManager.READ + CountryDBSchema.ID + "=" + MYSQL_TEST_ID);
         countryDBManager.waitForResponse();
 
         cityDBManager.importFromMySQL(APIManager.API_URL + APIManager.CITIES +
-                APIManager.READ + CityDBSchema.ID + "=" + MYSQL_TEST_ID);
+                                      APIManager.READ + CityDBSchema.ID + "=" + MYSQL_TEST_ID);
         cityDBManager.waitForResponse();
 
         profileDBManager.importFromMySQL(APIManager.API_URL + APIManager.PROFILES +
-                APIManager.READ + ProfileDBSchema.ID + "=" + MYSQL_TEST_ID);
+                                         APIManager.READ + ProfileDBSchema.ID + "=" + MYSQL_TEST_ID);
         profileDBManager.waitForResponse();
 
         userDBManager.importFromMySQL(APIManager.API_URL + APIManager.USERS +
-                APIManager.READ + UserDBSchema.ID + "=" + review.getUserId());
+                                      APIManager.READ + UserDBSchema.ID + "=" + review.getUserId());
         userDBManager.waitForResponse();
 
         this.manager.importFromMySQL(APIManager.API_URL + APIManager.REVIEWS + APIManager.READ + BOOK + "=" +
-                review.getId() + "&" + USER + "=" + review.getUserId());
+                                     review.getId() + "&" + USER + "=" + review.getUserId());
         this.manager.waitForResponse();
 
         Review imported = this.manager.loadSQLite(MYSQL_TEST_ID, MYSQL_TEST_ID);
@@ -275,12 +261,36 @@ public final class ReviewDBManagerTest extends CommonDBManagerTest {
     }
 
     @Test
+    public void testIdSoftDeleteMySQL() {
+        Review toDelete = this.initTestEntityMySQL();
+
+        assertNotNull(toDelete);
+
+        this.manager.softDeleteMySQL(toDelete.getUserId(), toDelete.getId());
+        this.manager.waitForResponse();
+
+        assertNull(this.manager.loadMySQL(toDelete.getUserId(), toDelete.getId()));
+    }
+
+    @Test
     public void testEntityDeleteMySQL() {
         Review deleted = this.initTestEntityMySQL();
 
         assertNotNull(deleted);
 
         this.manager.deleteMySQL(deleted);
+        this.manager.waitForResponse();
+
+        assertNull(this.manager.loadMySQL(deleted.getUserId(), deleted.getId()));
+    }
+
+    @Test
+    public void testEntitySoftDeleteMySQL() {
+        Review deleted = this.initTestEntityMySQL();
+
+        assertNotNull(deleted);
+
+        this.manager.softDeleteMySQL(deleted);
         this.manager.waitForResponse();
 
         assertNull(this.manager.loadMySQL(deleted.getUserId(), deleted.getId()));
@@ -307,11 +317,51 @@ public final class ReviewDBManagerTest extends CommonDBManagerTest {
             testId = MYSQL_TEST_ID - i;
             testString = "testString" + String.valueOf(testId);
 
-            assertNotNull(bookDBManagerTest.initTestEntityMySQL(testId, testString, testString, testString, 2000, category));
+            assertNotNull(
+                    bookDBManagerTest.initTestEntityMySQL(testId, testString, testString, testString, 2000, category));
             assertNotNull(this.initTestEntityMySQL(user.getId(), testId, TEST_REVIEW, TEST_SHARED));
         }
 
         this.manager.deleteUserMySQL(user.getId());
+        this.manager.waitForResponse();
+
+        Review deleted;
+
+        for (int i = 0; i < generatedTestEntities; i++) {
+            testId = MYSQL_TEST_ID - i;
+            deleted = this.manager.loadMySQL(user.getId(), testId);
+
+            assertNull(deleted);
+        }
+    }
+
+    @Test
+    public void testSoftDeleteUserMySQL() {
+        CategoryDBManagerTest categoryDBManagerTest = new CategoryDBManagerTest();
+        BookDBManagerTest bookDBManagerTest = new BookDBManagerTest();
+        UserDBManagerTest userDBManagerTest = new UserDBManagerTest();
+
+        Category category = categoryDBManagerTest.initTestEntityMySQL();
+        PrivateUser user = userDBManagerTest.initTestEntityMySQL();
+
+        assertNotNull(category);
+        assertNotNull(user);
+
+        int testId;
+        String testString;
+
+        int generatedTestEntities = 5;
+
+        for (int i = 0; i < generatedTestEntities; i++) {
+            testId = MYSQL_TEST_ID - i;
+            testString = "testString" + String.valueOf(testId);
+
+            assertNotNull(
+                    bookDBManagerTest.initTestEntityMySQL(testId, testString, testString, testString, 2000, category));
+            assertNotNull(this.initTestEntityMySQL(user.getId(), testId, TEST_REVIEW, TEST_SHARED));
+        }
+
+        this.manager.softDeleteUserMySQL(user.getId());
         this.manager.waitForResponse();
 
         Review deleted;
@@ -330,7 +380,7 @@ public final class ReviewDBManagerTest extends CommonDBManagerTest {
 
         assertNotNull(toRestore);
 
-        this.manager.deleteMySQL(toRestore.getUserId(), toRestore.getId());
+        this.manager.softDeleteMySQL(toRestore.getUserId(), toRestore.getId());
         this.manager.waitForResponse();
 
         assertNull(this.manager.loadMySQL(toRestore.getUserId(), toRestore.getId()));
@@ -362,11 +412,12 @@ public final class ReviewDBManagerTest extends CommonDBManagerTest {
             testId = MYSQL_TEST_ID - i;
             testString = "testString" + String.valueOf(testId);
 
-            assertNotNull(bookDBManagerTest.initTestEntityMySQL(testId, testString, testString, testString, 2000, category));
+            assertNotNull(
+                    bookDBManagerTest.initTestEntityMySQL(testId, testString, testString, testString, 2000, category));
             assertNotNull(this.initTestEntityMySQL(user.getId(), testId, TEST_REVIEW, TEST_SHARED));
         }
 
-        this.manager.deleteUserMySQL(user.getId());
+        this.manager.softDeleteUserMySQL(user.getId());
         this.manager.waitForResponse();
 
         for (int i = 0; i < generatedTestEntities; i++) {

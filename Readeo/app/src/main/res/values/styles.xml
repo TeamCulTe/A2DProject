@@ -17,7 +17,7 @@
         <item name="android:windowIsFloating">false</item>
         <item name="android:windowBackground">@color/grey_anthracite_transparent</item>
     </style>
-    
+
     <style name="inputStyle">
         <item name="android:background">@drawable/input_drawable</item>
         <item name="android:padding">10dp</item>

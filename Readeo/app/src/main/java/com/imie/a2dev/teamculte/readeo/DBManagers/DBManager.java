@@ -6,17 +6,22 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteException;
 import android.support.annotation.NonNull;
 import android.util.Log;
+
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.StringRequest;
 import com.imie.a2dev.teamculte.readeo.APIManager;
+import com.imie.a2dev.teamculte.readeo.App;
 import com.imie.a2dev.teamculte.readeo.Utils.HTTPRequestQueueSingleton;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,37 +32,35 @@ public abstract class DBManager {
     /**
      * Defines the database file name.
      */
-    public static String dbFileName = "readeo.db";
-
-    // Predefined queries.
-
-    /**
-     * Defines the default all fields database query.
-     */
-    protected final String QUERY_ALL = "SELECT * FROM %s";
-
-    /**
-     * Defines the default all fields database query with a double where clause.
-     */
-    protected final String DOUBLE_QUERY_ALL = "SELECT * FROM %s WHERE %s = ? AND %s = ?";
-
-    /**
-     * Defines the default all fields database query with paginated results.
-     */
-    protected final String QUERY_ALL_PAGINATED = "SELECT * FROM %s LIMIT %s OFFSET %s";
-
-    /**
-     * Defines the default all fields database query with a simple where clause.
-     */
-    protected final String SIMPLE_QUERY_ALL = "SELECT * FROM %s WHERE %s = ?";
-
-    // Other attributes
-
+    public static final String APP_DB_FILE_NAME = "readeo.db";
     /**
      * Stores the default id value for tests on MySQL database (as big as possible).
      */
     public static final int MYSQL_TEST_ID = -666;
 
+    // Predefined queries.
+    /**
+     * Defines the database file name.
+     */
+    public static String dbFileName = APP_DB_FILE_NAME;
+    /**
+     * Defines the default all fields database query.
+     */
+    protected final String QUERY_ALL = "SELECT * FROM %s";
+    /**
+     * Defines the default all fields database query with a double where clause.
+     */
+    protected final String DOUBLE_QUERY_ALL = "SELECT * FROM %s WHERE %s = ? AND %s = ?";
+    /**
+     * Defines the default all fields database query with paginated results.
+     */
+    protected final String QUERY_ALL_PAGINATED = "SELECT * FROM %s LIMIT %s OFFSET %s";
+
+    // Other attributes
+    /**
+     * Defines the default all fields database query with a simple where clause.
+     */
+    protected final String SIMPLE_QUERY_ALL = "SELECT * FROM %s WHERE %s = ?";
     /**
      * Defines the count param and json value from MySQL query alias.
      */
@@ -94,19 +97,29 @@ public abstract class DBManager {
     private Context context;
 
     /**
-     * Stores the associated DBHandler to get the database object.
-     */
-    private DBHandler handler;
-
-    /**
      * DBManager's full filled constructor initializing the handler attribute and opening the database.
      * @param context The associated context.
      */
     protected DBManager(Context context) {
-        this.handler = DBHandler.getInstance();
         this.context = context;
 
         this.open();
+    }
+
+    /**
+     * Returns the database file name.
+     * @return The name of the file.
+     */
+    public static String getDbFileName() {
+        return dbFileName;
+    }
+
+    /**
+     * Sets the database file name.
+     * @param newDbFileName The new name to set.
+     */
+    public static void setDbFileName(String newDbFileName) {
+        dbFileName = newDbFileName;
     }
 
     /**
@@ -118,27 +131,11 @@ public abstract class DBManager {
     }
 
     /**
-     * Gets the handler attribute.
-     * @return The DBHandler value of handler attribute.
-     */
-    public final DBHandler getHandler() {
-        return this.handler;
-    }
-
-    /**
      * Gets the context attribute.
      * @return The Context value of context attribute.
      */
     public final Context getContext() {
         return this.context;
-    }
-
-    /**
-     * Sets the handler attribute.
-     * @param newHandler The new DBHandler value to set.
-     */
-    public final void setHandler(DBHandler newHandler) {
-        this.handler = newHandler;
     }
 
     /**
@@ -171,22 +168,6 @@ public abstract class DBManager {
      */
     public final String getTable() {
         return this.table;
-    }
-
-    /**
-     * Returns the database file name.
-     * @return The name of the file.
-     */
-    public static String getDbFileName() {
-        return dbFileName;
-    }
-
-    /**
-     * Sets the database file name.
-     * @param newDbFileName The new name to set.
-     */
-    public static void setDbFileName(String newDbFileName) {
-        dbFileName = newDbFileName;
     }
 
     /**
@@ -234,8 +215,6 @@ public abstract class DBManager {
      * @return true if success else false.
      */
     public boolean deleteSQLite(int... ids) {
-        this.database.beginTransaction();
-        
         try {
             StringBuilder builder = new StringBuilder();
             String[] whereArgs = new String[ids.length];
@@ -250,18 +229,12 @@ public abstract class DBManager {
                     builder.append(" AND ");
                 }
             }
-            
-            boolean success = this.database.delete(this.table, builder.toString(), whereArgs) != 0; 
 
-            this.database.setTransactionSuccessful();
-            
-            return success;
+            return this.database.delete(this.table, builder.toString(), whereArgs) != 0;
         } catch (SQLiteException e) {
             this.logError("deleteSQLite", e);
 
             return false;
-        } finally {
-            this.database.endTransaction();
         }
     }
 
@@ -400,15 +373,15 @@ public abstract class DBManager {
      * Closes the database.
      */
     protected void close() {
-        this.handler.close();
+        DBHandler.getInstance().close();
     }
 
     /**
      * Opens and set the SQLiteDatabase.
      */
     private void open() {
-        if (this.database == null) {
-            this.database = this.handler.getWritableDatabase();
+        if (this.database == null || !this.database.isOpen()) {
+            this.database = DBHandler.getInstance().getWritableDatabase();
         }
     }
 

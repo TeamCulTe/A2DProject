@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
+
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Country;
 import com.imie.a2dev.teamculte.readeo.R;
 
@@ -37,30 +38,30 @@ public final class CountrySpinnerAdapter extends ArrayAdapter {
      */
     public CountrySpinnerAdapter(Context context, List<Country> items) {
         super(context, DEFAULT_LAYOUT);
-        
+
         this.items = items;
         this.context = context;
     }
-    
+
     @NonNull
     @Override
     public TextView getView(int position, View convertView, @NonNull ViewGroup parent) {
-        if (convertView == null){
+        if (convertView == null) {
             convertView = View.inflate(this.context, DEFAULT_LAYOUT, null);
         }
-        
+
         TextView text = convertView.findViewById(android.R.id.text1);
         text.setTextColor(this.getContext().getColor(R.color.grey_anthracite));
-        
+
         text.setText(this.items.get(position).getName());
-        
+
         return text;
     }
 
     @NonNull
     @Override
     public TextView getDropDownView(int position, View convertView, @NonNull ViewGroup parent) {
-        if (convertView == null){
+        if (convertView == null) {
             convertView = View.inflate(this.context, DEFAULT_LAYOUT, null);
         }
 
@@ -70,7 +71,7 @@ public final class CountrySpinnerAdapter extends ArrayAdapter {
 
         return text;
     }
-    
+
     @Override
     public int getCount() {
         return this.items.size();
@@ -87,7 +88,7 @@ public final class CountrySpinnerAdapter extends ArrayAdapter {
                 return i;
             }
         }
-        
+
         return -1;
     }
 }

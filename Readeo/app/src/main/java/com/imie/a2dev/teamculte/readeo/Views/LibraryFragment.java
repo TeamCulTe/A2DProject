@@ -94,7 +94,7 @@ public final class LibraryFragment extends Fragment implements View.OnClickListe
                 }
             }
         };
-        
+
         Thread thread = new Thread() {
             @Override
             public void run() {
@@ -127,9 +127,9 @@ public final class LibraryFragment extends Fragment implements View.OnClickListe
                 }
 
                 LibraryFragment.this.adapter.getBooks().addAll(books);
-                
+
                 Message message = handler.obtainMessage();
-                
+
                 message.sendToTarget();
             }
         };

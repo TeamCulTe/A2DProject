@@ -44,7 +44,7 @@ public enum InputError {
      */
     InputError(int value) {
         this.value = value;
-        
+
         this.initMessage();
     }
 
@@ -86,32 +86,32 @@ public enum InputError {
     private void initMessage() {
         String baseMsg;
         String elt;
-        
+
         switch (this.value) {
             case 1:
                 baseMsg = FORMAT_MSG;
                 elt = "pseudo";
-                
+
                 break;
             case 2:
                 baseMsg = TAKEN_MSG;
                 elt = "pseudo";
-                
+
                 break;
             case 3:
                 baseMsg = FORMAT_MSG;
                 elt = "email";
-                
+
                 break;
             case 4:
                 baseMsg = TAKEN_MSG;
                 elt = "email";
-                
+
                 break;
             case 5:
                 baseMsg = FORMAT_MSG;
                 elt = "city";
-                
+
                 break;
             case 6:
                 baseMsg = FORMAT_MSG;
@@ -124,10 +124,10 @@ public enum InputError {
 
                 break;
             default:
-                
+
                 return;
         }
-        
+
         this.message = String.format(baseMsg, elt);
     }
 }

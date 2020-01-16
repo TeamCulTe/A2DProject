@@ -6,6 +6,7 @@ import com.imie.a2dev.teamculte.readeo.DBSchemas.BookDBSchema;
 import com.imie.a2dev.teamculte.readeo.DBSchemas.CategoryDBSchema;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Author;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Book;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.After;
@@ -54,22 +55,6 @@ public final class WriterDBManagerTest extends CommonDBManagerTest {
      * Stores the author manager used to interact with the database.
      */
     private AuthorDBManager authorDBManager = new AuthorDBManager(this.context);
-
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-    }
-
-    @After
-    public void tearDown() {
-        this.context.deleteDatabase(TEST_DB);
-
-        if (this.testedMySQL) {
-            this.deleteMySQLTestEntities();
-
-            this.testedMySQL = false;
-        }
-    }
 
     @Test
     public void testJSONCreateSQLite() throws JSONException {
@@ -142,19 +127,19 @@ public final class WriterDBManagerTest extends CommonDBManagerTest {
         AuthorDBManager authorDBManager = new AuthorDBManager(this.context);
 
         categoryDBManager.importFromMySQL(APIManager.API_URL + APIManager.CATEGORIES +
-                APIManager.READ + CategoryDBSchema.ID + "=" + MYSQL_TEST_ID);
+                                          APIManager.READ + CategoryDBSchema.ID + "=" + MYSQL_TEST_ID);
         categoryDBManager.waitForResponse();
 
         bookDBManager.importFromMySQL(APIManager.API_URL + APIManager.BOOKS +
-                APIManager.READ + BookDBSchema.ID + "=" + MYSQL_TEST_ID);
+                                      APIManager.READ + BookDBSchema.ID + "=" + MYSQL_TEST_ID);
         bookDBManager.waitForResponse();
 
         authorDBManager.importFromMySQL(APIManager.API_URL + APIManager.AUTHORS +
-                APIManager.READ + AuthorDBSchema.ID + "=" + MYSQL_TEST_ID);
+                                        APIManager.READ + AuthorDBSchema.ID + "=" + MYSQL_TEST_ID);
         authorDBManager.waitForResponse();
 
         this.manager.importFromMySQL(APIManager.API_URL + APIManager.WRITERS + APIManager.READ + BOOK + "=" +
-                MYSQL_TEST_ID + "&" + AUTHOR + "=" + MYSQL_TEST_ID);
+                                     MYSQL_TEST_ID + "&" + AUTHOR + "=" + MYSQL_TEST_ID);
         this.manager.waitForResponse();
 
         assertEquals(ENTITY_NB + 1, this.manager.countSQLite());

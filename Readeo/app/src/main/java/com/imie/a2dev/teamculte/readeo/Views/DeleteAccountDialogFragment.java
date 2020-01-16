@@ -140,13 +140,13 @@ public final class DeleteAccountDialogFragment extends DialogFragment
 
         ManagerHolderUtils.getInstance().getQuoteDBManager().deleteUserMySQL(user.getId());
         ManagerHolderUtils.getInstance().getReviewDBManager().deleteUserMySQL(user.getId());
-        
+
         ManagerHolderUtils.getInstance().getQuoteDBManager().deleteUserSQLite(user.getId());
         ManagerHolderUtils.getInstance().getReviewDBManager().deleteUserSQLite(user.getId());
 
         ManagerHolderUtils.getInstance().getUserDBManager().deleteMySQL(user);
         ManagerHolderUtils.getInstance().getUserDBManager().deleteSQLite(user.getId());
-        
+
         ManagerHolderUtils.getInstance().getProfileDBManager().deleteMySQL(user.getProfile().getId());
         ManagerHolderUtils.getInstance().getProfileDBManager().deleteSQLite(user.getProfile().getId());
     }

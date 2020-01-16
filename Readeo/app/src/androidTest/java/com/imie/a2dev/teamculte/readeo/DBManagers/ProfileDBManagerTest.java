@@ -2,6 +2,7 @@ package com.imie.a2dev.teamculte.readeo.DBManagers;
 
 import com.imie.a2dev.teamculte.readeo.APIManager;
 import com.imie.a2dev.teamculte.readeo.Entities.DBEntities.Profile;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 import org.junit.After;
@@ -32,22 +33,6 @@ public final class ProfileDBManagerTest extends CommonDBManagerTest {
      * Stores the associated manager used to interact with the database.
      */
     private ProfileDBManager manager = new ProfileDBManager(this.context);
-
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-    }
-
-    @After
-    public void tearDown() {
-        this.context.deleteDatabase(TEST_DB);
-
-        if (this.testedMySQL) {
-            this.deleteMySQLTestEntities();
-
-            this.testedMySQL = false;
-        }
-    }
 
     @Test
     public void testEntityCreateSQLite() {
@@ -128,7 +113,7 @@ public final class ProfileDBManagerTest extends CommonDBManagerTest {
         Profile profile = this.initTestEntityMySQL();
 
         this.manager.importFromMySQL(APIManager.API_URL + APIManager.PROFILES + APIManager.READ + APIManager.START +
-                "=" + TEST_START + "&" + APIManager.END + "=" + TEST_END);
+                                     "=" + TEST_START + "&" + APIManager.END + "=" + TEST_END);
 
         this.manager.waitForResponse();
 
@@ -204,6 +189,18 @@ public final class ProfileDBManagerTest extends CommonDBManagerTest {
     }
 
     @Test
+    public void testIdSoftDeleteMySQL() {
+        Profile toDelete = this.initTestEntityMySQL();
+
+        assertNotNull(toDelete);
+
+        this.manager.softDeleteMySQL(toDelete.getId());
+        this.manager.waitForResponse();
+
+        assertNull(this.manager.loadMySQL(toDelete.getId()));
+    }
+
+    @Test
     public void testEntityDeleteMySQL() {
         Profile deleted = this.initTestEntityMySQL();
 
@@ -216,14 +213,26 @@ public final class ProfileDBManagerTest extends CommonDBManagerTest {
     }
 
     @Test
+    public void testEntitySoftDeleteMySQL() {
+        Profile deleted = this.initTestEntityMySQL();
+
+        assertNotNull(deleted);
+
+        this.manager.softDeleteMySQL(deleted);
+        this.manager.waitForResponse();
+
+        assertNull(this.manager.loadMySQL(deleted.getId()));
+    }
+
+    @Test
     public void testRestoreMySQL() {
         Profile toRestore = this.initTestEntityMySQL();
 
         assertNotNull(toRestore);
 
-        this.manager.deleteMySQL(toRestore.getId());
+        this.manager.softDeleteMySQL(toRestore.getId());
         this.manager.waitForResponse();
-        
+
         assertNull(this.manager.loadMySQL(toRestore.getId()));
 
         this.manager.restoreMySQL(toRestore.getId());

@@ -49,20 +49,20 @@ public abstract class BookDBSchema {
      * Defines the book create table statement.
      */
     public static final String BOOK_TABLE_STATEMENT = String.format("CREATE TABLE IF NOT EXISTS %s (%s INTEGER " +
-                    "PRIMARY KEY, %s INTEGER NOT NULL, %s TEXT(%s) UNIQUE NOT NULL, %s TEXT(%s), %s TEXT, %s " +
-                    "INTEGER(4) NOT NULL, %s DATETIME NOT NULL DEFAULT %s, CONSTRAINT Book_Category_FK FOREIGN KEY " +
-                    "(%s) REFERENCES Category(%s));",
-            TABLE,
-            ID,
-            CATEGORY,
-            TITLE,
-            TEXT_SIZE,
-            COVER,
-            TEXT_SIZE,
-            SUMMARY,
-            DATE,
-            CommonDBSchema.UPDATE,
-            CommonDBSchema.UPDATE_DEFAULT,
-            CATEGORY,
-            CategoryDBSchema.ID);
+                                                                    "PRIMARY KEY, %s INTEGER NOT NULL, %s TEXT(%s) UNIQUE NOT NULL, %s TEXT(%s), %s TEXT, %s " +
+                                                                    "INTEGER(4) NOT NULL, %s DATETIME NOT NULL DEFAULT %s, CONSTRAINT Book_Category_FK FOREIGN KEY " +
+                                                                    "(%s) REFERENCES Category(%s));",
+                                                                    TABLE,
+                                                                    ID,
+                                                                    CATEGORY,
+                                                                    TITLE,
+                                                                    TEXT_SIZE,
+                                                                    COVER,
+                                                                    TEXT_SIZE,
+                                                                    SUMMARY,
+                                                                    DATE,
+                                                                    CommonDBSchema.UPDATE,
+                                                                    CommonDBSchema.UPDATE_DEFAULT,
+                                                                    CATEGORY,
+                                                                    CategoryDBSchema.ID);
 }

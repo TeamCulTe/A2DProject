@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+
 import org.joda.time.DateTime;
 
 /**
@@ -31,7 +32,7 @@ public final class UpdateDataElement {
     public UpdateDataElement(int idNb) {
         this.ids = new int[idNb];
         this.dateUpdated = new DateTime();
-        
+
         for (int i = 0; i < idNb; ++i) {
             this.ids[i] = -1;
         }
